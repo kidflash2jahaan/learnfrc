@@ -22,9 +22,10 @@ import { deptMeta } from "@/lib/departments";
 import { Icon } from "@/lib/icon-map";
 import { Markdown } from "@/components/markdown";
 import { LessonActions } from "@/components/lesson/lesson-actions";
+import { LessonComplete } from "@/components/lesson/lesson-complete";
 import { Reveal } from "@/components/motion/reveal";
 import { cn } from "@/lib/utils";
-import type { Resource } from "@/lib/types";
+import type { Resource, QuizQuestion } from "@/lib/types";
 
 export async function generateMetadata({
   params,
@@ -67,6 +68,10 @@ export default async function LessonPage({
 
   const takeaways = (les.key_takeaways ?? []) as string[];
   const resources = (les.resources ?? []) as Resource[];
+  const quiz = (les.quiz ?? []) as QuizQuestion[];
+  const nextHref = next
+    ? `/guides/${dept.slug}/${next.moduleSlug}/${next.slug}`
+    : `/guides/${dept.slug}`;
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 lg:px-8">
@@ -118,6 +123,7 @@ export default async function LessonPage({
                 authed={!!user}
                 initialCompleted={isCompleted}
                 initialBookmarked={bookmarks.has(les.id)}
+                quizRequired={quiz.length > 0}
               />
               {!user && (
                 <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -186,6 +192,17 @@ export default async function LessonPage({
               </ul>
             </div>
           )}
+
+          {/* completion / quiz */}
+          <LessonComplete
+            lessonId={les.id}
+            deptSlug={dept.slug}
+            lessonPath={lessonPath}
+            authed={!!user}
+            initialCompleted={isCompleted}
+            quiz={quiz}
+            nextHref={nextHref}
+          />
 
           {/* prev / next */}
           <nav className="mt-10 grid gap-4 sm:grid-cols-2">

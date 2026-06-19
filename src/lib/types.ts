@@ -3,6 +3,13 @@ export interface Resource {
   url: string;
 }
 
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  answer: number; // index of the correct option
+  explanation?: string;
+}
+
 export interface Lesson {
   id: string;
   module_id: string;
@@ -12,6 +19,7 @@ export interface Lesson {
   content: string;
   key_takeaways: string[];
   resources: Resource[];
+  quiz: QuizQuestion[];
   estimated_minutes: number;
   sort_order: number;
 }

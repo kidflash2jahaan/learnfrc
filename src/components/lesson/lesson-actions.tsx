@@ -2,50 +2,12 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
-import { Check, Circle, Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
+import { Check, Circle, Bookmark, BookmarkCheck, Loader2, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { setLessonComplete, toggleBookmark } from "@/app/actions/progress";
 import { Button } from "@/components/ui/button";
+import { Confetti } from "@/components/lesson/confetti";
 import { cn } from "@/lib/utils";
-
-const COLORS = ["#2f5fff", "#22d3ee", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
-
-function Confetti({ trigger }: { trigger: number }) {
-  const reduce = useReducedMotion();
-  const [pieces, setPieces] = React.useState<
-    { id: string; x: number; y: number; r: number; c: string }[]
-  >([]);
-
-  React.useEffect(() => {
-    if (trigger === 0 || reduce) return;
-    const ps = Array.from({ length: 20 }, (_, i) => ({
-      id: `${trigger}-${i}`,
-      x: (Math.random() - 0.5) * 240,
-      y: -(Math.random() * 170 + 50),
-      r: Math.random() * 360,
-      c: COLORS[i % COLORS.length],
-    }));
-    setPieces(ps);
-    const t = setTimeout(() => setPieces([]), 950);
-    return () => clearTimeout(t);
-  }, [trigger, reduce]);
-
-  return (
-    <div className="pointer-events-none absolute left-8 top-1/2 z-20">
-      {pieces.map((p) => (
-        <motion.span
-          key={p.id}
-          initial={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
-          animate={{ opacity: 0, x: p.x, y: p.y, rotate: p.r }}
-          transition={{ duration: 0.95, ease: "easeOut" }}
-          className="absolute h-2 w-2 rounded-[2px]"
-          style={{ background: p.c }}
-        />
-      ))}
-    </div>
-  );
-}
 
 export function LessonActions({
   lessonId,
@@ -54,6 +16,7 @@ export function LessonActions({
   authed,
   initialCompleted,
   initialBookmarked,
+  quizRequired = false,
 }: {
   lessonId: string;
   deptSlug: string;
@@ -61,12 +24,15 @@ export function LessonActions({
   authed: boolean;
   initialCompleted: boolean;
   initialBookmarked: boolean;
+  quizRequired?: boolean;
 }) {
   const router = useRouter();
   const [completed, setCompleted] = React.useState(initialCompleted);
   const [bookmarked, setBookmarked] = React.useState(initialBookmarked);
   const [pending, startTransition] = React.useTransition();
   const [burst, setBurst] = React.useState(0);
+
+  React.useEffect(() => setCompleted(initialCompleted), [initialCompleted]);
 
   const requireAuth = (verb: string) => {
     toast(`Sign in to ${verb}`, {
@@ -78,8 +44,14 @@ export function LessonActions({
     });
   };
 
+  const scrollToQuiz = () => {
+    document.getElementById("lesson-quiz")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const onComplete = () => {
     if (!authed) return requireAuth("track your progress");
+    // Completing requires the quiz when one exists and isn't passed yet.
+    if (quizRequired && !completed) return scrollToQuiz();
     const next = !completed;
     setCompleted(next);
     if (next) setBurst((b) => b + 1);
@@ -111,23 +83,27 @@ export function LessonActions({
     });
   };
 
+  const showQuizCta = quizRequired && !completed;
+
   return (
     <div className="relative flex flex-wrap items-center gap-3">
       <Confetti trigger={burst} />
       <Button
         onClick={onComplete}
         disabled={pending}
-        variant={completed ? "secondary" : "brand"}
+        variant={completed ? "secondary" : showQuizCta ? "outline" : "brand"}
         size="lg"
       >
         {pending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : completed ? (
           <Check className="h-4 w-4" />
+        ) : showQuizCta ? (
+          <ListChecks className="h-4 w-4" />
         ) : (
           <Circle className="h-4 w-4" />
         )}
-        {completed ? "Completed" : "Mark complete"}
+        {completed ? "Completed" : showQuizCta ? "Take the quiz" : "Mark complete"}
       </Button>
       <button
         onClick={onBookmark}
