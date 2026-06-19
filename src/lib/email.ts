@@ -1,0 +1,85 @@
+import "server-only";
+
+const FROM = process.env.EMAIL_FROM || "LearnFRC <onboarding@resend.dev>";
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  replyTo,
+}: {
+  to: string | string[];
+  subject: string;
+  html: string;
+  replyTo?: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return { ok: false, error: "missing RESEND_API_KEY" };
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: FROM,
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        html,
+        ...(replyTo ? { reply_to: replyTo } : {}),
+      }),
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      return { ok: false, error: t };
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+const shell = (inner: string) => `
+<div style="background:#060912;padding:40px 0;font-family:Inter,Arial,sans-serif">
+  <div style="max-width:520px;margin:0 auto;background:#0c1220;border:1px solid #1d2740;border-radius:18px;overflow:hidden">
+    <div style="background:linear-gradient(110deg,#2f5fff,#22d3ee);padding:28px 32px">
+      <div style="color:#fff;font-size:22px;font-weight:800;letter-spacing:-0.02em">LearnFRC</div>
+      <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:2px">Master FIRST Robotics Competition</div>
+    </div>
+    <div style="padding:30px 32px;color:#e8edf7;font-size:15px;line-height:1.6">${inner}</div>
+    <div style="padding:18px 32px;border-top:1px solid #1d2740;color:#94a2bf;font-size:12px">
+      LearnFRC · Built by Jahaan Pardhanani · Sage Hill Robotics 5835
+    </div>
+  </div>
+</div>`;
+
+export function welcomeEmailHtml(name?: string | null) {
+  const greeting = name ? `Hey ${name},` : "Welcome aboard,";
+  return shell(`
+    <p style="margin:0 0 14px">${greeting}</p>
+    <p style="margin:0 0 14px">Welcome to <strong>LearnFRC</strong> — your structured path to mastering every department of FIRST Robotics Competition, from swerve drivetrains and WPILib to the Impact Award and scouting.</p>
+    <p style="margin:0 0 22px">Pick a department, work through the guides, and track your progress as you go.</p>
+    <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://learnfrc.systemerr.com"}/guides"
+       style="display:inline-block;background:linear-gradient(110deg,#2f5fff,#22d3ee);color:#fff;text-decoration:none;padding:12px 22px;border-radius:12px;font-weight:600">Explore the guides →</a>
+    <p style="margin:22px 0 0;color:#94a2bf">Gracious professionalism, always. 🤖</p>
+  `);
+}
+
+export function feedbackEmailHtml({
+  message,
+  fromEmail,
+  page,
+}: {
+  message: string;
+  fromEmail?: string;
+  page?: string;
+}) {
+  return shell(`
+    <p style="margin:0 0 10px;font-weight:600">New feedback / topic request</p>
+    <p style="margin:0 0 10px;white-space:pre-wrap">${message.replace(/</g, "&lt;")}</p>
+    <p style="margin:14px 0 0;color:#94a2bf;font-size:13px">From: ${
+      fromEmail || "anonymous"
+    }${page ? ` · Page: ${page}` : ""}</p>
+  `);
+}
