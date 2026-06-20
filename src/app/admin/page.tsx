@@ -10,6 +10,7 @@ import {
   Award,
   ShieldAlert,
   TrendingUp,
+  Mail,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin";
@@ -56,6 +57,7 @@ export default async function AdminPage() {
     { label: "Achievements earned", value: stats.totals.achievementsEarned, icon: Award, sub: "badges unlocked" },
     { label: "Lessons", value: stats.totals.lessons, icon: BookOpen, sub: `${stats.totals.departments} departments` },
     { label: "Bookmarks", value: stats.totals.bookmarks, icon: Layers, sub: "saved lessons" },
+    { label: "Email subscribers", value: stats.totals.subscribers, icon: Mail, sub: "early-access list" },
   ];
 
   return (

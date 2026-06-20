@@ -37,6 +37,7 @@ export type AdminStats = {
     lessons: number;
     departments: number;
     achievementsEarned: number;
+    subscribers: number;
   };
   totalXP: number;
   signups7d: number;
@@ -120,6 +121,10 @@ export async function getAdminStats(): Promise<AdminStats> {
     supabase.from("admin_daily_completions").select("day, count"),
   ]);
 
+  const subscribersRes = await supabase
+    .from("subscribers")
+    .select("*", { count: "exact", head: true });
+
   const completions = countOf(completionsRes);
 
   const topDepartments = ((deptStatsRes.data as DepartmentStat[]) ?? [])
@@ -167,6 +172,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       lessons: countOf(lessonsRes),
       departments: countOf(departmentsRes),
       achievementsEarned: countOf(achievementsEarnedRes),
+      subscribers: countOf(subscribersRes),
     },
     totalXP: completions * XP_PER_COMPLETION,
     signups7d: countOf(signups7dRes),
