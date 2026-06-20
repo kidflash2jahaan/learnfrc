@@ -11,6 +11,7 @@ import {
   ListChecks,
   ExternalLink,
   Sparkles,
+  Award,
 } from "lucide-react";
 import { getDepartmentBySlug, getCompletedLessonIds, flattenLessons } from "@/lib/queries";
 import { getSession } from "@/lib/auth";
@@ -154,6 +155,13 @@ export default async function DepartmentPage({
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
+              {pct === 100 && (
+                <Button asChild variant="outline" size="lg">
+                  <Link href={`/certificate/${dept.slug}`}>
+                    <Award className="h-4 w-4" /> Get certificate
+                  </Link>
+                </Button>
+              )}
               {user && (
                 <div className="flex min-w-[180px] flex-1 items-center gap-3">
                   <Progress
