@@ -5,7 +5,6 @@ import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { ScrollProgress } from "@/components/scroll-progress";
-import { getSession } from "@/lib/auth";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -75,11 +74,9 @@ export const viewport: Viewport = {
   ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { user, profile, isAdmin } = await getSession();
-
   return (
     <html
       lang="en"
@@ -96,12 +93,7 @@ export default async function RootLayout({
         </a>
         <Providers>
           <ScrollProgress />
-          <Navbar
-            authed={!!user}
-            profile={profile}
-            email={user?.email}
-            isAdmin={isAdmin}
-          />
+          <Navbar />
           <main id="main-content" className="flex-1">
             {children}
           </main>

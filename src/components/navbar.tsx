@@ -30,6 +30,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/app/actions/auth";
+import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 
 const NAV = [
@@ -40,20 +41,47 @@ const NAV = [
   { href: "/leaderboard", label: "Leaderboard" },
 ];
 
-export function Navbar({
-  authed,
-  profile,
-  email,
-  isAdmin,
-}: {
+type Me = {
   authed: boolean;
   profile: Profile | null;
   email?: string | null;
   isAdmin: boolean;
-}) {
+};
+
+export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [me, setMe] = React.useState<Me>({
+    authed: false,
+    profile: null,
+    isAdmin: false,
+  });
+  const [loaded, setLoaded] = React.useState(false);
+
+  // Auth is fetched client-side so the root layout can stay static/cacheable.
+  React.useEffect(() => {
+    let active = true;
+    const load = () =>
+      fetch("/api/me", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((d) => {
+          if (active) {
+            setMe(d);
+            setLoaded(true);
+          }
+        })
+        .catch(() => active && setLoaded(true));
+    load();
+    const supabase = createClient();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const { authed, profile, email, isAdmin } = me;
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -139,7 +167,12 @@ export function Navbar({
 
           <ThemeToggle className="hidden sm:inline-flex" />
 
-          {authed ? (
+          {!loaded ? (
+            <div
+              className="h-9 w-9 rounded-full bg-muted animate-pulse"
+              aria-hidden
+            />
+          ) : authed ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-1.5 rounded-full outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-ring">
@@ -243,7 +276,7 @@ export function Navbar({
               ))}
               <div className="flex items-center gap-2 pt-2">
                 <ThemeToggle />
-                {!authed && (
+                {loaded && !authed && (
                   <>
                     <Button asChild variant="outline" size="sm" className="flex-1">
                       <Link href="/login">Log in</Link>
