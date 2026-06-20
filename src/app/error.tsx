@@ -14,6 +14,22 @@ export default function Error({
 }) {
   React.useEffect(() => {
     console.error(error);
+    try {
+      fetch("/api/report-error", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: error?.message || "Error",
+          stack: error?.stack,
+          digest: error?.digest,
+          url: typeof window !== "undefined" ? window.location.href : undefined,
+          kind: "App error",
+        }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      /* never let reporting break the error page */
+    }
   }, [error]);
 
   return (

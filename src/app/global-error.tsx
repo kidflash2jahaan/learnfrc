@@ -1,11 +1,33 @@
 "use client";
 
+import * as React from "react";
+
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  React.useEffect(() => {
+    try {
+      fetch("/api/report-error", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: error?.message || "Error",
+          stack: error?.stack,
+          digest: error?.digest,
+          url: typeof window !== "undefined" ? window.location.href : undefined,
+          kind: "Global error",
+        }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      /* ignore */
+    }
+  }, [error]);
+
   return (
     <html lang="en">
       <body
