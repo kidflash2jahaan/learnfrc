@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/lib/icon-map";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { AnimatedCounter } from "@/components/animated-counter";
+import { ShareButton } from "@/components/profile/share-button";
 import type { Profile } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -99,6 +100,9 @@ export default async function PublicProfilePage({
               {p.bio}
             </p>
           )}
+          <div className="mt-5">
+            <ShareButton username={username} name={p.full_name || p.username || username} />
+          </div>
         </div>
       </Reveal>
 
