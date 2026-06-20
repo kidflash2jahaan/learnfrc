@@ -131,7 +131,7 @@ export function LessonComplete({
                     </span>
                     {q.question}
                   </p>
-                  <div className="mt-3 grid gap-2">
+                  <div className="mt-3 grid gap-2" role="radiogroup" aria-label={q.question}>
                     {q.options.map((opt, oi) => {
                       const isSelected = selected === oi;
                       const isCorrect = oi === q.answer;
@@ -144,6 +144,13 @@ export function LessonComplete({
                         <button
                           key={oi}
                           type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          aria-label={
+                            graded
+                              ? `${opt}${state === "correct" ? " — correct answer" : state === "wrong" ? " — incorrect" : ""}`
+                              : opt
+                          }
                           disabled={graded}
                           onClick={() => setAnswers((a) => ({ ...a, [qi]: oi }))}
                           className={cn(
@@ -184,7 +191,7 @@ export function LessonComplete({
               </Button>
             ) : (
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium" role="status" aria-live="polite">
                   You got {correctCount}/{quiz.length} 🎉
                 </span>
                 <Button

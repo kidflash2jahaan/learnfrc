@@ -70,7 +70,7 @@ export function Markdown({
             }
             return (
               <code
-                className="rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[0.82em] text-accent"
+                className="rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[0.82em] text-[#0e7490] dark:text-accent"
                 {...rest}
               >
                 {children}

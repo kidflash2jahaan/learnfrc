@@ -153,6 +153,14 @@ export function CommandPalette() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search departments, lessons, topics…"
+              role="combobox"
+              aria-expanded={results.length > 0}
+              aria-controls="cmdk-list"
+              aria-autocomplete="list"
+              aria-activedescendant={
+                results[active] ? `cmdk-opt-${active}` : undefined
+              }
+              aria-label="Search LearnFRC"
               className="h-14 w-full bg-transparent text-[0.95rem] outline-none placeholder:text-muted-foreground/70"
             />
             <kbd className="hidden sm:inline-flex h-6 items-center rounded-md border border-border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">
@@ -160,7 +168,7 @@ export function CommandPalette() {
             </kbd>
           </div>
 
-          <div ref={listRef} className="max-h-[56vh] overflow-y-auto p-2">
+          <div ref={listRef} id="cmdk-list" role="listbox" aria-label="Search results" className="max-h-[56vh] overflow-y-auto p-2">
             {!loaded && (
               <div className="px-3 py-8 text-center text-sm text-muted-foreground">
                 Loading…
@@ -179,6 +187,9 @@ export function CommandPalette() {
                 return (
                   <button
                     key={`d-${r.dept.slug}`}
+                    id={`cmdk-opt-${i}`}
+                    role="option"
+                    aria-selected={i === active}
                     onMouseEnter={() => setActive(i)}
                     onClick={() => go(r.href)}
                     className={cn(
@@ -207,6 +218,9 @@ export function CommandPalette() {
               return (
                 <button
                   key={`l-${r.lesson.deptSlug}-${r.lesson.slug}`}
+                  id={`cmdk-opt-${i}`}
+                  role="option"
+                  aria-selected={i === active}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => go(r.href)}
                   className={cn(

@@ -9,6 +9,8 @@ import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { AnimatedCounter } from "@/components/animated-counter";
 import type { Profile } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

@@ -30,6 +30,8 @@ import type { Resource, QuizQuestion } from "@/lib/types";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://learnfrc.systemerr.com";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

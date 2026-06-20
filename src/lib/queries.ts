@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type {
   Department,
@@ -59,9 +60,9 @@ export async function getDepartments(): Promise<DepartmentSummary[]> {
   });
 }
 
-export async function getDepartmentBySlug(
+export const getDepartmentBySlug = cache(async (
   slug: string
-): Promise<DeptWithModules | null> {
+): Promise<DeptWithModules | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("departments")
@@ -74,7 +75,7 @@ export async function getDepartmentBySlug(
     ...(data as unknown as Department),
     modules: sortModules((data as { modules: Module[] }).modules ?? []),
   };
-}
+});
 
 export async function getAllDepartmentSlugs(): Promise<string[]> {
   const supabase = await createClient();

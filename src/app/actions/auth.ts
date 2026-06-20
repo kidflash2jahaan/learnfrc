@@ -6,6 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = { error?: string } | undefined;
 
+/** Only allow same-origin relative paths (blocks //evil.com, /\evil.com). */
+function safeNext(n: string): string {
+  return n.startsWith("/") && !n.startsWith("//") && !n.startsWith("/\\")
+    ? n
+    : "/dashboard";
+}
+
 export async function signIn(
   _prev: AuthState,
   formData: FormData
@@ -22,7 +29,7 @@ export async function signIn(
   if (error) return { error: error.message };
 
   revalidatePath("/", "layout");
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  redirect(safeNext(next));
 }
 
 export async function signUp(
@@ -47,6 +54,13 @@ export async function signUp(
   if (usernameRaw && username.length < 3)
     return { error: "Username must be at least 3 characters (letters, numbers, _)." };
 
+  let teamNum: number | null = null;
+  if (teamNumber) {
+    teamNum = parseInt(teamNumber, 10);
+    if (Number.isNaN(teamNum) || teamNum < 1 || teamNum > 99999)
+      return { error: "Enter a valid FRC team number." };
+  }
+
   const supabase = await createClient();
 
   // Friendly pre-check for username collision (avoids cryptic DB error)
@@ -59,7 +73,7 @@ export async function signUp(
     if (taken) return { error: "That username is already taken." };
   }
 
-  const dest = next.startsWith("/") ? next : "/dashboard";
+  const dest = safeNext(next);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
   const { error } = await supabase.auth.signUp({
     email,
@@ -69,7 +83,7 @@ export async function signUp(
       data: {
         full_name: fullName || null,
         username: username || null,
-        team_number: teamNumber || null,
+        team_number: teamNum !== null ? String(teamNum) : null,
       },
     },
   });
