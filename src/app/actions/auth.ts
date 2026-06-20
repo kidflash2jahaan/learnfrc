@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { sendEmail, welcomeEmailHtml } from "@/lib/email";
 
 export type AuthState = { error?: string } | undefined;
 
@@ -60,10 +59,13 @@ export async function signUp(
     if (taken) return { error: "That username is already taken." };
   }
 
+  const dest = next.startsWith("/") ? next : "/dashboard";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(dest)}`,
       data: {
         full_name: fullName || null,
         username: username || null,
@@ -73,15 +75,8 @@ export async function signUp(
   });
   if (error) return { error: error.message };
 
-  // Best-effort welcome email (won't block signup)
-  void sendEmail({
-    to: email,
-    subject: "Welcome to LearnFRC 🤖",
-    html: welcomeEmailHtml(fullName),
-  });
-
-  revalidatePath("/", "layout");
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  // Email confirmation is required — send them to a "check your inbox" screen.
+  redirect(`/auth/verify-email?email=${encodeURIComponent(email)}`);
 }
 
 export async function signOut() {
@@ -89,4 +84,19 @@ export async function signOut() {
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+export async function resendConfirmation(
+  email: string
+): Promise<{ error?: string; success?: boolean }> {
+  if (!email) return { error: "Missing email." };
+  const supabase = await createClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: `${siteUrl}/auth/callback?next=/dashboard` },
+  });
+  if (error) return { error: error.message };
+  return { success: true };
 }
