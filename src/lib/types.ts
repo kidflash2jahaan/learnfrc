@@ -31,6 +31,7 @@ export interface Module {
   title: string;
   overview: string | null;
   sort_order: number;
+  is_prerequisite?: boolean;
   lessons: Lesson[];
 }
 

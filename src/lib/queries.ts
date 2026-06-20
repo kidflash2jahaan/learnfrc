@@ -12,7 +12,13 @@ type DeptWithModules = Department & { modules: Module[] };
 
 function sortModules(modules: Module[]): Module[] {
   return [...(modules ?? [])]
-    .sort((a, b) => a.sort_order - b.sort_order)
+    .sort((a, b) => {
+      // Prerequisite modules always come first.
+      const ap = a.is_prerequisite ? 0 : 1;
+      const bp = b.is_prerequisite ? 0 : 1;
+      if (ap !== bp) return ap - bp;
+      return a.sort_order - b.sort_order;
+    })
     .map((m) => ({
       ...m,
       lessons: [...(m.lessons ?? [])].sort((a, b) => a.sort_order - b.sort_order),

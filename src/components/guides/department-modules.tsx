@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, CheckCircle2, Circle } from "lucide-react";
+import { ChevronDown, CheckCircle2, Circle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Lesson = {
@@ -18,6 +18,7 @@ type ModuleT = {
   slug: string;
   title: string;
   overview: string | null;
+  is_prerequisite?: boolean;
   lessons: Lesson[];
 };
 
@@ -37,6 +38,10 @@ export function DepartmentModules({
     Object.fromEntries(modules.map((m, i) => [m.id, i === 0]))
   );
 
+  // Number regular modules 1..N; prerequisite modules show a "start here" mark.
+  let regular = 0;
+  const labels = modules.map((m) => (m.is_prerequisite ? "pre" : String(++regular)));
+
   return (
     <div className="space-y-4">
       {modules.map((m, mi) => {
@@ -44,6 +49,8 @@ export function DepartmentModules({
         const done = m.lessons.filter((l) => completed.has(l.id)).length;
         const pct = total ? Math.round((done / total) * 100) : 0;
         const isOpen = open[m.id];
+        const isPre = !!m.is_prerequisite;
+        const label = labels[mi];
         return (
           <motion.div
             key={m.id}
@@ -51,7 +58,10 @@ export function DepartmentModules({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.45, delay: mi * 0.04 }}
-            className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-sm)]"
+            className={cn(
+              "overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-sm)]",
+              isPre ? "border-primary/40 bg-primary/[0.04]" : "border-border"
+            )}
           >
             <button
               onClick={() => setOpen((o) => ({ ...o, [m.id]: !o[m.id] }))}
@@ -62,16 +72,22 @@ export function DepartmentModules({
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-semibold text-white"
                 style={{ background: accent }}
               >
-                {String(mi + 1).padStart(2, "0")}
+                {isPre ? <Sparkles className="h-5 w-5" /> : String(Number(label)).padStart(2, "0")}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {isPre && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary">
+                      Start here · Prerequisite
+                    </span>
+                  )}
                   <h3 className="truncate font-semibold">{m.title}</h3>
                   {done === total && total > 0 && (
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
                   )}
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
+                  {isPre ? "Recommended before you start · " : ""}
                   {done}/{total} lessons · {pct}%
                 </p>
               </div>
@@ -124,7 +140,7 @@ export function DepartmentModules({
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate text-sm font-medium group-hover:text-foreground">
                                   <span className="mr-2 font-mono text-xs text-muted-foreground">
-                                    {mi + 1}.{li + 1}
+                                    {isPre ? "P" : label}.{li + 1}
                                   </span>
                                   {l.title}
                                 </span>
