@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Bot, ExternalLink } from "lucide-react";
+import { NewsletterForm } from "@/components/newsletter-form";
 
 const COLS = [
   {
@@ -47,6 +48,10 @@ export function Footer() {
               The complete, structured guide to mastering every department of the
               FIRST Robotics Competition — from swerve drives to the Impact Award.
             </p>
+            <div className="mt-5">
+              <p className="mb-2 text-sm font-medium">Get updates on new content</p>
+              <NewsletterForm />
+            </div>
           </div>
 
           {COLS.map((col) => (

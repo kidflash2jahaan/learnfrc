@@ -1,6 +1,7 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendEmail, welcomeEmailHtml } from "@/lib/email";
 
 /**
  * Email confirmation via token hash (works across devices/browsers — no PKCE
@@ -15,8 +16,18 @@ export async function GET(request: Request) {
 
   if (token_hash && type) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash });
+    const { data, error } = await supabase.auth.verifyOtp({ type, token_hash });
     if (!error) {
+      // Best-effort welcome email on first confirmation
+      const email = data.user?.email;
+      const name = (data.user?.user_metadata?.full_name as string) || null;
+      if (email && type === "signup") {
+        void sendEmail({
+          to: email,
+          subject: "Welcome to LearnFRC 🤖",
+          html: welcomeEmailHtml(name),
+        });
+      }
       return NextResponse.redirect(new URL(next, origin));
     }
     return NextResponse.redirect(

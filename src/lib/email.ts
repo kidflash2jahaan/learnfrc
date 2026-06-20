@@ -83,3 +83,12 @@ export function feedbackEmailHtml({
     }${page ? ` · Page: ${page}` : ""}</p>
   `);
 }
+
+export function subscribeEmailHtml() {
+  return shell(`
+    <p style="margin:0 0 14px">Thanks for joining the LearnFRC list! 🤖</p>
+    <p style="margin:0 0 18px">We'll send the occasional update on new departments, lessons, and features. In the meantime, dive in:</p>
+    <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://learnfrc.systemerr.com"}/guides"
+       style="display:inline-block;background:linear-gradient(110deg,#2f5fff,#22d3ee);color:#fff;text-decoration:none;padding:12px 22px;border-radius:12px;font-weight:600">Explore the guides</a>
+  `);
+}

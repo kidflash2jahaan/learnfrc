@@ -51,6 +51,8 @@ const ACHIEVEMENTS = [
   { slug: "first-department", name: "Department Graduate", description: "Finish every lesson in a department.", icon: "GraduationCap", criteria: { type: "departments", count: 1 }, sort_order: 7 },
   { slug: "three-departments", name: "Multi-Disciplinary", description: "Finish 3 full departments.", icon: "Sparkles", criteria: { type: "departments", count: 3 }, sort_order: 8 },
   { slug: "all-departments", name: "FRC Master", description: "Finish every department on LearnFRC.", icon: "Trophy", criteria: { type: "departments", count: 11 }, sort_order: 9 },
+  { slug: "three-day-streak", name: "On a Roll", description: "Maintain a 3-day learning streak.", icon: "Flame", criteria: { type: "streak", days: 3 }, sort_order: 10 },
+  { slug: "week-streak", name: "Unstoppable", description: "Maintain a 7-day learning streak.", icon: "Flame", criteria: { type: "streak", days: 7 }, sort_order: 11 },
 ];
 
 function uniqueSlugs(items, getSlug) {

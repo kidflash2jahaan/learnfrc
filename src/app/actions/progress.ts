@@ -4,14 +4,39 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+function currentStreak(timestamps: string[]): number {
+  const key = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  const days = new Set<string>();
+  for (const ts of timestamps) {
+    const d = new Date(ts);
+    if (!Number.isNaN(d.getTime())) days.add(key(d));
+  }
+  if (!days.size) return 0;
+  const DAY = 86_400_000;
+  const today = new Date();
+  if (!days.has(key(today)) && !days.has(key(new Date(today.getTime() - DAY))))
+    return 0;
+  let streak = 0;
+  const cur = new Date(today);
+  if (!days.has(key(cur))) cur.setTime(cur.getTime() - DAY);
+  while (days.has(key(cur))) {
+    streak++;
+    cur.setTime(cur.getTime() - DAY);
+  }
+  return streak;
+}
+
 async function awardAchievements(supabase: SupabaseClient, userId: string) {
   // total completed
   const { data: progress } = await supabase
     .from("lesson_progress")
-    .select("lesson_id")
+    .select("lesson_id, completed_at")
     .eq("user_id", userId);
   const completedIds = new Set((progress ?? []).map((r) => r.lesson_id as string));
   const completedCount = completedIds.size;
+  const streak = currentStreak(
+    (progress ?? []).map((r) => r.completed_at as string)
+  );
 
   // lesson -> department map to compute fully-finished departments
   const { data: lessonRows } = await supabase
@@ -42,10 +67,16 @@ async function awardAchievements(supabase: SupabaseClient, userId: string) {
   const toInsert: { user_id: string; achievement_id: string }[] = [];
   for (const a of achievements ?? []) {
     if (haveSet.has(a.id as string)) continue;
-    const c = (a.criteria ?? {}) as { type?: string; count?: number };
+    const c = (a.criteria ?? {}) as {
+      type?: string;
+      count?: number;
+      days?: number;
+    };
     if (c.type === "lessons" && completedCount >= (c.count ?? Infinity))
       toInsert.push({ user_id: userId, achievement_id: a.id as string });
     if (c.type === "departments" && fullDepts >= (c.count ?? Infinity))
+      toInsert.push({ user_id: userId, achievement_id: a.id as string });
+    if (c.type === "streak" && streak >= (c.days ?? Infinity))
       toInsert.push({ user_id: userId, achievement_id: a.id as string });
   }
   if (toInsert.length)

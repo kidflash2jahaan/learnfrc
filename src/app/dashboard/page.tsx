@@ -301,6 +301,30 @@ export default async function DashboardPage() {
         </div>
       </Reveal>
 
+      {/* ============================ PROFILE NUDGE ============================ */}
+      {(!profile?.username || !profile?.team_number) && (
+        <Reveal className="mt-4">
+          <Link
+            href="/settings"
+            className="group flex items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-primary/[0.07] p-4 transition-colors hover:bg-primary/[0.12]"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-primary">
+                <Sparkles className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold">Complete your profile</p>
+                <p className="text-xs text-muted-foreground">
+                  Add a username{!profile?.team_number ? " and your FRC team number" : ""} to
+                  show up on the leaderboard.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
+          </Link>
+        </Reveal>
+      )}
+
       {/* ============================ STAT CARDS ============================ */}
       <Stagger className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => (
