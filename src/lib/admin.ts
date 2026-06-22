@@ -70,6 +70,8 @@ export type AdminStats = {
   recentSignups: RecentSignup[];
   users: AdminUser[];
   teams: AdminTeam[];
+  /** Distinct FRC team numbers represented across all user profiles. */
+  totalUniqueTeams: number;
   daily: DailyPoint[];
 };
 
@@ -269,6 +271,12 @@ export async function getAdminStats(): Promise<AdminStats> {
     };
   });
 
+  const totalUniqueTeams = new Set(
+    ((profsRes.data as { team_number: number | null }[]) ?? [])
+      .map((p) => p.team_number)
+      .filter((t): t is number => t != null)
+  ).size;
+
   return {
     totals: {
       users: countOf(usersRes),
@@ -287,6 +295,7 @@ export async function getAdminStats(): Promise<AdminStats> {
     recentSignups,
     users,
     teams,
+    totalUniqueTeams,
     daily,
   };
 }

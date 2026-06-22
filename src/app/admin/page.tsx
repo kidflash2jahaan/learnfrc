@@ -1,26 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  Users,
-  CheckCircle2,
-  Zap,
-  BookOpen,
-  Layers,
-  Award,
-  ShieldAlert,
-  TrendingUp,
-  Mail,
-  UsersRound,
-} from "lucide-react";
+import { ShieldAlert, TrendingUp } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin";
 import { deptMeta } from "@/lib/departments";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { AnimatedCounter } from "@/components/animated-counter";
-import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { Reveal } from "@/components/motion/reveal";
 import { ActivityChart } from "@/components/admin/activity-chart";
+import { AdminOverview } from "@/components/admin/admin-overview";
 
 export const metadata: Metadata = { title: "Admin" };
 
@@ -51,17 +40,6 @@ export default async function AdminPage() {
     ...stats.topDepartments.map((d) => d.completions ?? 0)
   );
 
-  const cards = [
-    { label: "Learners", value: stats.totals.users, icon: Users, sub: `+${stats.signups7d} this week` },
-    { label: "Lessons completed", value: stats.totals.completions, icon: CheckCircle2, sub: `+${stats.completions7d} this week` },
-    { label: "Total XP awarded", value: stats.totalXP, icon: Zap, sub: "across all learners" },
-    { label: "Achievements earned", value: stats.totals.achievementsEarned, icon: Award, sub: "badges unlocked" },
-    { label: "Lessons", value: stats.totals.lessons, icon: BookOpen, sub: `${stats.totals.departments} departments` },
-    { label: "Bookmarks", value: stats.totals.bookmarks, icon: Layers, sub: "saved lessons" },
-    { label: "Email subscribers", value: stats.totals.subscribers, icon: Mail, sub: "early-access list" },
-    { label: "Teams", value: stats.teams.length, icon: UsersRound, sub: `${stats.teams.reduce((s, t) => s + t.members, 0)} members total` },
-  ];
-
   return (
     <div className="mx-auto max-w-6xl px-4 pt-28 pb-20 sm:px-6 lg:px-8">
       <Reveal>
@@ -75,26 +53,28 @@ export default async function AdminPage() {
         </div>
         <h1 className="mt-4 text-3xl font-bold tracking-tight">Overview</h1>
         <p className="mt-1.5 text-muted-foreground">
-          Live metrics across LearnFRC.
+          Live metrics across LearnFRC. Tap a highlighted card to see the full list.
         </p>
       </Reveal>
 
-      <Stagger className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-3">
-        {cards.map((c) => (
-          <StaggerItem key={c.label}>
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-sm)]">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{c.label}</span>
-                <c.icon className="h-4 w-4 text-primary" />
-              </div>
-              <div className="mt-2 font-display text-3xl font-bold">
-                <AnimatedCounter value={c.value} />
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">{c.sub}</div>
-            </div>
-          </StaggerItem>
-        ))}
-      </Stagger>
+      <AdminOverview
+        data={{
+          users: stats.totals.users,
+          completions: stats.totals.completions,
+          totalXP: stats.totalXP,
+          achievementsEarned: stats.totals.achievementsEarned,
+          lessons: stats.totals.lessons,
+          departments: stats.totals.departments,
+          bookmarks: stats.totals.bookmarks,
+          subscribers: stats.totals.subscribers,
+          signups7d: stats.signups7d,
+          completions7d: stats.completions7d,
+          registeredTeams: stats.teams.length,
+          totalUniqueTeams: stats.totalUniqueTeams,
+        }}
+        users={stats.users}
+        teams={stats.teams}
+      />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-5">
         <Reveal className="lg:col-span-3">
@@ -173,121 +153,6 @@ export default async function AdminPage() {
                       <td className="py-3 text-right font-mono">{p.xp}</td>
                       <td className="py-3 text-right text-muted-foreground">
                         {new Date(p.created_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </Reveal>
-
-      <Reveal className="mt-6">
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Users</h2>
-            <Badge variant="outline">{stats.users.length} total</Badge>
-          </div>
-          {stats.users.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No users yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                    <th className="pb-2 font-medium">Member</th>
-                    <th className="pb-2 font-medium">Team</th>
-                    <th className="pb-2 text-right font-medium">XP</th>
-                    <th className="pb-2 font-medium">Status</th>
-                    <th className="pb-2 text-right font-medium">Joined</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.users.map((u) => (
-                    <tr key={u.id} className="border-b border-border/60 last:border-0">
-                      <td className="py-3">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar
-                            name={u.full_name || u.username || u.email}
-                            seed={u.id}
-                            className="h-8 w-8"
-                          />
-                          <div className="min-w-0">
-                            <div className="truncate font-medium">
-                              {u.full_name || u.username || "Learner"}
-                            </div>
-                            <div className="truncate text-xs text-muted-foreground">
-                              {u.email}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 text-muted-foreground">
-                        {u.team_number ? `#${u.team_number}` : "—"}
-                      </td>
-                      <td className="py-3 text-right font-mono">{u.xp}</td>
-                      <td className="py-3">
-                        {u.confirmed ? (
-                          <Badge variant="success">Verified</Badge>
-                        ) : (
-                          <Badge variant="warning">Unverified</Badge>
-                        )}
-                      </td>
-                      <td className="py-3 text-right text-muted-foreground">
-                        {new Date(u.created_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </Reveal>
-
-      <Reveal className="mt-6">
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Teams</h2>
-            <Badge variant="outline">{stats.teams.length} total</Badge>
-          </div>
-          {stats.teams.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No teams yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                    <th className="pb-2 font-medium">Team</th>
-                    <th className="pb-2 font-medium">Owner</th>
-                    <th className="pb-2 text-right font-medium">Members</th>
-                    <th className="pb-2 text-right font-medium">Lessons done</th>
-                    <th className="pb-2 font-medium">Code</th>
-                    <th className="pb-2 text-right font-medium">Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.teams.map((t) => (
-                    <tr key={t.id} className="border-b border-border/60 last:border-0">
-                      <td className="py-3">
-                        <div className="font-medium">{t.name}</div>
-                        {t.team_number ? (
-                          <div className="text-xs text-muted-foreground">
-                            #{t.team_number}
-                          </div>
-                        ) : null}
-                      </td>
-                      <td className="py-3 text-muted-foreground">{t.owner}</td>
-                      <td className="py-3 text-right font-mono">{t.members}</td>
-                      <td className="py-3 text-right font-mono">{t.completed}</td>
-                      <td className="py-3">
-                        <span className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs tracking-widest">
-                          {t.join_code}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right text-muted-foreground">
-                        {new Date(t.created_at).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}
