@@ -110,18 +110,6 @@ export function errorEmailHtml({
   `);
 }
 
-export function streakReminderEmailHtml(name?: string | null) {
-  const greeting = name ? `Hi ${name},` : "Hi there,";
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://learnfrc.systemerr.com";
-  return shell(`
-    <p style="margin:0 0 14px">${greeting}</p>
-    <p style="margin:0 0 14px">You were learning on <strong>LearnFRC</strong> yesterday — don&apos;t let your streak reset! Finish just one lesson today to keep the 🔥 going.</p>
-    <a href="${site}/dashboard"
-       style="display:inline-block;background:linear-gradient(110deg,#2f5fff,#22d3ee);color:#fff;text-decoration:none;padding:12px 22px;border-radius:12px;font-weight:600">Continue learning →</a>
-    <p style="margin:18px 0 0;color:#94a2bf;font-size:12px">You&apos;re receiving this because you&apos;ve been active on LearnFRC.</p>
-  `);
-}
-
 export function subscribeEmailHtml() {
   return shell(`
     <p style="margin:0 0 14px">Thanks for joining the LearnFRC list! 🤖</p>
