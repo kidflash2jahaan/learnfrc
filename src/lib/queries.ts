@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   Department,
   Module,
@@ -152,7 +153,10 @@ export type WeeklyEntry = Profile & { weeklyXp: number; weeklyLessons: number };
 
 /** Leaderboard by XP earned in the last 7 days — always gives newcomers a shot. */
 export async function getWeeklyLeaderboard(limit = 50): Promise<WeeklyEntry[]> {
-  const supabase = await createClient();
+  // lesson_progress is RLS-protected per-user (lp_select_own), so a normal
+  // client would only count the current user. Use the service-role client to
+  // aggregate everyone's recent activity for the public weekly ranking.
+  const supabase = createAdminClient();
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
   const { data: lp } = await supabase
     .from("lesson_progress")
