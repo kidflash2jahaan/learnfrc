@@ -147,3 +147,59 @@ export async function getLeaderboard(limit = 25): Promise<Profile[]> {
     .limit(limit);
   return (data as Profile[]) ?? [];
 }
+
+export type WeeklyEntry = Profile & { weeklyXp: number; weeklyLessons: number };
+
+/** Leaderboard by XP earned in the last 7 days — always gives newcomers a shot. */
+export async function getWeeklyLeaderboard(limit = 50): Promise<WeeklyEntry[]> {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const { data: lp } = await supabase
+    .from("lesson_progress")
+    .select("user_id, completed_at")
+    .gte("completed_at", since);
+  const counts: Record<string, number> = {};
+  for (const r of (lp ?? []) as { user_id: string }[]) {
+    counts[r.user_id] = (counts[r.user_id] || 0) + 1;
+  }
+  const ids = Object.keys(counts);
+  if (!ids.length) return [];
+  const { data: profs } = await supabase
+    .from("profiles")
+    .select("*")
+    .in("id", ids);
+  return ((profs as Profile[]) ?? [])
+    .map((p) => ({
+      ...p,
+      weeklyLessons: counts[p.id] ?? 0,
+      weeklyXp: (counts[p.id] ?? 0) * 10,
+    }))
+    .sort((a, b) => b.weeklyXp - a.weeklyXp || b.xp - a.xp)
+    .slice(0, limit);
+}
+
+export type TeamEntry = {
+  team_number: number;
+  totalXp: number;
+  members: number;
+};
+
+/** Leaderboard of teams ranked by their members' combined XP. */
+export async function getTeamLeaderboard(limit = 50): Promise<TeamEntry[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("team_number, xp")
+    .not("team_number", "is", null);
+  const teams: Record<number, TeamEntry> = {};
+  for (const p of (data ?? []) as { team_number: number; xp: number }[]) {
+    const t = p.team_number;
+    if (t == null) continue;
+    teams[t] = teams[t] || { team_number: t, totalXp: 0, members: 0 };
+    teams[t].totalXp += p.xp || 0;
+    teams[t].members += 1;
+  }
+  return Object.values(teams)
+    .sort((a, b) => b.totalXp - a.totalXp || b.members - a.members)
+    .slice(0, limit);
+}

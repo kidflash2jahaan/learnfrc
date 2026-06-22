@@ -2,8 +2,17 @@ import Link from "next/link";
 import { Trophy, Sparkles, ArrowRight, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
-import { Podium, LeaderList, type PodiumEntry } from "@/components/leaderboard/podium";
-import { getLeaderboard } from "@/lib/queries";
+import { type PodiumEntry } from "@/components/leaderboard/podium";
+import {
+  LeaderboardTabs,
+  type TeamRow,
+} from "@/components/leaderboard/leaderboard-tabs";
+import {
+  getLeaderboard,
+  getWeeklyLeaderboard,
+  getTeamLeaderboard,
+  type WeeklyEntry,
+} from "@/lib/queries";
 import { getSession } from "@/lib/auth";
 import type { Profile } from "@/lib/types";
 
@@ -35,20 +44,42 @@ function toEntry(p: Profile, rank: number, currentUserId: string | null): Podium
   };
 }
 
+function toWeeklyEntry(
+  p: WeeklyEntry,
+  rank: number,
+  currentUserId: string | null
+): PodiumEntry {
+  return {
+    id: p.id,
+    rank,
+    name: displayName(p),
+    username: p.username,
+    avatarUrl: p.avatar_url,
+    teamNumber: p.team_number,
+    role: p.role || "Learner",
+    xp: p.weeklyXp,
+    level: Math.floor((p.xp ?? 0) / 100) + 1,
+    lessons: p.weeklyLessons,
+    isYou: currentUserId != null && p.id === currentUserId,
+  };
+}
+
 export default async function LeaderboardPage() {
-  const [profiles, { user }] = await Promise.all([
+  const [profiles, weekly, teams, { user }] = await Promise.all([
     getLeaderboard(50),
+    getWeeklyLeaderboard(50),
+    getTeamLeaderboard(50),
     getSession(),
   ]);
 
-  const entries = profiles.map((p, i) => toEntry(p, i + 1, user?.id ?? null));
-  const podium = entries.slice(0, 3);
-  const rest = entries.slice(3);
-  const totalXp = entries.reduce((s, e) => s + e.xp, 0);
+  const uid = user?.id ?? null;
+  const allTimeEntries = profiles.map((p, i) => toEntry(p, i + 1, uid));
+  const weeklyEntries = weekly.map((p, i) => toWeeklyEntry(p, i + 1, uid));
+  const teamRows: TeamRow[] = teams.map((t, i) => ({ rank: i + 1, ...t }));
+  const totalXp = allTimeEntries.reduce((s, e) => s + e.xp, 0);
 
   return (
     <div className="relative">
-      {/* ambient background */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] aurora-bg opacity-25 mask-b-faded"
@@ -65,18 +96,18 @@ export default async function LeaderboardPage() {
             The <span className="text-gradient">Leaderboard</span>
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-pretty text-base text-muted-foreground sm:text-lg">
-            Every lesson you complete earns XP. Level up, climb the ranks, and put
-            your team on the map alongside learners from everywhere.
+            Every lesson you complete earns XP. Climb the weekly race, chase the
+            all-time greats, and put your team on the map.
           </p>
 
-          {entries.length > 0 && (
+          {allTimeEntries.length > 0 && (
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-3 py-1">
                 <Users className="h-3.5 w-3.5 text-primary" />
                 <span className="font-semibold text-foreground">
-                  {entries.length.toLocaleString()}
+                  {allTimeEntries.length.toLocaleString()}
                 </span>{" "}
-                ranked {entries.length === 1 ? "learner" : "learners"}
+                ranked {allTimeEntries.length === 1 ? "learner" : "learners"}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-3 py-1">
                 <Sparkles className="h-3.5 w-3.5 text-accent" />
@@ -89,8 +120,8 @@ export default async function LeaderboardPage() {
           )}
         </Reveal>
 
-        {entries.length === 0 ? (
-          /* Empty state */
+        {allTimeEntries.length === 0 ? (
+          /* Empty state — no learners at all yet */
           <Reveal className="mt-16">
             <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-10 text-center shadow-[var(--shadow-sm)]">
               <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand text-white shadow-[var(--shadow-md)]">
@@ -112,31 +143,11 @@ export default async function LeaderboardPage() {
           </Reveal>
         ) : (
           <>
-            {/* Podium — top 3 */}
-            {podium.length > 0 && (
-              <section className="mt-14 sm:mt-16" aria-label="Top three learners">
-                <Podium entries={podium} />
-              </section>
-            )}
-
-            {/* Ranked list — ranks 4+ */}
-            {rest.length > 0 && (
-              <Reveal className="mt-12">
-                <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-sm)]">
-                  {/* column header (desktop) */}
-                  <div className="hidden items-center gap-4 border-b border-border px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:flex">
-                    <span className="w-9 text-center">#</span>
-                    <span className="flex-1">Learner</span>
-                    <span className="w-[4.5rem] text-center">Level</span>
-                    <span className="hidden w-20 text-right md:block">Lessons</span>
-                    <span className="w-24 text-right">XP</span>
-                  </div>
-                  <LeaderList entries={rest} />
-                </div>
-              </Reveal>
-            )}
-
-            {/* CTA */}
+            <LeaderboardTabs
+              weekly={weeklyEntries}
+              allTime={allTimeEntries}
+              teams={teamRows}
+            />
             <Reveal className="mt-12 text-center">
               <p className="text-sm text-muted-foreground">
                 Not on the board yet?{" "}
