@@ -8,6 +8,7 @@ const COLS = [
     links: [
       { label: "All Guides", href: "/guides" },
       { label: "Learning Paths", href: "/paths" },
+      { label: "Articles", href: "/blog" },
       { label: "Glossary", href: "/glossary" },
       { label: "Resources", href: "/resources" },
     ],

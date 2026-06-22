@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { ARTICLES } from "@/lib/blog-data";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://learnfrc.systemerr.com";
 
@@ -12,6 +13,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/glossary",
     "/resources",
     "/leaderboard",
+    "/blog",
+    "/for-teams",
     "/login",
     "/signup",
   ].map((p) => ({
@@ -19,6 +22,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: "weekly",
     priority: p === "" ? 1 : 0.7,
+  }));
+
+  const blogRoutes: MetadataRoute.Sitemap = ARTICLES.map((a) => ({
+    url: `${SITE}/blog/${a.slug}`,
+    lastModified: new Date(`${a.date}T12:00:00`),
+    changeFrequency: "monthly",
+    priority: 0.7,
   }));
 
   try {
@@ -50,8 +60,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
       .filter(Boolean) as MetadataRoute.Sitemap;
 
-    return [...staticRoutes, ...deptRoutes, ...lessonRoutes];
+    return [...staticRoutes, ...blogRoutes, ...deptRoutes, ...lessonRoutes];
   } catch {
-    return staticRoutes;
+    return [...staticRoutes, ...blogRoutes];
   }
 }
