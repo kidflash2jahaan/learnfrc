@@ -14,6 +14,12 @@ export async function GET(req: Request) {
     return new NextResponse("unauthorized", { status: 401 });
   }
 
+  // Kill-switch: disabled until these emails are strictly opt-in with a
+  // working one-click unsubscribe (they were going out without consent).
+  if (process.env.STREAK_EMAILS_ENABLED !== "true") {
+    return NextResponse.json({ disabled: true, sent: 0 });
+  }
+
   const now = new Date();
   const startToday = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
