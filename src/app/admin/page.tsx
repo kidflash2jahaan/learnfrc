@@ -11,6 +11,7 @@ import {
   ShieldAlert,
   TrendingUp,
   Mail,
+  UsersRound,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin";
@@ -58,6 +59,7 @@ export default async function AdminPage() {
     { label: "Lessons", value: stats.totals.lessons, icon: BookOpen, sub: `${stats.totals.departments} departments` },
     { label: "Bookmarks", value: stats.totals.bookmarks, icon: Layers, sub: "saved lessons" },
     { label: "Email subscribers", value: stats.totals.subscribers, icon: Mail, sub: "early-access list" },
+    { label: "Teams", value: stats.teams.length, icon: UsersRound, sub: `${stats.teams.reduce((s, t) => s + t.members, 0)} members total` },
   ];
 
   return (
@@ -234,6 +236,58 @@ export default async function AdminPage() {
                       </td>
                       <td className="py-3 text-right text-muted-foreground">
                         {new Date(u.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </Reveal>
+
+      <Reveal className="mt-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold">Teams</h2>
+            <Badge variant="outline">{stats.teams.length} total</Badge>
+          </div>
+          {stats.teams.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No teams yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="pb-2 font-medium">Team</th>
+                    <th className="pb-2 font-medium">Owner</th>
+                    <th className="pb-2 text-right font-medium">Members</th>
+                    <th className="pb-2 text-right font-medium">Lessons done</th>
+                    <th className="pb-2 font-medium">Code</th>
+                    <th className="pb-2 text-right font-medium">Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.teams.map((t) => (
+                    <tr key={t.id} className="border-b border-border/60 last:border-0">
+                      <td className="py-3">
+                        <div className="font-medium">{t.name}</div>
+                        {t.team_number ? (
+                          <div className="text-xs text-muted-foreground">
+                            #{t.team_number}
+                          </div>
+                        ) : null}
+                      </td>
+                      <td className="py-3 text-muted-foreground">{t.owner}</td>
+                      <td className="py-3 text-right font-mono">{t.members}</td>
+                      <td className="py-3 text-right font-mono">{t.completed}</td>
+                      <td className="py-3">
+                        <span className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs tracking-widest">
+                          {t.join_code}
+                        </span>
+                      </td>
+                      <td className="py-3 text-right text-muted-foreground">
+                        {new Date(t.created_at).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}

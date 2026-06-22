@@ -33,6 +33,18 @@ export type AdminUser = {
   created_at: string;
 };
 
+/** A managed team for the admin Teams table. */
+export type AdminTeam = {
+  id: string;
+  name: string;
+  team_number: number | null;
+  join_code: string;
+  owner: string;
+  members: number;
+  completed: number;
+  created_at: string;
+};
+
 /** One calendar day of activity for the chart. */
 export type DailyPoint = {
   day: string; // YYYY-MM-DD
@@ -57,6 +69,7 @@ export type AdminStats = {
   topDepartments: DepartmentStat[];
   recentSignups: RecentSignup[];
   users: AdminUser[];
+  teams: AdminTeam[];
   daily: DailyPoint[];
 };
 
@@ -204,6 +217,58 @@ export async function getAdminStats(): Promise<AdminStats> {
     })
     .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
 
+  // ── Teams ──────────────────────────────────────────────────────
+  const [teamsRes, membershipsRes] = await Promise.all([
+    supabase
+      .from("teams")
+      .select("id, name, team_number, join_code, owner_id, created_at")
+      .order("created_at", { ascending: false }),
+    supabase.from("team_memberships").select("team_id, user_id"),
+  ]);
+  const teamRows = (teamsRes.data ?? []) as {
+    id: string;
+    name: string;
+    team_number: number | null;
+    join_code: string;
+    owner_id: string;
+    created_at: string;
+  }[];
+  const memRows = (membershipsRes.data ?? []) as {
+    team_id: string;
+    user_id: string;
+  }[];
+  const membersByTeam = new Map<string, string[]>();
+  for (const m of memRows) {
+    const arr = membersByTeam.get(m.team_id) ?? [];
+    arr.push(m.user_id);
+    membersByTeam.set(m.team_id, arr);
+  }
+  const completedByUser = new Map<string, number>();
+  const memberIds = [...new Set(memRows.map((m) => m.user_id))];
+  if (memberIds.length) {
+    const lpRes = await supabase
+      .from("lesson_progress")
+      .select("user_id")
+      .in("user_id", memberIds);
+    for (const r of (lpRes.data as { user_id: string }[]) ?? [])
+      completedByUser.set(r.user_id, (completedByUser.get(r.user_id) ?? 0) + 1);
+  }
+  const teams: AdminTeam[] = teamRows.map((t) => {
+    const ids = membersByTeam.get(t.id) ?? [];
+    const owner = pmap.get(t.owner_id) as Record<string, unknown> | undefined;
+    return {
+      id: t.id,
+      name: t.name,
+      team_number: t.team_number,
+      join_code: t.join_code,
+      owner:
+        (owner?.full_name as string) || (owner?.username as string) || "—",
+      members: ids.length,
+      completed: ids.reduce((s, id) => s + (completedByUser.get(id) ?? 0), 0),
+      created_at: t.created_at,
+    };
+  });
+
   return {
     totals: {
       users: countOf(usersRes),
@@ -221,6 +286,7 @@ export async function getAdminStats(): Promise<AdminStats> {
     topDepartments,
     recentSignups,
     users,
+    teams,
     daily,
   };
 }
