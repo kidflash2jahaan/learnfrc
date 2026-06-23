@@ -29,7 +29,11 @@ function displayName(p: Profile): string {
   return p.full_name?.trim() || p.username?.trim() || "Learner";
 }
 
-function toEntry(p: Profile, rank: number, currentUserId: string | null): PodiumEntry {
+function toEntry(
+  p: Profile & { lessons: number },
+  rank: number,
+  currentUserId: string | null
+): PodiumEntry {
   const xp = p.xp ?? 0;
   return {
     id: p.id,
@@ -41,7 +45,7 @@ function toEntry(p: Profile, rank: number, currentUserId: string | null): Podium
     role: p.role || "Learner",
     xp,
     level: Math.floor(xp / 100) + 1,
-    lessons: Math.floor(xp / 10),
+    lessons: p.lessons,
     isYou: currentUserId != null && p.id === currentUserId,
   };
 }

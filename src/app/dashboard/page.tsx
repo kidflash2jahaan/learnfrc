@@ -106,6 +106,10 @@ export default async function DashboardPage() {
   const completedIds = new Set(progressRows.map((r) => r.lesson_id));
   const completedCount = completedIds.size;
   const streak = streakFromDates(progressRows.map((r) => r.completed_at));
+  // Lesson XP = 10 + 1 per streak-day, capped at 20 (max 2x). Show the multiplier.
+  const xpMultiplier = (
+    1 + Math.min(10, Math.max(0, streak - 1)) / 10
+  ).toFixed(1);
 
   // lesson -> department id
   const lessonRows = (lessonMapRes.data ?? []) as {
@@ -277,7 +281,7 @@ export default async function DashboardPage() {
                 </h1>
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   {completedCount > 0
-                    ? `You've completed ${pluralize(completedCount, "lesson")}${streak > 1 ? ` · ${streak}-day streak 🔥` : ""}.`
+                    ? `You've completed ${pluralize(completedCount, "lesson")}${streak > 1 ? ` · ${streak}-day streak 🔥 (${xpMultiplier}× XP)` : ""}.`
                     : "Let's start your FRC journey today."}
                 </p>
               </div>

@@ -139,7 +139,9 @@ export async function getOverviewStats() {
   };
 }
 
-export async function getLeaderboard(limit = 25): Promise<Profile[]> {
+export async function getLeaderboard(
+  limit = 25
+): Promise<(Profile & { lessons: number })[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
@@ -147,7 +149,22 @@ export async function getLeaderboard(limit = 25): Promise<Profile[]> {
     .order("xp", { ascending: false })
     .order("created_at", { ascending: true })
     .limit(limit);
-  return (data as Profile[]) ?? [];
+  const profs = (data as Profile[]) ?? [];
+  if (!profs.length) return [];
+  // XP no longer equals lessons*10 (streak multiplier), so count real
+  // completions. lesson_progress is per-user RLS-locked → use the admin client.
+  const admin = createAdminClient();
+  const { data: lp } = await admin
+    .from("lesson_progress")
+    .select("user_id")
+    .in(
+      "user_id",
+      profs.map((p) => p.id)
+    );
+  const counts: Record<string, number> = {};
+  for (const r of (lp ?? []) as { user_id: string }[])
+    counts[r.user_id] = (counts[r.user_id] ?? 0) + 1;
+  return profs.map((p) => ({ ...p, lessons: counts[p.id] ?? 0 }));
 }
 
 export type WeeklyEntry = Profile & { weeklyXp: number; weeklyLessons: number };
