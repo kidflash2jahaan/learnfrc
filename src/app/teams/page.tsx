@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Reveal } from "@/components/motion/reveal";
+import { ShareButton } from "@/components/share-button";
 import { clampPct, pluralize } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -118,6 +119,23 @@ export default async function TeamsPage() {
                 <div className="mt-0.5 text-xs text-muted-foreground">{s.label}</div>
               </div>
             ))}
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.06}>
+          <div className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/[0.06] p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-sm font-semibold">Invite your teammates</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Anyone who signs up with team #{teamNumber} joins automatically — no codes, no setup.
+              </p>
+            </div>
+            <ShareButton
+              variant="brand"
+              label="Share invite"
+              text={`Join our FRC team on LearnFRC — sign up with team #${teamNumber} and we can track each other's progress and learn together:`}
+              url="https://learnfrc.systemerr.com"
+            />
           </div>
         </Reveal>
 

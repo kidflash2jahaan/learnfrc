@@ -14,6 +14,7 @@ import { Icon } from "@/lib/icon-map";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { PrintButton } from "@/components/certificate/print-button";
+import { ShareButton } from "@/components/share-button";
 
 export const dynamic = "force-dynamic";
 
@@ -125,7 +126,13 @@ export default async function CertificatePage({
         >
           <ArrowLeft className="h-4 w-4" /> Back to {dept.name}
         </Link>
-        <PrintButton />
+        <div className="flex items-center gap-2">
+          <ShareButton
+            text={`I just earned the ${dept.name} certificate on LearnFRC! 🤖`}
+            url="https://learnfrc.systemerr.com"
+          />
+          <PrintButton />
+        </div>
       </div>
 
       {/* Certificate */}
