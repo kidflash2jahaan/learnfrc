@@ -62,6 +62,10 @@ export async function signUp(
   const usernameRaw = String(formData.get("username") || "").trim();
   const teamNumber = String(formData.get("team_number") || "").trim();
   const next = String(formData.get("next") || "/dashboard");
+  const ref = String(formData.get("ref") || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "");
 
   if (!email || !password)
     return { error: "Email and password are required." };
@@ -95,7 +99,7 @@ export async function signUp(
 
   const dest = safeNext(next);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -108,6 +112,23 @@ export async function signUp(
     },
   });
   if (error) return { error: error.message };
+
+  // Credit the referrer (status/recognition only — no XP, to keep the
+  // leaderboard farm-resistant). The profile row is created by a trigger.
+  if (ref && data.user) {
+    const admin = createAdminClient();
+    const { data: referrer } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("username", ref)
+      .maybeSingle();
+    if (referrer && referrer.id !== data.user.id) {
+      await admin
+        .from("profiles")
+        .update({ referred_by: referrer.id })
+        .eq("id", data.user.id);
+    }
+  }
 
   // Email confirmation is required — send them to a "check your inbox" screen.
   redirect(`/auth/verify-email?email=${encodeURIComponent(email)}`);

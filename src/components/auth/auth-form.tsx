@@ -26,7 +26,15 @@ const EASE = [0.21, 0.47, 0.32, 0.98] as const;
 
 type Mode = "login" | "signup";
 
-export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
+export function AuthForm({
+  mode,
+  next,
+  referrer,
+}: {
+  mode: Mode;
+  next?: string;
+  referrer?: string;
+}) {
   const reduce = useReducedMotion();
   const isSignup = mode === "signup";
   const action = isSignup ? signUp : signIn;
@@ -69,6 +77,9 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
       noValidate
     >
       <input type="hidden" name="next" value={nextValue} />
+      {isSignup && referrer && (
+        <input type="hidden" name="ref" value={referrer} />
+      )}
 
       {/* Error alert */}
       <AnimatePresence initial={false}>

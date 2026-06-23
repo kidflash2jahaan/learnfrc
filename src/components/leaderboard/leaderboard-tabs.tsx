@@ -25,10 +25,12 @@ export function LeaderboardTabs({
   weekly,
   allTime,
   teams,
+  userTeam = null,
 }: {
   weekly: PodiumEntry[];
   allTime: PodiumEntry[];
   teams: TeamRow[];
+  userTeam?: number | null;
 }) {
   const [tab, setTab] = React.useState<TabKey>("week");
 
@@ -73,7 +75,7 @@ export function LeaderboardTabs({
       )}
 
       {tab === "team" ? (
-        <TeamBoard teams={teams} />
+        <TeamBoard teams={teams} userTeam={userTeam} />
       ) : (
         <IndividualBoard
           entries={tab === "week" ? weekly : allTime}
@@ -121,7 +123,13 @@ function IndividualBoard({
   );
 }
 
-function TeamBoard({ teams }: { teams: TeamRow[] }) {
+function TeamBoard({
+  teams,
+  userTeam,
+}: {
+  teams: TeamRow[];
+  userTeam: number | null;
+}) {
   if (!teams.length)
     return <Empty label="No teams on the board yet — add your team number in settings." />;
   return (
@@ -136,7 +144,10 @@ function TeamBoard({ teams }: { teams: TeamRow[] }) {
         {teams.map((t) => (
           <li
             key={t.team_number}
-            className="flex items-center gap-3 px-3 py-3 sm:gap-4 sm:px-5"
+            className={cn(
+              "flex items-center gap-3 px-3 py-3 sm:gap-4 sm:px-5",
+              t.team_number === userTeam && "bg-primary/[0.06]"
+            )}
           >
             <span className="w-7 shrink-0 text-center font-mono text-sm font-semibold text-muted-foreground sm:w-9 sm:text-base">
               {t.rank}
@@ -147,6 +158,11 @@ function TeamBoard({ teams }: { teams: TeamRow[] }) {
             <div className="min-w-0 flex-1">
               <div className="font-semibold tracking-tight">
                 Team {t.team_number}
+                {t.team_number === userTeam && (
+                  <span className="ml-2 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                    Your team
+                  </span>
+                )}
               </div>
             </div>
             <span className="w-24 text-right text-xs text-muted-foreground sm:text-sm">

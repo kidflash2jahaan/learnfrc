@@ -39,13 +39,14 @@ const VALUE_PROPS = [
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; ref?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, ref } = await searchParams;
   const { user } = await getSession();
   if (user) redirect("/dashboard");
 
   const safeNext = next && next.startsWith("/") ? next : undefined;
+  const refValue = (ref || "").toLowerCase().replace(/[^a-z0-9_]/g, "") || undefined;
 
   return (
     <main className="relative min-h-[100svh] overflow-hidden">
@@ -85,7 +86,7 @@ export default async function SignupPage({
                 </p>
 
                 <div className="mt-6">
-                  <AuthForm mode="signup" next={safeNext} />
+                  <AuthForm mode="signup" next={safeNext} referrer={refValue} />
                 </div>
               </CardContent>
             </Card>
