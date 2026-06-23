@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Trophy, Sparkles, ArrowRight, Users, UserPlus } from "lucide-react";
+import { Trophy, Sparkles, ArrowRight, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
 import { Reveal } from "@/components/motion/reveal";
 import { type PodiumEntry } from "@/components/leaderboard/podium";
 import {
@@ -13,7 +12,6 @@ import {
   getLeaderboard,
   getWeeklyLeaderboard,
   getTeamLeaderboard,
-  getTopRecruiters,
   getReferralCount,
   type WeeklyEntry,
 } from "@/lib/queries";
@@ -69,14 +67,12 @@ function toWeeklyEntry(
 }
 
 export default async function LeaderboardPage() {
-  const [profiles, weekly, teams, recruiters, { user, profile }] =
-    await Promise.all([
-      getLeaderboard(50),
-      getWeeklyLeaderboard(50),
-      getTeamLeaderboard(50),
-      getTopRecruiters(10),
-      getSession(),
-    ]);
+  const [profiles, weekly, teams, { user, profile }] = await Promise.all([
+    getLeaderboard(50),
+    getWeeklyLeaderboard(50),
+    getTeamLeaderboard(50),
+    getSession(),
+  ]);
 
   const uid = user?.id ?? null;
   const referralCount = uid ? await getReferralCount(uid) : 0;
@@ -162,42 +158,6 @@ export default async function LeaderboardPage() {
               teams={teamRows}
               userTeam={profile?.team_number ?? null}
             />
-
-            {recruiters.length > 0 && (
-              <Reveal className="mt-12">
-                <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-sm)]">
-                  <div className="flex items-center gap-2 border-b border-border px-5 py-3.5">
-                    <UserPlus className="h-4 w-4 text-primary" />
-                    <h2 className="text-sm font-semibold">Top Recruiters</h2>
-                    <span className="ml-auto hidden text-xs text-muted-foreground sm:block">
-                      Members who brought the most people to LearnFRC
-                    </span>
-                  </div>
-                  <ul className="divide-y divide-border">
-                    {recruiters.map((r, i) => (
-                      <li key={r.id} className="flex items-center gap-3 px-5 py-3 sm:gap-4">
-                        <span className="w-7 shrink-0 text-center font-mono text-sm font-semibold text-muted-foreground">
-                          {i + 1}
-                        </span>
-                        <Avatar name={r.name} src={r.avatarUrl} seed={r.id} className="h-9 w-9 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate font-medium">{r.name}</div>
-                          {r.username && (
-                            <div className="truncate text-xs text-muted-foreground">@{r.username}</div>
-                          )}
-                        </div>
-                        <span className="shrink-0 text-right">
-                          <span className="font-mono text-sm font-bold tabular-nums">{r.referrals}</span>
-                          <span className="ml-1 text-[10px] font-medium uppercase text-muted-foreground">
-                            referred
-                          </span>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </Reveal>
-            )}
 
             <Reveal className="mt-12 text-center">
               <p className="text-sm text-muted-foreground">

@@ -30,13 +30,14 @@ export function InviteCard({
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-primary">
           <UserPlus className="h-4.5 w-4.5" />
         </span>
-        <h2 className="text-sm font-semibold">Invite & climb the Recruiters board</h2>
+        <h2 className="text-sm font-semibold">Invite friends, earn XP</h2>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
         You&apos;ve referred{" "}
         <span className="font-semibold text-foreground">{count}</span>{" "}
-        {count === 1 ? "person" : "people"} so far. Share your link — everyone who
-        joins through it counts toward your spot on the Top Recruiters board.
+        {count === 1 ? "person" : "people"} so far. Share your link — you earn{" "}
+        <span className="font-semibold text-foreground">+25 XP</span> for everyone
+        who joins through it.
       </p>
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
