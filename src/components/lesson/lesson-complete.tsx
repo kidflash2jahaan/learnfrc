@@ -43,8 +43,20 @@ export function LessonComplete({
   const [burst, setBurst] = React.useState(0);
   const [answers, setAnswers] = React.useState<Record<number, number>>({});
   const [graded, setGraded] = React.useState(false);
+  const completedRef = React.useRef<HTMLDivElement>(null);
+  const prevCompleted = React.useRef(initialCompleted);
 
   React.useEffect(() => setCompleted(initialCompleted), [initialCompleted]);
+
+  // When a quiz is passed the tall quiz collapses into a short panel, which
+  // makes the browser clamp the scroll position and jump. Instead, gently bring
+  // the result into view so completion lands somewhere predictable on mobile.
+  React.useEffect(() => {
+    if (completed && !prevCompleted.current && quiz && quiz.length > 0) {
+      completedRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+    prevCompleted.current = completed;
+  }, [completed, quiz]);
 
   const hasQuiz = quiz && quiz.length > 0;
   const allAnswered = hasQuiz && quiz.every((_, i) => answers[i] !== undefined);
@@ -94,7 +106,10 @@ export function LessonComplete({
   // ---- Completed ----
   if (completed) {
     return (
-      <div className="relative mt-10 overflow-hidden rounded-2xl border border-success/30 bg-success/10 p-6 text-center">
+      <div
+        ref={completedRef}
+        className="relative mt-10 scroll-mt-24 overflow-hidden rounded-2xl border border-success/30 bg-success/10 p-6 text-center"
+      >
         <Confetti trigger={burst} />
         <CheckCircle2 className="mx-auto h-10 w-10 text-success" />
         <h2 className="mt-3 text-xl font-bold">Lesson complete</h2>
