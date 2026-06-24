@@ -35,9 +35,8 @@ export default async function Image({
   }
 
   const level = Math.floor(xp / 100) + 1;
-  const lessons = Math.floor(xp / 10);
   const stat = (label: string, value: string | number) => ({ label, value });
-  const stats = [stat("XP", xp), stat("Level", level), stat("Lessons", lessons)];
+  const stats = [stat("XP", xp), stat("Level", level)];
 
   return new ImageResponse(
     (

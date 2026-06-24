@@ -76,9 +76,6 @@ export type AdminStats = {
   daily: DailyPoint[];
 };
 
-/** XP awarded per completed lesson (kept in sync with the progress action). */
-const XP_PER_COMPLETION = 10;
-
 /** Number of trailing calendar days rendered in the activity chart. */
 const DAILY_WINDOW = 14;
 
@@ -202,6 +199,12 @@ export async function getAdminStats(): Promise<AdminStats> {
       p,
     ])
   );
+  // Real total XP = sum of every profile's stored xp (includes the streak
+  // multiplier and referral bonuses), not completions * 10.
+  const totalXP = ((profsRes.data as { xp: number | null }[]) ?? []).reduce(
+    (s, p) => s + (p.xp ?? 0),
+    0
+  );
   const users: AdminUser[] = (authList.data?.users ?? [])
     .map((u) => {
       const p = (pmap.get(u.id) ?? {}) as Record<string, unknown>;
@@ -324,7 +327,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       achievementsEarned: countOf(achievementsEarnedRes),
       subscribers: countOf(subscribersRes),
     },
-    totalXP: completions * XP_PER_COMPLETION,
+    totalXP,
     signups7d: countOf(signups7dRes),
     signups30d: countOf(signups30dRes),
     completions7d: countOf(completions7dRes),

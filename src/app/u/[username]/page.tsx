@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Calendar, Zap, Trophy, BookOpen } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/lib/icon-map";
@@ -48,7 +49,12 @@ export default async function PublicProfilePage({
   const displayName =
     (p.hide_name ? p.username : p.full_name || p.username) || username;
   const level = Math.floor(p.xp / 100) + 1;
-  const lessons = Math.floor(p.xp / 10); // derived (others' progress is private)
+  // Real completed-lesson count (lesson_progress is RLS-private → admin client).
+  const { count: lessonsCount } = await createAdminClient()
+    .from("lesson_progress")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", p.id);
+  const lessons = lessonsCount ?? 0;
 
   const { data: ua } = await supabase
     .from("user_achievements")

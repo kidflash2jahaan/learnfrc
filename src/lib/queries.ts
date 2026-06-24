@@ -178,11 +178,13 @@ export async function getWeeklyLeaderboard(limit = 50): Promise<WeeklyEntry[]> {
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
   const { data: lp } = await supabase
     .from("lesson_progress")
-    .select("user_id, completed_at")
+    .select("user_id, xp_awarded")
     .gte("completed_at", since);
   const counts: Record<string, number> = {};
-  for (const r of (lp ?? []) as { user_id: string }[]) {
+  const xpByUser: Record<string, number> = {};
+  for (const r of (lp ?? []) as { user_id: string; xp_awarded: number | null }[]) {
     counts[r.user_id] = (counts[r.user_id] || 0) + 1;
+    xpByUser[r.user_id] = (xpByUser[r.user_id] || 0) + (r.xp_awarded ?? 10);
   }
   const ids = Object.keys(counts);
   if (!ids.length) return [];
@@ -194,7 +196,7 @@ export async function getWeeklyLeaderboard(limit = 50): Promise<WeeklyEntry[]> {
     .map((p) => ({
       ...p,
       weeklyLessons: counts[p.id] ?? 0,
-      weeklyXp: (counts[p.id] ?? 0) * 10,
+      weeklyXp: xpByUser[p.id] ?? 0,
     }))
     .sort((a, b) => b.weeklyXp - a.weeklyXp || b.xp - a.xp)
     .slice(0, limit);
