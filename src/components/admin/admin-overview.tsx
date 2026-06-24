@@ -11,6 +11,7 @@ import {
   Mail,
   UsersRound,
   ChevronDown,
+  Radio,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar";
@@ -20,6 +21,7 @@ import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import type { AdminUser, AdminTeam } from "@/lib/admin";
 
 type Panel =
+  | "online"
   | "users"
   | "teams"
   | "completions"
@@ -27,7 +29,14 @@ type Panel =
   | "achievements"
   | null;
 
+function relTime(iso: string): string {
+  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (m < 1) return "active now";
+  return `${m}m ago`;
+}
+
 type OverviewData = {
+  onlineNow: number;
   users: number;
   completions: number;
   totalXP: number;
@@ -48,6 +57,7 @@ export function AdminOverview({
   completions,
   subscribers,
   achievements,
+  onlineUsers,
 }: {
   data: OverviewData;
   users: AdminUser[];
@@ -55,12 +65,20 @@ export function AdminOverview({
   completions: { user: string; lesson: string; dept: string; at: string }[];
   subscribers: { email: string; created_at: string }[];
   achievements: { name: string; icon: string; earned: number }[];
+  onlineUsers: { name: string; username: string | null; lastSeen: string }[];
 }) {
   const [open, setOpen] = React.useState<Panel>(null);
   const toggle = (p: Panel) => setOpen((cur) => (cur === p ? null : p));
   const maxAch = Math.max(1, ...achievements.map((a) => a.earned));
 
   const cards = [
+    {
+      label: "Online now",
+      value: data.onlineNow,
+      icon: Radio,
+      sub: "signed in · last 5 min",
+      panel: "online" as Panel,
+    },
     {
       label: "Learners",
       value: data.users,
@@ -139,6 +157,51 @@ export function AdminOverview({
           );
         })}
       </Stagger>
+
+      {open === "online" && (
+        <div className="mt-4 rounded-2xl border border-border bg-card p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-semibold">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </span>
+              Online now
+            </h2>
+            <Badge variant="outline">{onlineUsers.length} online</Badge>
+          </div>
+          {onlineUsers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No signed-in users are active right now.
+            </p>
+          ) : (
+            <ul className="max-h-[32rem] divide-y divide-border overflow-auto">
+              {onlineUsers.map((u, i) => (
+                <li key={i} className="flex items-center justify-between gap-3 py-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <Avatar
+                      name={u.name}
+                      seed={u.username || u.name}
+                      className="h-8 w-8"
+                    />
+                    <div className="min-w-0">
+                      <div className="truncate font-medium">{u.name}</div>
+                      {u.username && (
+                        <div className="truncate text-xs text-muted-foreground">
+                          @{u.username}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {relTime(u.lastSeen)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {open === "users" && (
         <div className="mt-4 rounded-2xl border border-border bg-card p-6">

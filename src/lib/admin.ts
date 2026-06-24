@@ -70,6 +70,9 @@ export type AdminStats = {
   recentCompletions: { user: string; lesson: string; dept: string; at: string }[];
   subscriberList: { email: string; created_at: string }[];
   achievementBreakdown: { name: string; icon: string; earned: number }[];
+  /** Signed-in users active within the last few minutes. */
+  onlineNow: number;
+  onlineUsers: { name: string; username: string | null; lastSeen: string }[];
   daily: DailyPoint[];
 };
 
@@ -290,6 +293,27 @@ export async function getAdminStats(): Promise<AdminStats> {
     .map((a) => ({ name: a.name, icon: a.icon, earned: uaCounts[a.id] ?? 0 }))
     .sort((a, b) => b.earned - a.earned);
 
+  // Online now: signed-in users with a heartbeat in the last 5 minutes.
+  const onlineSince = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const onlineRes = await supabase
+    .from("profiles")
+    .select("full_name, username, hide_name, last_seen_at")
+    .gte("last_seen_at", onlineSince)
+    .order("last_seen_at", { ascending: false });
+  const onlineUsers = (
+    (onlineRes.data as {
+      full_name: string | null;
+      username: string | null;
+      hide_name: boolean | null;
+      last_seen_at: string;
+    }[]) ?? []
+  ).map((p) => ({
+    name: (!p.hide_name && (p.full_name || p.username)) || p.username || "Member",
+    username: p.username,
+    lastSeen: p.last_seen_at,
+  }));
+  const onlineNow = onlineUsers.length;
+
   return {
     totals: {
       users: countOf(usersRes),
@@ -312,6 +336,8 @@ export async function getAdminStats(): Promise<AdminStats> {
     recentCompletions,
     subscriberList,
     achievementBreakdown,
+    onlineNow,
+    onlineUsers,
     daily,
   };
 }

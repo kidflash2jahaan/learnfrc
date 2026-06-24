@@ -59,6 +59,7 @@ export default async function AdminPage() {
 
       <AdminOverview
         data={{
+          onlineNow: stats.onlineNow,
           users: stats.totals.users,
           completions: stats.totals.completions,
           totalXP: stats.totalXP,
@@ -76,6 +77,7 @@ export default async function AdminPage() {
         completions={stats.recentCompletions}
         subscribers={stats.subscriberList}
         achievements={stats.achievementBreakdown}
+        onlineUsers={stats.onlineUsers}
       />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-5">
