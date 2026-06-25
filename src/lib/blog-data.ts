@@ -1554,6 +1554,758 @@ The whole pattern is: subsystems own hardware and state, commands describe actio
 
 Ready to build your first command-based robot? Dive into the [LearnFRC Programming track](https://learnfrc.systemerr.com/guides/programming-software).`,
   },
+  {
+    slug: "frc-pid-tuning",
+    title: "How to Tune PID on an FRC Robot: A Practical Guide",
+    description: "A hands-on guide to tuning PID and feedforward on FRC mechanisms: a safe tuning order, fixing oscillation and steady-state error, and using WPILib SysId.",
+    keywords: ["FRC PID tuning","how to tune PID FRC","FRC PID loop","FRC SysId","tune PID controller robot","WPILib feedforward"],
+    date: "2026-06-24",
+    readMins: 8,
+    content: `Your arm slams past the setpoint and bounces. Your flywheel never quite reaches target RPM. Your drivetrain wobbles down the path like it had too much coffee. Almost every one of these is a tuning problem, not a code problem. The good news: you do not need control-theory math to fix them. You need a method, a feel for what each knob does, and the discipline to change one thing at a time. This guide gives you all three, grounded entirely in the official WPILib docs.
+
+If you have not read the theory yet, skim our [PID overview on the Programming track](https://learnfrc.systemerr.com/guides/programming-software) first. This article is about the *practical* part: turning a twitchy mechanism into one that hits its target and holds.
+
+## A 30-second refresher on P, I, and D
+
+A **PID controller** drives an **error** (the difference between where you are and where you want to be, the **setpoint**) to zero by combining three terms. In WPILib these live in the \`PIDController\` class, and you read its output every loop with \`calculate()\`.
+
+| Term | Gain | What WPILib says it does |
+|------|------|--------------------------|
+| Proportional | \`kP\` | Pushes the output toward the reference, proportional to current error. Acts like a "software-defined spring." |
+| Integral | \`kI\` | Sums all past error to kill leftover **steady-state error**, the small gap P alone cannot close. |
+| Derivative | \`kD\` | Responds to how fast the error is changing. Acts like a "software-defined damper" that slows the system as it approaches. |
+
+That spring-and-damper picture is the whole intuition. **P** yanks you toward the target. **D** pumps the brakes so you do not blow past it. **I** nudges away the last stubborn sliver of error. Source: [WPILib's Introduction to PID](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html).
+
+## The one rule: change one gain at a time
+
+Before any numbers, internalize this. Tuning is a search, and if you move two knobs at once you can never tell which one helped. Set the others to zero, move one gain, watch the mechanism (a real-time plot of position or velocity vs. setpoint is gold), then move the next. Every procedure below follows this rule.
+
+## A safe tuning order
+
+WPILib's tuning walkthroughs are consistent: **feedforward first, then P, then D, then I sparingly.** Here is why that order is safe.
+
+1. **Feedforward** does most of the work, so the PID has less to clean up.
+2. **P** gives you responsiveness once feedforward has it close.
+3. **D** tames the overshoot that aggressive P creates.
+4. **I** is a last resort for stubborn steady-state error, because it is the easiest term to misuse.
+
+Notice I is *last and smallest*. WPILib is blunt about this: "integral gain is generally not recommended for FRC use." We will come back to why.
+
+## Feedforward: the part beginners skip (and shouldn't)
+
+PID is **reactive**: it only acts after error appears. **Feedforward** is **predictive**: it computes the voltage a mechanism *should* need before any error shows up. For velocity control especially, this is not optional. As WPILib notes, a permanent-magnet DC motor's steady-state velocity is roughly proportional to applied voltage, so a good feedforward gets a flywheel almost exactly to speed on its own, leaving PID to trim small disturbances.
+
+WPILib provides three feedforward classes. Each gain is a real, physical voltage, all per [WPILib's feedforward docs](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/feedforward.html):
+
+| Gain | Physical meaning |
+|------|------------------|
+| \`kS\` | Volts to overcome **static friction**, just barely get it moving. |
+| \`kV\` | Volts to **hold a constant velocity** (fights back-EMF and speed-dependent friction). |
+| \`kA\` | Volts to produce a given **acceleration**. |
+| \`kG\` | Volts to fight **gravity** (arms and elevators only). |
+
+The classes and their models:
+
+- \`SimpleMotorFeedforward(kS, kV, kA)\` for flywheels and drivetrains: \`V = kS·sgn(v) + kV·v + kA·a\`
+- \`ElevatorFeedforward(kS, kG, kV, kA)\`: adds a constant \`kG\` because gravity always pulls down.
+- \`ArmFeedforward(kS, kG, kV, kA)\`: gravity varies with angle, so the term is \`kG·cos(θ)\`, biggest when the arm is horizontal.
+
+Note the argument order: the two gravity-aware classes take \`kG\` *second*, right after \`kS\`. Get the order wrong and your numbers go to the wrong terms. In code you add feedforward to PID each loop: \`motor.setVoltage(feedforward.calculate(targetVelocity) + pid.calculate(measuredVelocity, targetVelocity))\`.
+
+## WPILib SysId: stop guessing your feedforward
+
+You *can* find \`kS\`, \`kV\`, and \`kA\` by hand, but the **WPILib System Identification Tool (SysId)** measures them for you. It is the right starting point for any serious mechanism. SysId works in two parts: robot-side code runs your motor through a set of tests and logs voltage, position, and velocity; then the desktop app fits a model to that data. See [WPILib's SysId introduction](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/introduction.html). It supports simple motors, elevators, and arms.
+
+You define a \`SysIdRoutine\` with two objects (per [creating a routine](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/creating-routine.html)):
+
+- A \`Config\` that sets the **quasistatic ramp rate** (default 1 V/s) and the **dynamic step voltage** (default 7 V).
+- A \`Mechanism\` with a voltage consumer (passes voltage to your motor controllers) and a log consumer (records the sensors).
+
+It runs four tests, forward and reverse for each:
+
+- **Quasistatic**: voltage ramps up *slowly* so acceleration is negligible. This isolates \`kS\` and \`kV\`.
+- **Dynamic**: a constant step voltage is applied to capture acceleration behavior, giving \`kA\`.
+
+Give SysId plenty of clear runway, because the mechanism *will* run on its own. The app then spits out \`kS\`, \`kV\`, \`kA\` (and \`kG\` for arms/elevators), plus diagnostic plots and even suggested feedback gains. Drop those numbers straight into your feedforward constructor.
+
+## Symptoms and fixes
+
+This is the table to keep open during practice. Match what you see to the cause.
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Fast oscillation / buzzing around setpoint | \`kP\` too high | Lower \`kP\` until oscillation stops. |
+| Sluggish, slow to reach setpoint | \`kP\` too low | Raise \`kP\`. |
+| Big overshoot then settles | Not enough damping | Add \`kD\`. |
+| Settles just short of target forever | Steady-state error | First add/fix **feedforward**; only then a tiny \`kI\`. |
+| Slowly grows worse / "winds up" and lurches | Integral windup | Reduce \`kI\`; use \`setIZone()\` or \`setIntegratorRange()\`. |
+| Velocity setpoint never quite reached | Missing or low \`kV\` | Tune feedforward \`kV\`. |
+
+A few of these deserve more than a row.
+
+### Oscillation = too much P
+
+Crank \`kP\` and the mechanism becomes a buzzing, overshooting mess. WPILib's procedure: raise \`kP\` until oscillation just appears, then back it off until it stops. That edge is roughly your sweet spot for P.
+
+### Overshoot = needs D
+
+Once P is responsive, you will often see it sail past the target before settling. \`kD\` is the damper: it pushes back the faster the error is closing, smoothing the approach. Add it gradually. One caveat from WPILib: for **velocity control with a constant setpoint, \`kD\` is not useful** (it is only needed when the setpoint is changing), so skip it on a flywheel.
+
+### Steady-state error = feedforward first, then maybe I
+
+If the mechanism parks slightly short of target and stays there, the textbook answer is "add I." In FRC the *better* first answer is "fix your feedforward." A correct \`kV\` (and \`kG\` on an arm or elevator) usually eliminates the gap with no integral at all. Only if a residual error remains should you add a **small** \`kI\`. WPILib's guidance across its arm and flywheel walkthroughs is the same: increase integral gain only when the output gets "stuck" before converging to the setpoint.
+
+The reason for caution is **integral windup**: while error persists, the integral term keeps accumulating, and if the mechanism was stalled or saturated it can build up a huge correction that overshoots wildly once it frees. WPILib's \`PIDController\` gives you two guards: \`setIZone()\` (ignore the integral unless error is small) and \`setIntegratorRange()\` (cap how much the integral can contribute). Use them whenever you use \`kI\` at all.
+
+## Position vs. velocity loops
+
+The two big mechanism types tune differently:
+
+- **Position loops** (an arm to an angle, an elevator to a height) care about *where* you end up. They use the full P + D, lean on \`kG\` for gravity, and benefit from \`setTolerance()\` plus \`atSetpoint()\` to know when you have arrived. For rotating mechanisms, \`enableContinuousInput()\` lets the controller wrap angles correctly.
+- **Velocity loops** (a flywheel, drive wheels at a target speed) care about a *steady speed*. Here \`kV\` does the heavy lifting, \`kP\` trims disturbances, \`kD\` is skipped, and \`kI\` is rarely needed.
+
+## Worked intuition for three mechanisms
+
+**Flywheel (velocity).** Run SysId, get \`kS\`/\`kV\`, drop them into \`SimpleMotorFeedforward\`. WPILib's flywheel order: raise \`kV\` until the wheel approaches target over time (reduce it if it overshoots), then add \`kP\` until it oscillates and back off, add a touch of \`kI\` only if it sticks below target. No \`kD\`.
+
+**Arm (position).** Use \`ArmFeedforward\` and tune \`kG\` first: increase it until the arm holds its angle against gravity with almost no motor effort. Then raise \`kV\` so it tracks slow, smooth motions. Now add \`kP\` until it responds sharply to a setpoint change, \`kD\` to smooth the approach and cut overshoot, and \`kI\` only if it stops short. This is straight from [WPILib's vertical arm tuning guide](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html).
+
+**Drivetrain.** Each side is a velocity loop, so treat it like the flywheel: characterize with SysId for \`kS\`/\`kV\`/\`kA\`, run \`SimpleMotorFeedforward\`, then trim with a modest \`kP\`. Accurate drive feedforward is also what makes WPILib trajectory following and tools like PathPlanner track cleanly, because the path planner already knows the velocities to command. Get this right and your autonomous gets dramatically more repeatable.
+
+## Putting it together
+
+Tuning feels like dark art until you have a recipe. Yours is now: measure feedforward with SysId, add \`kP\` for response, \`kD\` for damping (not on velocity loops), and \`kI\` only as a guarded last resort. Change one gain at a time, watch a live plot, and let the symptom table tell you which knob to touch. Most FRC mechanisms tune in well under an hour once you stop guessing.
+
+Ready to wire this into real subsystem code? Head to the [LearnFRC Programming track](https://learnfrc.systemerr.com/guides/programming-software) to build your first feedforward-plus-PID mechanism end to end.`,
+  },
+  {
+    slug: "frc-java-vs-python-vs-cpp",
+    title: "FRC Programming Languages: Java vs C++ vs Python",
+    description: "An honest, beginner-friendly comparison of the three WPILib-supported FRC languages — Java, C++, and Python (RobotPy) — with vendor support and how to choose.",
+    keywords: ["FRC Java vs Python","should I use Java or C++ FRC","RobotPy","best language for FRC","FRC programming language"],
+    date: "2026-06-24",
+    readMins: 7,
+    content: `One of the first real decisions a new FRC team makes is which language to write robot code in. The good news: there is no wrong answer that will keep you off the field. WPILib officially supports three languages — Java, C++, and Python — and a robot written well in any of them can win events. The differences are about how easy the language is to learn, how fast your code runs, and how much help you can find when you get stuck. This guide breaks down all three honestly so you can pick the one that fits your team.
+
+## The three officially supported languages
+
+**WPILib** is the standard software library every FRC team uses to talk to motors, sensors, and the driver station. According to the [WPILib documentation](https://docs.wpilib.org/en/stable/docs/software/what-is-wpilib.html), Java, C++, and Python "were chosen for the officially-supported languages due to their appropriate level-of-abstraction and ubiquity in both industry and high-school computer science classes."
+
+You may also hear about **LabVIEW**, a graphical language National Instruments historically supported for FRC. It still exists in the ecosystem, but the modern, actively documented path for new teams is one of the three text-based languages above, so that is where this guide focuses.
+
+Here is the short version before we dig in:
+
+| Language | Best for | Tradeoff |
+| --- | --- | --- |
+| **Java** | Most teams, especially new ones | Slightly slower than C++ (rarely matters) |
+| **C++** | Teams wanting maximum control/performance | Manual memory management; easier to crash |
+| **Python (RobotPy)** | Beginners and Python-first programs | Newer, smaller community; some vendor gaps |
+
+## Java: the default for most teams
+
+Java is the most popular FRC language and, for most teams, the recommended starting point. The WPILib docs put it plainly: "New/inexperienced users are encouraged to use Java." It hits a sweet spot between being readable and being safe — the language manages memory for you (so a forgotten cleanup will not silently corrupt your robot), and the compiler catches many mistakes before code ever runs.
+
+The practical advantage of Java is the ecosystem around it. Because so many teams use it, the example code, tutorials, and Chief Delphi forum answers you will find are overwhelmingly in Java. Every vendor ships a polished Java library on day one, and WPILib's own example projects are written first in Java and C++. When your robot misbehaves at 11 p.m. before a competition, having the largest pool of people who have hit your exact problem is worth a lot.
+
+Java code interacts with WPILib classes like \`TimedRobot\`, \`CommandScheduler\`, and motor controller classes such as \`SparkMax\` (REV) or \`TalonFX\` (CTRE). Heads up that vendor class names drift between seasons — REV's controller class, for example, was renamed from \`CANSparkMax\` to \`SparkMax\` in the 2025 library, so older code you find online may use the previous name. Always confirm names against the current vendor docs. Either way, the overall structure you learn in Java carries over almost identically to the other two languages.
+
+## C++: maximum performance, more responsibility
+
+C++ is the choice for teams that want the absolute best performance and the most direct control over the hardware. The [WPILib docs](https://docs.wpilib.org/en/stable/docs/software/what-is-wpilib.html) describe the tradeoff well: C++ "offers better high-end performance, at the cost of increased user effort. Memory must be handled manually, and the C++ compiler does not do much to ensure user code will not crash at runtime."
+
+That last part is the catch. In Java and Python, the language cleans up memory for you. In C++, you are responsible for it, and a mistake there can crash your robot code mid-match — exactly when you cannot afford it. Modern C++ has tools (like smart pointers) that make this much safer than it used to be, but it is still more to think about.
+
+So who actually benefits? In practice, the **roboRIO** (the robot's main controller) is fast enough that a typical robot program written in Java runs perfectly well. The performance gap C++ offers mostly matters for unusually heavy computation — for example, running custom vision or control math on the robot itself. Many veteran programmers also simply prefer C++ because they like the control, or because their team has used it for years and has a mature codebase. If that is not you, the performance benefit alone is rarely a reason to choose C++ over Java as a new team. The same WPILib classes (\`TimedRobot\`, command-based framework, vendor motor classes) are all available in C++.
+
+## Python (RobotPy): the most approachable, with caveats
+
+Python became an **officially supported FRC language in 2024**, and it is the most approachable of the three for true beginners. The project that makes this work is **RobotPy** — a community of FRC mentors and students who maintain the Python bindings. Its documentation lives at [robotpy.readthedocs.io](https://robotpy.readthedocs.io/).
+
+The biggest surprise for newcomers is performance. You might assume "interpreted Python must be slow," but the [RobotPy FAQ](https://robotpy.readthedocs.io/en/stable/faq.html) explains that Python is "fast enough" and "almost certainly just as fast as Java for typical WPILib-using robot code." The reason: RobotPy is a thin Python layer over the same native C++ WPILib that the other languages use. The heavy lifting happens in compiled C++; only your robot-specific logic is interpreted. So for normal robot code, performance is a non-issue.
+
+Python's honest tradeoffs are elsewhere:
+
+- **Crash safety.** Because Python is interpreted, the WPILib docs warn that "Python users should take care to test their program to ensure that typos and other issues don't cause robot crashes." A typo Java would flag at compile time can sneak through to the robot, so simulation and testing matter more.
+- **Smaller, newer community.** The RobotPy FAQ notes that "because RobotPy is not yet widely adopted, bugs tend to be found during the first half of competition season." Fewer teams means fewer example projects and forum answers in Python.
+- **Vendor coverage.** Most major vendors are now supported (more on this below), but Python support occasionally lags slightly behind the Java/C++ release, and a niche library may not have a Python version yet.
+
+RobotPy also includes a robot simulator, so you can test logic on a laptop without the robot connected — important given the crash-safety note above.
+
+## Vendor library support, by language
+
+Your robot code is only as useful as the vendor libraries it can call. Here is where the three languages stand for the most common vendors:
+
+| Vendor / Library | Java / C++ | Python (RobotPy) |
+| --- | --- | --- |
+| **CTRE Phoenix 6** (Kraken/Falcon, \`TalonFX\`) | Yes (vendordep) | Yes — official \`phoenix6\` on PyPI |
+| **REV REVLib** (SPARK MAX/Flex) | Yes (vendordep) | Yes — RobotPy package |
+| **PhotonVision** | Yes | Yes — \`photonlibpy\` |
+| **PathPlanner** | Yes | Yes — \`robotpy-pathplannerlib\` |
+| **navX** (IMU) | Yes | Yes — \`robotpy-navx\` |
+
+CTRE provides an **official** Python distribution for Phoenix 6, installable with \`pip install phoenix6\` per the [Phoenix 6 install docs](https://v6.docs.ctr-electronics.com/en/latest/docs/installation/installation-frc.html). For Java and C++, you add Phoenix 6 and REVLib through WPILib's vendor-dependency (vendordep) system in VS Code, as described in the [WPILib third-party libraries guide](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html). The takeaway: the libraries most teams need exist in all three languages, but Java/C++ remain the most complete and earliest-updated. Exact package names and versions change each season, so check the current vendor docs before you install.
+
+## How to choose
+
+A few honest rules of thumb:
+
+- **No programming experience on the team?** Start with **Java**. It is the WPILib-recommended default, it is what most schools teach, and you will find the most help.
+- **Your team already knows Python (from a CS class or club)?** **Python/RobotPy** is a legitimate, officially supported choice — just lean hard on the simulator and testing to catch the typos a compiler would have caught.
+- **You have an experienced programmer who wants maximum control, or an existing C++ codebase?** **C++** is great, as long as someone understands manual memory management.
+- **Worried about performance?** For nearly every team, don't be. The roboRIO handles normal robot code in any of the three languages, and Python's native-C++ backing keeps it competitive with Java.
+
+Whatever you pick, the concepts transfer. The command-based framework, \`TimedRobot\` structure, and PID control you learn in one language map directly onto the others, so a switch later is far easier than learning to program from scratch. Want a structured path from your first line of robot code to a competition-ready program? Start with the [LearnFRC Programming track](https://learnfrc.systemerr.com/guides/programming-software).
+`,
+  },
+  {
+    slug: "frc-software-tools",
+    title: "The FRC Software Toolbox: Driver Station, Dashboards, AdvantageScope & SysId",
+    description: "A beginner-friendly tour of the FRC software ecosystem beyond robot code: Driver Station, dashboards (Glass, Elastic, AdvantageScope), SysId, and vendor tools.",
+    keywords: ["FRC AdvantageScope","FRC Elastic dashboard","FRC Driver Station","FRC software tools","FRC log analysis"],
+    date: "2026-06-24",
+    readMins: 8,
+    content: `Writing robot code is only half the job. The other half is the constellation of desktop apps you use to deploy that code, drive the robot, watch what it's doing, and figure out why it just drove into a wall. Most of these tools are free, most ship with WPILib, and learning them early is one of the fastest ways to look like a veteran programmer at your first competition. Here's the toolbox, what each piece does, and when you actually reach for it.
+
+## The FRC Driver Station: the one tool you can't skip
+
+Everything starts here. The **FRC Driver Station** is the only software allowed to control the state of your robot during a match, and it's the program your drive team stares at all weekend. It ships inside the **FRC Game Tools**, a package distributed by **NI (National Instruments)** that also includes the **roboRIO Imaging Tool** and the LabVIEW runtime the Driver Station needs. The Game Tools run on **Windows 10 or 11 only** — there is no Mac or Linux build — so your drive laptop must be a Windows machine. You can grab it from the [FRC Game Tools install guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html).
+
+What the Driver Station actually does, per the [WPILib Driver Station docs](https://docs.wpilib.org/en/stable/docs/software/driverstation/driver-station.html):
+
+- **Enables and disables** the robot. A disabled robot cannot move; this is your single most important safety control.
+- Selects the **operation mode**: \`TeleOperated\` runs your teleop code, \`Autonomous\` runs your auto routine, \`Practice\` cycles through the real match sequence (auto, then teleop, with the right timing), and \`Test\` runs test-only code that never runs in a real match.
+- Reads your **joysticks and gamepads** and forwards their inputs to the robot.
+- Shows four critical **status indicators** — Communications (is the laptop talking to the roboRIO?), Robot Code (is your program running?), Joysticks (is at least one controller detected?), and Battery Voltage with a live history plot.
+- Logs everything. The Driver Station records match logs and a stream of errors and warnings you can replay later in the **Log File Viewer**.
+
+You set your **team number** in the Setup tab; this tells the Driver Station the mDNS name to look for your roboRIO at. At a competition the field's **FMS (Field Management System)** takes over enabling and disabling, but the Driver Station is still the program that connects you to the field. If you learn nothing else, learn to read those four status indicators — most "the robot won't move" panics are solved by noticing which one is red.
+
+## Dashboards: how you see what the robot sees
+
+A **dashboard** displays live data from your robot — sensor values, camera streams, a chooser for which autonomous to run. FRC has several, and they fall into two buckets: **driver dashboards** (clean, glanceable, used behind the glass during a match) and **programmer dashboards** (dense, diagnostic, used at the bench). The [Choosing a Dashboard guide](https://docs.wpilib.org/en/stable/docs/software/dashboards/dashboard-intro.html) is the official starting point.
+
+| Dashboard | Made by | Best for | Status |
+|---|---|---|---|
+| **Shuffleboard** | WPILib | Driver / programming | Removed for the 2027 season |
+| **SmartDashboard** | WPILib | Driver | Removed for the 2027 season |
+| **Glass** | WPILib | Programmer debugging | Active, bundled with WPILib |
+| **Elastic** | Team 353 | Driver (behind the glass) | Active, bundled with WPILib |
+| **AdvantageScope** | Team 6328 | Log analysis / diagnostics | Active, bundled with WPILib |
+
+### Shuffleboard and SmartDashboard (legacy)
+
+For years **Shuffleboard** and the older **SmartDashboard** were the default driver dashboards. They are now gone: the WPILib docs record that **both were removed for the 2027 season** — Shuffleboard for lacking a maintainer and having resource-utilization issues, and SmartDashboard because it relied on the old NetworkTables v3 protocol. If you're starting fresh today, learn Elastic instead — but you'll still see Shuffleboard in older tutorials and on veteran teams' laptops. (Removal timelines like this can shift, so when in doubt check the current WPILib documentation for the season you're on.)
+
+### Glass — the programmer's microscope
+
+**Glass** is WPILib's official data-visualization tool, and the docs are explicit that it's "meant to be used as a programmer's tool rather than a proper dashboard in a competition environment." It focuses on **high-performance real-time plotting** and pose visualization — the **Field2d** widget draws your robot's position on a top-down field, which is the single best way to debug odometry. You launch it from VS Code via the WPILib Command Palette. Reach for Glass when you want to watch a value change in real time while you tune something at the bench.
+
+### Elastic — the modern driver dashboard
+
+**Elastic**, built by **Team 353**, is the dashboard most teams now put in front of their drivers. The [Elastic docs](https://docs.wpilib.org/en/stable/docs/software/dashboards/elastic.html) describe it as a **drag-and-drop** dashboard of resizable card widgets, designed for "a high pressure competition environment." It reads data over **NetworkTables (NT4)**, automatically grabs the robot's IP from the Driver Station, supports camera streams, and offers a full-screen mode for behind-the-glass use. Use Elastic to build your driver's match view: an autonomous chooser, key sensor readouts, and a camera feed.
+
+### AdvantageScope — logging and replay, the popular one
+
+**AdvantageScope**, made by **Team 6328 (Littleton Robotics)**, has become the de-facto standard for FRC log analysis, and since the 2024 season it ships bundled inside the WPILib installer. The [AdvantageScope docs](https://docs.advantagescope.org/) call it a "robot diagnostics, log review/analysis, and data visualization application."
+
+Its superpower is **replay**. During a live connection it streams **NetworkTables (NT4)** data; afterward it opens recorded logs so you can scrub back through a match and see exactly what every sensor reported, frame by frame. It reads an unusually wide range of formats — WPILib data logs (\`.wpilog\`), Driver Station logs, CTRE **Hoot** logs, and REV **REVLOG** logs among them. Its visualization tabs include line graphs, a **2D and 3D field** view with custom robot models, swerve vector displays, a joystick viewer, a console, and **synchronized video playback** so you can line up your match footage with the data. When the robot did something weird and you don't know why, AdvantageScope is how you find out. (It pairs especially well with the same team's **AdvantageKit** logging framework, though AdvantageKit is not required.)
+
+## SysId: stop guessing your tuning numbers
+
+Good control — smooth driving, an arm that holds position, an elevator that doesn't slam — depends on accurate **feedforward** constants. **SysId** (System Identification) is the WPILib tool that measures these for you instead of making you guess. Per the [SysId introduction](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/introduction.html), it runs your mechanism through controlled tests, records the data, and fits a mathematical model.
+
+You add a \`SysIdRoutine\` to your robot code (described in [Creating a Routine](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/creating-routine.html)) with a \`Config\` and a \`Mechanism\` object. SysId then runs two kinds of tests, each forwards and backwards — four tests in total:
+
+- **Quasistatic** — the mechanism is sped up so slowly that acceleration is negligible.
+- **Dynamic** — a constant step voltage is applied so you can measure how it accelerates.
+
+From the logged data, SysId computes feedforward gains: **kS** (static friction), **kV** (velocity), and **kA** (acceleration) for every mechanism, plus **kG** (gravity) for arms and elevators that have to fight their own weight. You feed these numbers into WPILib's feedforward and \`PIDController\` classes. Run SysId once per mechanism early in the build season, write down the gains, and your closed-loop control gets dramatically easier.
+
+## roboRIO Imaging Tool and vendor utilities
+
+Two more categories round out the toolbox.
+
+The **roboRIO Imaging Tool**, included in the NI Game Tools, flashes (images) the firmware on your **roboRIO** — the robot's main controller — and sets its team number. You run it once when you first set up a roboRIO, and again if a firmware update or a corrupted image ever requires it.
+
+Your motor controllers and CAN devices have their own configuration apps:
+
+- **REV Hardware Client** — REV's tool for updating firmware and configuring REV devices like the **SPARK MAX** and **SPARK Flex** motor controllers. The [REV docs](https://docs.revrobotics.com/rev-hardware-client) describe it auto-detecting connected devices and pulling the latest firmware.
+- **CTRE Phoenix Tuner X** — CTR Electronics' app to "update, configure, analyze, and control" their CAN devices, including **Talon FX** controllers (the **Kraken X60** uses an integrated Talon FX), the **CANcoder**, and the **Pigeon 2** gyro. The [Phoenix 6 Tuner docs](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/index.html) cover firmware updates, assigning CAN IDs, self-tests, live plotting, and "blipping" a motor to confirm it's wired right. Tuner X runs on Windows, macOS, Android, and iOS.
+
+Whenever you add a CAN motor controller or sensor to the robot, you'll open one of these to give it a unique **CAN ID** and update its firmware — a step that prevents a huge fraction of "device not found" errors. Note that exact part numbers and which devices a vendor supports shift each season, so confirm against the current vendor docs before a build.
+
+## Putting it together
+
+A typical workflow: image the roboRIO and set CAN IDs with the **Imaging Tool**, **REV Hardware Client**, and **Phoenix Tuner X**; deploy code and control the robot with the **Driver Station**; debug live at the bench with **Glass**; give your drivers a clean match view in **Elastic**; characterize mechanisms with **SysId**; and after every match, replay the logs in **AdvantageScope** to see what really happened. None of these require writing more robot code to use — they're force multipliers that make the code you already wrote far easier to get right.
+
+Ready to put these tools to work? Start with our [Programming track](https://learnfrc.systemerr.com/guides/programming-software) to learn the robot code that feeds them all.`,
+  },
+  {
+    slug: "frc-can-bus",
+    title: "FRC CAN Bus Explained (and How to Fix Common Problems)",
+    description: "How the FRC CAN bus works, the daisy-chain wiring with 120-ohm termination, avoiding device ID conflicts, and fixing the most common CAN failures.",
+    keywords: ["FRC CAN bus","FRC CAN bus not working","FRC CAN ID conflict","roboRIO CAN","FRC CAN troubleshooting"],
+    date: "2026-06-24",
+    readMins: 8,
+    content: `Almost every motor controller, your power distribution board, and most of your sensors talk to the roboRIO over a single pair of wires. That pair is the CAN bus, and when it works you forget it exists. When it breaks, your whole robot can go dark at once. The good news: CAN failures are extremely predictable, and almost all of them come down to four or five causes you can learn to spot in minutes. This guide explains what CAN is, how to wire it correctly, and exactly how to track down the most common problems with the same tools the pros use.
+
+## What CAN is and why FRC uses it
+
+**CAN** stands for Controller Area Network. It's a communication standard originally built for cars, where dozens of electronic modules need to share one network reliably in a noisy electrical environment. FRC adopted it for the same reason: instead of running a separate control wire to every device, every device shares one bus.
+
+The big advantage is data and wiring. A CAN connection is daisy-chained from device to device, which usually means much shorter wire runs, and it carries far more information than the old PWM signal wires could. According to [WPILib's "Using CAN Devices" docs](https://docs.wpilib.org/en/stable/docs/software/can-devices/using-can-devices.html), CAN lets devices report rich telemetry back to the roboRIO, like motor temperature, current draw, and encoder position, all over the same two wires that carry commands out.
+
+Devices that live on the CAN bus include CTRE **Talon FX** / Kraken motors, **CANcoder** and **Pigeon 2.0** sensors, REV **SPARK MAX** and **SPARK Flex** controllers, and your **Power Distribution Panel (PDP)** or **Power Distribution Hub (PDH)**.
+
+## The daisy-chain and 120-ohm termination
+
+CAN on an FRC robot is wired as a **daisy chain**. Per the [WPILib CAN Wiring Basics page](https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/can-wiring-basics.html), the wiring "should usually start at your roboRIO and go into and out of each device successively until finally ending at the PDP." There is no branching and no star topology. The signal flows in one continuous line from one end to the other.
+
+CAN uses two signal wires, conventionally **yellow for CAN-High** and **green for CAN-Low**. Keeping the colors consistent across every device makes wiring mistakes obvious at a glance.
+
+The most important and most misunderstood part is **termination**. A CAN bus needs a 120-ohm resistor at *each end* of the chain. These resistors absorb electrical reflections that would otherwise bounce back down the wire and corrupt your data. In FRC you usually don't add these yourself, because they're built into the devices at the two ends:
+
+- The **roboRIO** has a 120-ohm terminating resistor built in. It sits at one end of the bus.
+- The **PDP** ships with its termination jumper in the **"ON"** position. WPILib recommends leaving that jumper on and placing the PDP at the *other* end of the bus, so it provides the second terminator.
+
+If you want the PDP somewhere in the middle of the chain instead, you must move its jumper to **"OFF"** and add your own 120-ohm resistor at the new end of the bus. CTRE's [CAN Bus Troubleshooting guide](https://v6.docs.ctr-electronics.com/en/stable/docs/troubleshooting/canbus-troubleshooting.html) puts it simply: there must be two 120-ohm resistors, one at each end.
+
+### The 60-ohm test
+
+Here's a trick worth memorizing. Two 120-ohm resistors at opposite ends of the bus are electrically in parallel, and two equal resistors in parallel give half the value. So a correctly terminated, **powered-off** CAN bus measures about **60 ohms** between CAN-High and CAN-Low. CTRE documents this directly: with the robot off, measuring CANH-to-CANL should read roughly **60 ohm**. If your meter reads close to **120 ohm**, only one terminator is in the circuit, meaning the other end (often the PDP) isn't connected through, or a hop in the daisy chain is broken. A multimeter and this one measurement will tell you more than an hour of guessing.
+
+## Device IDs and avoiding conflicts
+
+Every device on a CAN bus is addressed by a **device ID**. The roboRIO doesn't care where a device physically sits in the chain; it finds devices by their ID. The rule is simple but strict: **every device of the same type must have a unique ID** on that bus.
+
+The exact range depends on the vendor, but they overlap closely:
+
+| Vendor | Tool | Valid device ID range | Default out of box |
+| --- | --- | --- | --- |
+| CTRE (Talon FX, CANcoder, Pigeon 2.0) | Phoenix Tuner X | 0-62 | 0 |
+| REV (SPARK MAX, SPARK Flex) | REV Hardware Client | 1-62 recommended | 0 |
+
+[REV's documentation](https://docs.revrobotics.com/brushless/spark-max/control-interfaces) states plainly that "each device on the CAN bus must be assigned a unique CAN ID number" — give two SPARK MAX controllers the same ID and the roboRIO can no longer tell them apart. A common beginner trap: every new controller ships with **ID 0**, so the moment you put two fresh controllers on the bus, you have a conflict. Assign a unique ID to each device the first time you connect it. Many teams use a simple scheme, like numbering controllers 1-8 by mechanism, and write the ID on tape next to each one.
+
+One nuance from the [WPILib CAN addressing docs](https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html): the full CAN address also includes a device *type* and *manufacturer* field. That means a CTRE Talon FX with ID 1 and a REV SPARK MAX with ID 1 do **not** conflict, because they're different device types from different manufacturers. The conflict rule applies within the same device type. When in doubt, give everything a unique number anyway. It's free insurance.
+
+## Reading CAN utilization in the Driver Station
+
+The [FRC Driver Station](https://docs.wpilib.org/en/stable/docs/software/driverstation/driver-station.html) has a built-in CAN health monitor. On the **CAN/Power tab** (the fifth tab down on the left side) you'll find:
+
+- **CAN Bus Utilization** - the percentage of the bus's capacity currently in use. Lower is healthier; if you're pushing very high utilization, status frames can start to lag.
+- **CAN faults** - counts of each of the four CAN fault types accumulated since the Driver Station connected. Rising fault counts are a strong signal that something on the bus is intermittent or miswired.
+
+There's an important catch documented in WPILib's [Known Issues](https://docs.wpilib.org/en/stable/docs/yearly-overview/known-issues.html): the live utilization number "spikes" because the roboRIO occasionally counts CAN packets in the wrong time period, so one reading is too low and the next too high. The fix is to open the **DS log** afterward, zoom in, and read the *average* of the stable region. Don't panic over a single spike. The Diagnostics tab also lists **CAN Device Versions**, the firmware of connected devices, which is handy for confirming a device is actually being seen.
+
+## The most common failures and how to diagnose each
+
+Most CAN problems trace back to wiring, not code. The signature symptom is dramatic: because everything shares one line, a single bad spot can knock out *many* devices at once, and the devices "downstream" of the break vanish from your tools while upstream ones stay fine. That pattern is a gift, because it points you straight at the break.
+
+| Failure | Symptom | How to diagnose / fix |
+| --- | --- | --- |
+| Loose or backed-out connector | Devices flicker offline; fault counts climb; problems come and go when the robot vibrates | "Tug-test" each crimped wire one at a time; gently flick/jostle harness sections while watching device LEDs and Tuner for red blips |
+| Missing termination | Whole bus unreliable or dead; 120-ohm reading instead of 60 | Confirm PDP jumper is "ON" and PDP is at the end; measure ~60 ohm CANH-to-CANL with power off |
+| Duplicate device IDs | Two devices "fight"; one disappears or behaves erratically | Phoenix Tuner X shows the device card in red with a conflict message; reassign IDs |
+| Single broken wire | Everything downstream of the break is gone all at once | Locate the boundary between working and missing devices; that gap holds the fault |
+| Swapped CAN-High/Low | Bus won't communicate at all | Verify yellow=CAN-High, green=CAN-Low at every connector |
+
+**Diagnosing with Phoenix Tuner X (CTRE devices):** Connect to the roboRIO and open the device list. Every healthy CTRE device appears as a card. A duplicate ID shows up as a **red card with a conflict message** in the middle. To resolve a conflict, CTRE recommends isolating devices: wire the roboRIO to **one device only** (roboRIO to device to a 120-ohm terminator), confirm it appears, give it a unique ID, then repeat for the next device. Select a device's numeric ID field to change it.
+
+**Diagnosing with the REV Hardware Client (REV devices):** Plug a USB cable into any SPARK MAX or the PDH and open the **Hardware tab**. Thanks to the USB-to-CAN bridge feature in SPARK MAX firmware, one USB-connected controller can surface the entire CAN bus, so you can see, configure, and update every REV device on the chain without cabling into each one. Set each device's CAN ID and update firmware from the same screen.
+
+When you genuinely can't tell whether you have an ID conflict or a wiring fault, fall back to the isolation method. Strip the bus down to roboRIO plus one device, prove it works, then add devices back one at a time. The moment things break, the last device or wire you touched is your culprit. For a deeper look at building a clean, fault-resistant electrical board, see our [electrical track](https://learnfrc.systemerr.com/guides/electrical).
+
+## What a CANivore is
+
+As you add more high-performance devices, a standard CAN bus can get crowded. The **CANivore** is CTRE's answer. Per the [Phoenix 6 CANivore docs](https://v6.docs.ctr-electronics.com/en/stable/docs/canivore/canivore-intro.html), it's a multipurpose **USB-to-CAN FD** device that adds a *second*, separate CAN bus to the roboRIO. CAN FD ("Flexible Data-rate") improves on classic CAN with higher device bandwidth and faster transfers, which matters when you're running many high-update-rate motors and sensors.
+
+Two practical wins for teams: you can split your devices across two buses to reduce load on each, and the CANivore has its own **built-in termination**, which makes it a handy bench tool. CTRE notes you can configure a single device on a short harness as **CANivore to device to a 120-ohm resistor**, giving you a known-good, properly terminated test setup away from the robot.
+
+## The takeaway
+
+CAN feels intimidating until you internalize three facts: it's one continuous daisy chain, it needs a 120-ohm terminator at each end (so ~60 ohm with power off), and every device of a type needs a unique ID. Master those, keep Phoenix Tuner X and the REV Hardware Client handy, and watch the Driver Station's fault counts, and you'll diagnose the vast majority of CAN problems before they ever cost you a match.
+
+Ready to wire a bulletproof electrical system from scratch? Start with the LearnFRC [electrical track](https://learnfrc.systemerr.com/guides/electrical).`,
+  },
+  {
+    slug: "frc-robot-rules-size-weight",
+    title: "FRC Robot Rules: Weight, Size, and Bumper Limits Explained",
+    description: "A beginner's guide to FRC robot weight, size, frame perimeter, extension, and bumper rules - with the recent-season numbers and why you must check the current manual.",
+    keywords: ["FRC robot weight limit","FRC robot size limit","FRC robot rules","FRC bumper rules","FRC frame perimeter"],
+    date: "2026-06-24",
+    readMins: 8,
+    content: `Every FRC robot has to live inside a box of rules before it ever touches a game piece. How heavy it can be, how big it can start, how far it can reach, and how its bumpers must be built - these constraints shape your entire design. Get them wrong and your robot fails inspection and never plays a match. Get them right and you have a safe, legal machine and the freedom to be creative inside the lines. This guide walks through each constraint, gives you the values from recent seasons so you know the ballpark, and - this is the important part - shows you why you must always confirm the exact numbers in the **current season's Game Manual**.
+
+## The one rule that beats all the others: check the current manual
+
+Here is the single most important thing to understand before any number in this article: **the robot construction limits change almost every season.** FIRST publishes a new Game Manual each January, and Section 8, *ROBOT Construction Rules (the "R" rules)*, is where weight, size, and bumper limits live. Those rules get revised game to game and even mid-season through **Team Updates**.
+
+How much do they change? A lot. Compare just two recent seasons:
+
+| Constraint | 2025 (Reefscape) | 2026 (Rebuilt) |
+| --- | --- | --- |
+| Max robot perimeter (starting) | 120 in | 110 in |
+| Max starting height | 3 ft 6 in (42 in) | 30 in |
+| Max horizontal extension | 1 ft 6 in (18 in) | 12 in |
+| Weight without bumpers | 115 lb | 115 lb |
+
+Same program, back-to-back years, and the size box shrank dramatically. That is exactly why you should treat every number below as "roughly this in recent seasons" and never as a permanent fact. Always open the [current FIRST Game Manual](https://www.firstinspires.org/resource-library/frc/competition-manual-qa-system) and read Section 8 for yourself. Rule numbers like \`R103\` or \`R405\` are stable handles, but the values attached to them are not.
+
+## Weight: lighter than you think
+
+In recent seasons the headline weight limit has been about **115 lb (~52 kg)** for the robot *excluding* bumpers and *excluding* the battery. In the 2026 manual this is rule \`R103\`: "The ROBOT weight must not exceed 115.0 lb." (2026 also excludes the battery and the field location-detection tags from that figure.)
+
+Two details trip up rookies:
+
+- **Bumpers and battery are weighed separately or excluded** from the base limit. Recent manuals also cap the robot *with* bumpers - in 2026, rule \`R408\` sets that at **135.0 lb (~61 kg)**. So your bumper set effectively gets its own ~20 lb budget on top of the robot.
+- Some seasons add a **total inspected weight** for robots with swappable mechanisms. Always check whether the current game allows interchangeable parts and what the combined cap is.
+
+Practical takeaway: weight is a budget you spend, not an afterthought. Heavy steel hardware, oversized gearboxes, and a tank-like superstructure add up fast. Teams that weigh subassemblies in CAD (Onshape reports mass automatically) almost never get a nasty surprise at the scale. Learn that workflow on our [CAD design track](https://learnfrc.systemerr.com/guides/cad-design).
+
+## Size and the frame perimeter
+
+Your robot's footprint is governed by the **frame perimeter** (recent manuals call it the **ROBOT PERIMETER** - the name changed from FRAME PERIMETER in 2025). This is one of the most important concepts in the whole rulebook, so it's worth slowing down.
+
+### What the frame perimeter actually is
+
+The frame perimeter is the outline formed by the **fixed, non-articulated structural elements** of your robot while it sits in its **starting configuration**, measured *excluding* bumpers. Crucially, it is the **convex hull** of those parts - imagine stretching a rubber band tightly around your robot's base. If you build a U-shaped frame, the perimeter is the rubber band that closes off the mouth of the U, turning it into a D. Concave notches do not count as "inside."
+
+Tiny bumps don't count either: **minor protrusions of 0.25 in or less** - bolt heads, rivets, fastener ends, weld beads - are excluded from the perimeter. This is why your CAD team draws a clean perimeter sketch first and builds the frame to match it.
+
+### The size box
+
+In recent seasons, the **starting configuration** has had two limits:
+
+- A maximum **perimeter length** (the total distance around that rubber band) - 120 in in 2025 (\`R104\`), reduced to 110 in in 2026.
+- A maximum **starting height** - 42 in in 2025, dropped to 30 in in 2026 (\`R104\`).
+
+In the starting configuration, **nothing may stick out past the vertical projection of the frame perimeter** except the bumpers and those minor protrusions (in 2026 this is rule \`R102\`). In other words, at the start of the match your whole robot - arms folded, elevator down - must fit inside its own footprint.
+
+## Extension during the match
+
+Once the match begins, most seasons let you reach *beyond* the frame perimeter, but only by a limited amount. Recent rules have capped **horizontal extension** at 18 in beyond the vertical projection of the perimeter in 2025, tightened to 12 in in 2026 (\`R105\`). There is also a **height ceiling** you may not exceed even when extended - 30 in throughout 2026 (\`R107\`).
+
+Some games add their own extension twists (a single side that can extend, or no extension at all in certain zones), so the game-specific rules in Section 6 can override or layer on top of the general \`R\` rules. The design lesson: a mechanism that has to reach far horizontally - an intake, a scoring arm - must be planned around the current extension limit from day one. Our [mechanical build track](https://learnfrc.systemerr.com/guides/mechanical-build) covers how to size linkages and elevators against these limits.
+
+## Bumpers: the rules people most often get wrong
+
+Bumpers exist to protect robots from each other. They are *mandatory*, and inspectors scrutinize them hard. The bumper rules (the \`R4xx\` series in recent manuals) cover where bumpers sit, how they're built, how much they can stick out, and what color they are.
+
+### The bumper zone
+
+Bumpers must fill the **bumper zone**, a horizontal band measured up from the floor. In 2025 and 2026 (\`R405\`) that zone has been **2.5 in to 5.75 in (~63 mm to ~146 mm)** from the ground. Your backing and padding have to fully occupy that band so that two robots colliding hit padded bumper, not bare frame.
+
+### Construction: backing, padding, and cover
+
+Recent manuals (rule \`R402\`) require, in essence:
+
+- **Rigid backing** - traditionally a wood board such as plywood - tall enough to support the padding across the bumper zone (in 2026 the backing must be at least about 4.5 in tall).
+- **Soft padding** in front of the backing. The 2026 rules require a minimum padding depth (about 2.25 in) and call out approved materials: solid pool noodle, backer rod, foam floor tiles, closed-cell polyethylene foam (including crosslinked), or closed-cell EVA foam. Note a real 2026 change - **hollow pool noodles are no longer allowed**; the foam must be solid or closed-cell.
+- A **cloth cover** over the padding.
+
+This is exactly the kind of detail that shifts. Always read the current \`R402\` for the approved materials list and minimum dimensions before you cut anything.
+
+### How far bumpers stick out
+
+Recent rules cap how far the **hard parts** of a bumper can extend from the frame perimeter at **1.25 in (~31 mm)** (2026 \`R404\`), with the padding required to extend further beyond any hard part - at least 2.0 in in 2026 - and an overall bumper-extension cap (4.0 in in 2026, \`R403\`). The point: the soft stuff, not the wood or bolts, should be what makes contact.
+
+### Coverage and corners
+
+Bumpers must protect the **entire frame perimeter** (\`R401\`). Small gaps between segments are tolerated within limits - in 2026, gaps under about 1.25 in are allowed - and corners get special attention. Recent rules require corner joints to be filled with uncompressed padding extending a set distance from each corner (at least 2.25 in in 2026, \`R406\`), and limit how large any single gap can be while still protecting a minimum length of perimeter on each side of every corner (about 5 in per side in 2026, \`R401\`). Exposed corners are a classic inspection failure.
+
+### Alliance color and mounting
+
+Two more durable requirements:
+
+- **Alliance color:** every robot must be able to show **red or blue** bumpers to match its alliance for a given match (\`R411\`). Most teams build two swappable sets or reversible covers.
+- **Mounting:** bumpers must be **fixed relative to the frame perimeter** (\`R409\`) and designed for quick install and removal so inspectors can weigh and check the robot - the manual's guidance has been that two people should be able to swap them in just a few minutes.
+
+## Designing inside the box
+
+The teams that thrive treat these constraints as the *first* design input, not a final-week scramble. Sketch your frame perimeter in CAD before building, budget weight by subassembly, plan your reach against the extension limit, and build bumpers to spec the first time. Read the [FIRST Game Manual](https://www.firstinspires.org/resource-library/frc/competition-manual-qa-system) Section 8 every season, follow the Team Updates, and confirm every number - because as you've seen, they really do change.
+
+Ready to start building a legal, competitive frame and bumper set? Dive into our [mechanical build track](https://learnfrc.systemerr.com/guides/mechanical-build).`,
+  },
+  {
+    slug: "frc-onshape-tutorial",
+    title: "FRC Onshape Tutorial: How to CAD Your First Robot Part",
+    description: "A beginner Onshape tutorial for FRC: sign up free, learn Part Studios and Assemblies, sketch and extrude your first part, and pull in COTS parts.",
+    keywords: ["Onshape FRC tutorial","how to use Onshape for FRC","FRC CAD for beginners","Onshape sketch extrude","FRC Onshape"],
+    date: "2026-06-24",
+    readMins: 8,
+    content: `Every robot starts as a drawing before it becomes metal. In FRC, that drawing lives in CAD, and the most popular CAD tool on teams today is **Onshape** — a full professional 3D modeler that runs entirely in your browser, with nothing to install. If you can open a Chrome tab, you can CAD. This guide walks you from a blank account to your first real part: a length of \`2x1\` aluminum tube, the same stock that frames thousands of FRC robots. Let's get you modeling.
+
+## Why Onshape for FRC
+
+Onshape is browser-based, so it works the same on a school Chromebook, a Mac, or a Windows laptop, and your documents auto-save to the cloud. That cloud model also means real-time collaboration: multiple students can edit the same document at once, like a Google Doc for CAD. Best of all, it is **free for students and teams** through the Onshape Education plans.
+
+If you also want to brush up on the build side that CAD feeds into, our [mechanical build track](https://learnfrc.systemerr.com/guides/mechanical-build) and [CAD design track](https://learnfrc.systemerr.com/guides/cad-design) pair well with this tutorial.
+
+## Step 1: Sign up free with an Education plan
+
+Onshape offers a **free Student plan** for individuals and a **free Educator plan** for teams, mentors, and coaches. Both are real, full-featured Onshape — not a stripped-down demo. (Education plans are for non-commercial use.)
+
+- **Individual students:** Go to the [Onshape for Education sign-up page](https://www.onshape.com/en/education/sign-up) and create an EDU account. Indicate you are a student in grade school, fill in your school details, and — per [FRCDesign.org's setup guide](https://frcdesign.org/learning-course/course-setup/new-to-onshape/account-setup/) — you can simply enter \\"Robotics\\" as your reason for using Onshape. Onshape verifies your info, emails you, and you set a password.
+- **Whole teams:** A mentor or design lead can request the [Educator plan for FIRST teams](https://www.onshape.com/en/education/first-robotics), which adds a shared classroom with Classes and Assignments so you can manage everyone's work in one place, plus parts libraries and FRC field models.
+
+After your first login, set your default units (most FRC teams work in inches) and pick mouse controls. Then you're ready to make a document.
+
+## Step 2: Understand the Onshape document model
+
+Everything in Onshape lives inside a **document**. A single document can hold many tabs, and the two tab types you'll use constantly are:
+
+| Tab type | What it's for |
+|----------|---------------|
+| **Part Studio** | Where you design parts. You draw 2D **sketches** and turn them into 3D parts with **feature** tools like Extrude. A Part Studio can hold one part or many. |
+| **Assembly** | Where you bring parts together and define how they fit and move, using **mates**. |
+
+According to [Onshape's documentation](https://cad.onshape.com/help/Content/sketch.htm), you \\"use Sketch tools to create 2D geometry, and use Feature tools to create 3D models (or parts) from those sketches, all within a Part Studio.\\" That sketch-then-feature loop is the heart of CAD, so let's do it.
+
+## Step 3: Sketch on a plane
+
+Create a new document, and Onshape drops you into a Part Studio with three reference **planes** — Top, Front, and Right — plus an **Origin** point where they all meet. Every Part Studio has these by default, and they are your starting reference for any sketch.
+
+To begin, click the **Sketch** tool and pick a plane to draw on (the Top plane is a common choice for a flat part). Onshape rotates to look straight at that plane. Now draw your shape — for a length of \`2x1\` tube, use the **Rectangle** tool to draw a rough rectangle near the origin.
+
+### Dimension and constrain it
+
+A rough sketch isn't done until it's **fully defined** — meaning Onshape knows the exact size and position of every line. You lock that down two ways:
+
+- **Dimensions** set exact sizes. Use the **Dimension** tool, click a line, and type a value — for our tube cross-section, \`2 in\` for one side and \`1 in\` for the other.
+- **Constraints** set relationships, like making two lines equal, parallel, or **coincident** (touching). Snapping a corner of the rectangle onto the origin is a clean way to anchor it.
+
+When the sketch turns from blue to black, it's fully defined. Getting in the habit of fully defining sketches now will save you from parts that mysteriously shift later. Close the sketch when you're happy.
+
+## Step 4: Extrude into a 3D part
+
+A flat rectangle isn't a tube yet — you need depth. That's the **Extrude** feature. Onshape defines Extrude as a tool to [\\"add depth to a selected region or planar face along a straight path.\\"](https://cad.onshape.com/help/Content/extrude.htm) In plain terms: it pushes your 2D shape out into 3D.
+
+Select your rectangle and run **Extrude**. The key options:
+
+| Option | What it does |
+|--------|--------------|
+| **New** | Creates new material as a brand-new part (what you want for your first part). |
+| **Add / Remove / Intersect** | Add material to an existing part, cut material away, or keep only overlapping material. |
+| **Blind** | Extrude to a specific distance you type in the Depth field. |
+| **Symmetric** | Extrude equally to both sides of the sketch plane. |
+
+Set the result to **New**, choose **Blind**, and enter a length — say \`24 in\` for a two-foot piece of tube. Click the green check, and you have a solid \`2x1\` bar. To make it a real hollow tube, start a new sketch on one end face, draw a smaller rectangle inset from the edges (real \`2x1\` stock is often \`0.0625\\"\` or \`0.125\\"\` wall thickness), and Extrude it with **Remove** through the length to hollow it out. Congratulations — that's a recognizable FRC tube.
+
+Real teams buy this stock pre-made: vendors like [WCP](https://docs.wcproducts.com/welcome/frc-build-system/systems-structure/framing-and-material), AndyMark, and REV sell \`2x1\` and \`1x1\` 6061-T6 aluminum box tube, frequently pre-punched with a hole pattern (a common one is \`#10\` clearance holes on \`0.5\\"\` spacing). You can model those holes the same way — sketch circles, then Extrude with **Remove**.
+
+## Step 5: Skip the busywork with the FRC parts library
+
+You should learn to model your own structural parts, but you should *not* hand-model a NEO motor or a gearbox. The FRC community maintains **FRCDesignLib**, a library of off-the-shelf (**COTS**) FRC components and assemblies, and the easiest way to use it is the **FRCDesignApp**.
+
+Per the [FRCDesignLib resource page](https://frcdesign.org/resources/frcdesignlib/), the two are distinct: \\"FRCDesignApp is the plugin/app that helps you insert components into your documents, while FRCDesignLib is the actual collection of components.\\" To set it up, find FRCDesignApp in the Onshape App Store, choose **Subscribe**, then **Get for Free**. It links to your account automatically — just reload any already-open documents once so the inserter appears. From there you can search COTS parts and filter by vendor (REV, WCP, and more) and drop them straight into your design.
+
+## Step 6: Assemble with mates
+
+Once you have a few parts, open an **Assembly** tab to put them together. Parts are positioned and connected with **mates**, and mates snap to **mate connectors** — which Onshape describes as [\\"local coordinate systems located on or between entities.\\"](https://cad.onshape.com/help/Content/mate.htm) Think of a mate connector as a precise grab point.
+
+The two mates beginners use most:
+
+- **Fastened mate** — locks two parts together completely. Onshape's docs note it restricts all six degrees of freedom, so the parts can't move relative to each other at all. Use this to bolt a gusset onto your tube.
+- **Revolute mate** — allows rotation around one axis, perfect for a wheel on an axle, an arm pivot, or a shaft in a bearing.
+
+Other mate types — Slider, Cylindrical, Planar, Ball — cover more motion later, but Fastened and Revolute will carry you a long way.
+
+## Where to go next
+
+You now know the full loop: sketch, dimension, extrude, library parts, assemble. The single best place to go deep is [FRCDesign.org's free learning course](https://frcdesign.org/learning-course/), built specifically to take FRC students \\"from zero to being able to model a full robot.\\" It's sponsored by West Coast Products and Fabworks, weaves in Onshape's own learning courses, and even walks you through modeling a swerve drivebase using a top-down design workflow.
+
+One important note on accuracy: robot **weight and size limits change every season**, and so do many legal-material rules. Don't trust a number you read in a tutorial — always confirm dimensions, weight, and bumper rules in the current [FIRST game manual](https://www.firstinspires.org/robotics/frc/game-and-season) before you finalize a design.
+
+Ready to keep building your CAD skills? Dive into our [CAD design track](https://learnfrc.systemerr.com/guides/cad-design) and start turning ideas into robots.`,
+  },
+  {
+    slug: "frc-team-structure",
+    title: "How to Structure an FRC Team: Subteams, Roles, and Leadership",
+    description: "A practical guide to organizing an FRC team: the common subteams, student leadership, mentor roles, meeting cadence, rookie onboarding, and sustainability.",
+    keywords: ["FRC team structure","FRC team roles","how to organize an FRC team","FRC subteams","FRC student leadership","FRC drive team","FRC mentors"],
+    date: "2026-06-24",
+    readMins: 7,
+    content: `A great robot rarely comes from one genius working alone. It comes from a team where dozens of students each own a slice of the problem, hand work off cleanly, and pull in the same direction under a deadline. The good news: you do not need to invent your structure from scratch. FIRST and successful teams have converged on a handful of patterns that work, and you can adopt them on day one. This guide walks through the common subteams, how students lead, what mentors actually do, how the calendar shapes your meetings, and how to make sure your hard-won knowledge survives graduation.
+
+## The two halves of every team
+
+FIRST's official [How To: Organize a Team](https://www.firstinspires.org/hubfs/web/program/frc/resources/team-org.pdf) guide suggests starting with two big groups and subdividing from there: the **robot side** and the **logistics side** (sometimes called the team side or non-technical side). The robot side builds the machine. The logistics side keeps the team funded, documented, recruited, and known in the community. Both matter. A robot with no sponsors does not get to competition, and a flush bank account with no robot does not win matches.
+
+You do not need every subteam below. A rookie team of fifteen students might run a single "build" group and a single "business" group. A 60-student team might split each of these five ways. Pick the structure your leadership can actually support, and merge subteams when you are short on people.
+
+## The robot-side subteams
+
+### Design / CAD
+
+The **Design** subteam (often called **CAD**) turns the team's prototypes and decisions into a 3D model that serves as the blueprint for fabrication. Most FRC teams CAD in [Onshape](https://www.onshape.com/) or Autodesk Inventor, and a strong reference for learning is [FRCDesign.org](https://www.frcdesign.org/). Designers think in terms of mechanisms, tolerances, and how parts bolt together before anyone cuts metal. If your team uses 3D printing or CNC, this group usually owns the manufacturing files too. Learn more in our [CAD and design track](https://learnfrc.systemerr.com/guides/cad-design).
+
+### Mechanical / Build
+
+The **Mechanical** subteam (also "build") fabricates and assembles the robot. Early in the season they prototype end effectors and mechanisms; once the design is locked, they machine, cut, and assemble the real parts. This is where mills, lathes, drill presses, and a lot of deburring live. Our [mechanical build track](https://learnfrc.systemerr.com/guides/mechanical-build) covers gearboxes, drivetrains, and manipulators.
+
+### Electrical
+
+The **Electrical** subteam is the bridge between mechanical and programming. They wire the robot: the power distribution board, motor controllers, the roboRIO, the radio, breakers, and sensors, all laid out so the board is safe and serviceable. Clean wiring is not cosmetic; a loose connection is a match you lose. See our [electrical track](https://learnfrc.systemerr.com/guides/electrical) for wiring standards and component selection.
+
+### Programming
+
+The **Programming** subteam writes the code that connects driver controls to motors and sensors. Most teams use [WPILib](https://docs.wpilib.org/) in Java or C++, increasingly with the command-based framework, and tools like [PathPlanner](https://pathplanner.dev/) for autonomous paths and [PhotonVision](https://docs.photonvision.org/) or [Limelight](https://docs.limelightvision.io/) for vision. They own both the autonomous routines and the teleop control logic. Dive into our [programming track](https://learnfrc.systemerr.com/guides/programming-software).
+
+## The logistics-side subteams
+
+### Business / Finance
+
+The **Business** subteam manages the budget, writes the business plan, recruits and stewards sponsors, and tracks expenses. They are why your team can afford a [swerve drive](https://learnfrc.systemerr.com/guides/mechanical-build) and a trip to a regional.
+
+### Outreach / Community
+
+The **Outreach** subteam extends the team's impact beyond itself: running events, mentoring younger FIRST teams, and spreading STEM in the community. This work is the backbone of award submissions, including the FIRST Impact Award (called the Chairman's Award through the 2022 season), the most prestigious honor in the program.
+
+### Communications / Media
+
+Often split from business on larger teams, the **Communications/Audio-Visual** group handles the website, social media, newsletters, photography, video, and award essays. They document the season so the outreach story can actually be told.
+
+### Strategy / Scouting
+
+The **Strategy** subteam reads the game manual closely, runs mock matches to shape the robot's priorities, and at competition gathers and analyzes data on every team. That scouting data drives one of the highest-leverage decisions of the event: which partners to pick during alliance selection.
+
+## The drive team: a special case
+
+The **drive team** is not a year-round subteam so much as the small crew that operates the robot at competition, and its size is capped by the rules. In recent seasons the FRC game manual has defined a drive team of **up to five members** — a mix of **DRIVERS**, a **DRIVE COACH**, a **TECHNICIAN**, and **HUMAN PLAYERS** — with **no more than one non-student** among them. Because these limits and role labels can change year to year, always confirm the exact composition in the current [game manual](https://www.firstinspires.org/resource-library/frc/competition-manual-qa-system).
+
+| Role | What they do |
+| --- | --- |
+| Drive coach | Calls strategy, talks to alliance partners between matches, leads the crew on the field |
+| Driver | Controls robot movement and primary mechanisms |
+| Operator | An informal term for a driver who runs secondary mechanisms (arms, elevators, shooters) |
+| Human player | Handles game pieces from the field perimeter, per that year's game |
+| Technician | The one person allowed to handle the robot for pre-match setup and troubleshooting; not a coach or driver |
+
+Pick drivers on merit and practice, not seniority. FIRST publishes a [Selecting Drive Team Members](https://community.firstinspires.org/hubfs/web/program/frc/resources/selecting-drivers.pdf) guide that weighs talent against experience, communication, and composure, and Team 254 publicly shares its own [driver selection criteria](https://media.team254.com/2014/02/Team_254_FRC_Driver_Selection_Criteria-2013-2014.pdf): consistency, composure under pressure, and willingness to drill matter more than raw reflexes.
+
+## Student leadership
+
+FIRST recommends electing one or two **team captains** who supervise the whole team and relay between students and the head mentor. Beneath them, larger teams add **robot and logistics managers** who own the big picture for each half, freeing the **subteam leads** to focus on their specialty. Select leaders on merit and experience through an application, short essay, or interview, not a popularity contest. There is no single correct chart; the point is that every student knows who they report to and who depends on their work.
+
+## Mentor roles
+
+Mentors guide; they do not build the robot for the students. Every team needs a **Lead Coach/Mentor** who is the adult of record with FIRST and shepherds the season. Beyond that, **technical mentors** coach individual subteams (a machinist for mechanical, a software engineer for programming), and **non-technical mentors** support business, outreach, and logistics.
+
+Crucially, all coaches and mentors must complete FIRST's [Youth Protection Program](https://www.firstinspires.org/resources/youth-protection) training and screening before working with students, and FIRST provides a structured [Mentor Guide](https://info.firstinspires.org/hubfs/web/program/frc/resources/frc_mentor_guide.pdf) and onboarding pathway. Treat YPP compliance as non-negotiable.
+
+## Meeting cadence across the year
+
+Your schedule should breathe with the season. A typical rhythm looks like this:
+
+| Phase | Roughly when | Cadence and focus |
+| --- | --- | --- |
+| Offseason | May to August | Once a week; fundraising, outreach, summer camps, design experiments |
+| Preseason | September to December | A couple meetings a week; training rookies, prototyping, building a practice mechanism |
+| Build season | Kickoff in early January onward | Most meetings of the year; design, build, program, test |
+| Competition | Late February through April | Travel, compete, iterate between events |
+
+Kickoff lands on a Saturday in early January (it has fallen on the first or second Saturday depending on the year), so check the current season's calendar for the exact date. One important correction to outdated advice: FRC no longer has a six-week "stop build day." FIRST retired bag-and-tag for the 2020 season (see FIRST's [2020 rule-change announcement](https://www.firstinspires.org/robotics/frc/blog/2020-rule-changes-stop-build-day)), so teams may now keep working on the robot from kickoff right up to their first event. You can still structure your effort around six intense weeks if that suits you, but you are no longer forced to.
+
+## Onboarding rookies and training
+
+New members are the team's future, so make their first weeks count. Use the calm preseason to run hands-on training: a "rookie robot" or an old competition bot is a perfect sandbox for teaching wiring, basic CAD, and a first WPILib deploy without the pressure of a real deadline. FIRST's guide suggests having students apply to their top three subteam choices, which balances the groups and keeps everyone engaged rather than letting one subteam swell while another starves.
+
+## Documentation and sustainability
+
+The single biggest threat to an FRC team is graduation. Seniors leave and take their knowledge with them unless you write it down. Build a habit of documentation: an engineering notebook, a shared drive of CAD and code, wiring diagrams, and a team handbook covering norms, safety, and expectations (FIRST links example [team management resources](https://www.firstinspires.org/resources/library/frc/team-management-resources)). Use a communication platform like Discord, Slack, or Google Classroom with per-subteam channels so information is searchable, not trapped in one person's memory. A team that documents well can survive a rough year, rebuild, and come back stronger.
+
+Ready to find your spot on the team? Explore every subteam's skills in the [LearnFRC guides hub](https://learnfrc.systemerr.com/guides).`,
+  },
+  {
+    slug: "frc-rookie-mistakes",
+    title: "10 Common FRC Rookie Mistakes (and How to Avoid Them)",
+    description: "The 10 mistakes that trip up first-year FRC teams the most, with a concrete fix for each: scope, the game manual, driver practice, drivetrain, wiring, scouting, and more.",
+    keywords: ["FRC rookie mistakes","common FRC mistakes","FRC advice for new teams","FRC rookie tips","FRC first year"],
+    date: "2026-06-24",
+    readMins: 8,
+    content: `Every veteran FRC team was a rookie once, and almost all of them made the same handful of mistakes in their first season. The good news: those mistakes are well-documented, predictable, and completely avoidable. If you learn what they are now, you can skip months of frustration and show up to your first event with a robot that actually works. Here are the ten that trip up new teams the most, and exactly how to dodge each one.
+
+## 1. Designing a robot that does too much
+
+The single most common rookie mistake is scope creep: trying to build a machine that scores in every way the game allows. A robot that does one thing reliably beats a robot that does five things poorly, every single time.
+
+**The fix:** pick one or two scoring objectives and commit. Read the game's scoring breakdown, identify the highest-value action you can realistically build, and design around that. A simple robot you finish and test in week four is worth far more than an ambitious one you're still debugging the night before your event. Start from a known-good base like the official [KitBot](https://www.firstinspires.org/resources/library/frc/kitbot), then add exactly one mechanism on top.
+
+## 2. Not reading the game manual carefully
+
+At Kickoff, everyone watches the game animation and skips straight to brainstorming. Then at inspection they discover their robot is over the size limit, the bumpers are illegal, or a mechanism breaks a rule. Illegal **bumpers** in particular are one of the largest non-compliance issues inspectors see, per [FIRST's bumper rule-change guidance](https://info.firstinspires.org/hubfs/blog/frc/2024-bumper-rule-changes.pdf).
+
+**The fix:** assign someone to read the entire game manual, especially the **Robot Construction Rules** (the "R" rules) and the **Game Rules** (the "G" rules). In recent seasons the robot has had to fit a fixed frame perimeter, stay under a height limit, and weigh under a set maximum without bumpers and battery — but these numbers change every year (the weight limit itself changed for the 2025 season), so confirm the exact figures in the [current Game Manual](https://www.firstinspires.org/resources/library/frc/season-materials) before you cut a single piece of metal. Print the current season's inspection checklist from the [official season materials](https://www.firstinspires.org/resources/library/frc/season-materials) and check your robot against it weeks before your event, not at the field.
+
+## 3. No driver practice (or starting it too late)
+
+Teams pour hundreds of hours into building a robot, then hand the controls to someone who has never driven it until their first qualification match. A great robot with an untrained driver loses to an average robot with a practiced one.
+
+**The fix:** start driving early. You don't need a finished robot — a previous year's robot, a test chassis, or even the bare drivetrain of this year's machine is enough to begin, as [FIRST's driver-performance guide](https://www.firstinspires.org/hubfs/web/program/frc/resources/improving-driver-performance.pdf) notes. Run drills: slalom courses, repeated pickups, and scoring cycles against a timer. At the event, the practice day (usually the day before qualification matches start) exists for exactly this — get inspected first, then run as many practice matches as you can to shake out connection issues.
+
+## 4. An unreliable drivetrain
+
+If your robot can't move, nothing else matters. Rookie teams often try to design a clever custom drivetrain and end up with chain that throws, wheels that slip, or gearboxes that bind — and they spend the whole season fixing it instead of building scoring mechanisms.
+
+**The fix:** for your first year, build the [AndyMark AM14U6](https://andymark.com/products/am14u6-6-wheel-drop-center-robot-drive-base-2025-frc-kit-of-parts-drive-base) Kit-of-Parts chassis that ships in the Kickoff kit. It's a proven 6-wheel drop-center base, fully documented, and designed to survive a season of contact. A reliable, boring drivetrain frees your team to spend its energy on the parts of the robot that actually win matches. Learn the mechanical fundamentals in our [Mechanical / Build track](https://learnfrc.systemerr.com/guides/mechanical-build).
+
+## 5. Sloppy wiring with no strain relief
+
+Loose connectors, wires under tension, and stray copper "whiskers" cause more mid-match failures than almost anything else. A robot that browns out or loses a motor because a wire popped off during a collision is a robot that can't compete.
+
+**The fix:** follow the [WPILib wiring best practices](https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/wiring-best-practices.html). Key points:
+
+- Leave enough slack to **avoid strain on connectors**, then secure cables close to each connection point.
+- **Pull-test every connection** by hand to confirm nothing comes loose.
+- Make sure no stray wire whiskers stick out of a terminal.
+- Secure snap-in connectors like the **SB50** battery connector with clips or cable ties so impacts can't pop them loose.
+
+Treat clean wiring as a competitive feature, not an afterthought. Our [Electrical track](https://learnfrc.systemerr.com/guides/electrical) walks through the full power-distribution layout.
+
+## 6. Skipping scouting
+
+Rookie teams often treat scouting as optional busywork. Then alliance-selection day arrives, the top-ranked teams start picking partners, and the rookies have no data and no plan — so they either don't get picked or pick blindly.
+
+**The fix:** scout from match one. The [FIRST Introduction to Scouting Guide](https://info.firstinspires.org/hubfs/web/program/frc/resources/intro-scouting.pdf) explains the goal: gather data on what every robot can actually do so you can build a **pick list** before alliance selection. In the playoffs, the highest-seeded teams become alliance captains and invite partners to form alliances, and good scouting data tells you which partners complement your robot's strengths. Scouting also feeds **match strategy** — knowing what each robot does lets your drive team assign roles for auto, teleop, and endgame before the match starts.
+
+| Without scouting | With scouting |
+| --- | --- |
+| Guess at partner quality | Rank teams by real performance |
+| No pick list on selection day | A ready, data-backed pick list |
+| Improvise every match | Assign roles per game phase |
+
+## 7. Last-minute, untested changes
+
+The temptation to "just tweak one thing" the night before a match — or worse, between matches — has broken countless robots. An untested change is a gamble, and at competition the stakes are highest.
+
+**The fix:** adopt a simple rule — no change goes on the robot without a test afterward. Keep the working robot working. If you must modify something at an event, do it early in the day, run it in a practice match, and have a way to revert. Version-control your robot code so you can roll back a bad commit instantly; see our [Programming / Software track](https://learnfrc.systemerr.com/guides/programming-software) for setting that up.
+
+## 8. No documentation
+
+When the one student who wired the robot or wrote the autonomous code is out sick, an undocumented team is stuck. Rookies frequently keep everything in one person's head, then lose all of it when that person graduates.
+
+**The fix:** write things down as you go. A wiring diagram, a list of CAN IDs and motor-controller assignments, a build log, and a README in your code repository cost almost nothing to maintain and save you constantly. Documentation is also how knowledge survives from one season to the next — it's the difference between a team that improves every year and one that restarts from zero.
+
+## 9. Blowing the budget early
+
+FRC parts are expensive, and it's easy to spend most of your funds in the first few weeks on motors, pneumatics, and shiny COTS mechanisms — then have nothing left for spares, replacement parts, or travel.
+
+**The fix:** make a budget before you spend, and hold back a reserve. Prioritize the essentials (drivetrain, control system, battery, bumper materials), buy spares of the parts most likely to fail or get lost, and remember that the Kit of Parts already gives you a huge head start. Note that the rules also cap the value of any single non-kit item you put on the robot — there's a per-item fair-market-value limit, and that figure can change from year to year — so confirm the current cost rules in the [game manual](https://www.firstinspires.org/resources/library/frc/season-materials) and track your spending from day one.
+
+## 10. Skipping prototyping
+
+Rookies often go straight from an idea to a finished, machined mechanism — and discover too late that the geometry was wrong, the wheels were the wrong durometer, or the whole concept doesn't work. Rebuilding a "final" part is far more expensive than fixing a prototype.
+
+**The fix:** prototype cheaply and quickly first. As [FRCDesign.org](https://frcdesign.org/) advises, build with inexpensive materials like wood and screws, and power a wheeled shooter with a hand drill before you commit to motors and metal. The goal of a prototype is to learn fast and iterate, not to be pretty. Once a prototype proves the concept, then move it into [CAD](https://learnfrc.systemerr.com/guides/cad-design) and build the real version with confidence.
+
+## The pattern behind every fix
+
+Look back at the list and one theme repeats: do the simple, reliable thing early, then test it. Scope down, read the rules, build a proven drivetrain, wire it cleanly, practice driving, scout your matches, and prove every idea before you commit. None of these require genius — just discipline. Every championship team started by getting the basics right, and so can you.
+
+Ready to dig into the details? Start with the [LearnFRC guides hub](https://learnfrc.systemerr.com/guides) and pick the track that matches whatever part of your robot needs the most help right now.`,
+  },
 ];
 
 export function getArticle(slug: string): Article | undefined {

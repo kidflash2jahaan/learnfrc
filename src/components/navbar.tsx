@@ -36,6 +36,7 @@ import type { Profile } from "@/lib/types";
 
 const NAV = [
   { href: "/guides", label: "Guides" },
+  { href: "/blog", label: "Articles" },
   { href: "/paths", label: "Paths" },
   { href: "/glossary", label: "Glossary" },
   { href: "/resources", label: "Resources" },
