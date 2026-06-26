@@ -32,22 +32,20 @@ export function ActivityChart({ data }: { data: DailyPoint[] }) {
   const n = Math.max(data.length, 1);
   const max = Math.max(
     1,
-    ...data.map((d) => Math.max(d.signups, d.verified, d.completions))
+    ...data.map((d) => Math.max(d.signups, d.completions))
   );
 
   const x = (i: number) => PAD.l + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
   const y = (v: number) => PAD.t + innerH - (v / max) * innerH;
 
-  type SeriesKey = "signups" | "verified" | "completions";
-  const line = (key: SeriesKey) =>
+  const line = (key: "signups" | "completions") =>
     data.map((d, i) => `${i === 0 ? "M" : "L"} ${x(i)} ${y(d[key])}`).join(" ");
-  const area = (key: SeriesKey) =>
+  const area = (key: "signups" | "completions") =>
     `${line(key)} L ${x(n - 1)} ${PAD.t + innerH} L ${x(0)} ${PAD.t + innerH} Z`;
 
   const SERIES = [
     { key: "completions" as const, color: "#22d3ee", label: "Completions" },
-    { key: "signups" as const, color: "#2f5fff", label: "Signups (total)" },
-    { key: "verified" as const, color: "#34d399", label: "Verified" },
+    { key: "signups" as const, color: "#2f5fff", label: "Signups" },
   ];
 
   const gridY = [0, 0.5, 1];
@@ -94,10 +92,6 @@ export function ActivityChart({ data }: { data: DailyPoint[] }) {
             <div className="mt-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full" style={{ background: "#2f5fff" }} />
               Signups: <span className="font-mono font-medium">{hp.signups}</span>
-            </div>
-            <div className="mt-0.5 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#34d399" }} />
-              Verified: <span className="font-mono font-medium">{hp.verified}</span>
             </div>
             <div className="mt-0.5 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full" style={{ background: "#22d3ee" }} />
