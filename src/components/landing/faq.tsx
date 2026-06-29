@@ -19,7 +19,7 @@ const FAQS = [
   },
   {
     q: "Which departments are covered?",
-    a: "All of them — mechanical, CAD, programming, electrical, controls & sensors, pneumatics, plus business, media & outreach, the Impact Award, scouting, drive team, safety, and fundraising. Every role on a team has a path.",
+    a: "All 11 — Getting Started, Mechanical & Build, CAD & Design, Programming & Controls, Electrical & Wiring, Business & Fundraising, Media & Outreach, the Impact Award, Scouting & Strategy, Drive Team, and Safety. Every role on a team has a path.",
   },
   {
     q: "Is this affiliated with FIRST?",

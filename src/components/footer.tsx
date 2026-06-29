@@ -140,7 +140,7 @@ export function Footer() {
             rel="noopener noreferrer"
             className="underline underline-offset-2 transition-colors hover:text-primary"
           >
-            Let me know
+            Flag it on Chief Delphi
           </a>{" "}
           and it gets fixed fast.
         </p>

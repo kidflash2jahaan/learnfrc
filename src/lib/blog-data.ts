@@ -167,7 +167,7 @@ A complete Impact Award submission has three pieces:
 ### 1. The essay (up to 10,000 characters)
 A narrative of your team's story and impact. It should be specific and evidence-driven: concrete programs, real numbers, and the outcomes they produced — not vague mission statements. Show a trajectory: where you started, what you built, and where it's going.
 
-### 2. The executive summaries (12 questions)
+### 2. The executive summaries
 A set of short, punchy responses (each limited to ~500 characters) covering specific areas — your outreach, the teams you've started or mentored, your sustainability, your impact on participants, and more. These force you to be concrete. Every box should contain a real, quantified accomplishment.
 
 ### 3. The presentation / judged pitch
@@ -558,7 +558,7 @@ Ready to turn these numbers into a real drivetrain? Start with the [Mechanical &
 
 ## Know your number first
 
-Before you ask anyone for money, figure out what you actually need. FIRST registration fees alone run roughly 5,000 to 6,000 US dollars for the season, and that is just to get into your first event. Once you add a second event, travel, materials, tools, and spare parts, total team budgets commonly land anywhere from 8,000 to 50,000 dollars or more depending on how far you travel and how much you build.
+Before you ask anyone for money, figure out what you actually need. FIRST registration fees alone run roughly 6,000 to 6,500 US dollars for the season, and that is just to get into your first event. Once you add a second event, travel, materials, tools, and spare parts, total team budgets commonly land anywhere from 8,000 to 50,000 dollars or more depending on how far you travel and how much you build.
 
 Having a real budget does two things: it tells you how hard you need to fundraise, and it makes your sponsorship pitch far more credible. Sponsors trust a team that can say exactly where the money goes. For help structuring a budget and the operations behind it, our [Business and Operations guide](https://learnfrc.systemerr.com/guides/business-operations) walks through the basics.
 
