@@ -109,6 +109,8 @@
   --animate-gradient-x: gradient-x 6s ease infinite;
   --animate-hud-pan: hud-pan 22s linear infinite;
   --animate-blink: blink 1.2s steps(1) infinite;
+  --animate-gear: gear-spin 60s linear infinite;
+  --animate-gear-rev: gear-spin-rev 80s linear infinite;
 }
 
 /* ------------------------------------------------------------------ */
@@ -147,6 +149,8 @@
 }
 @keyframes gradient-x { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 @keyframes hud-pan { from { background-position: 0 0; } to { background-position: 56px 56px; } }
+@keyframes gear-spin { to { transform: rotate(360deg); } }
+@keyframes gear-spin-rev { to { transform: rotate(-360deg); } }
 
 /* ------------------------------------------------------------------ */
 /*  Base                                                              */
