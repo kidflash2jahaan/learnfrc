@@ -29,7 +29,7 @@ export function NewsletterForm({ className }: { className?: string }) {
           type="email"
           name="email"
           required
-          placeholder="you@team5835.org"
+          placeholder="you@team.org"
           aria-label="Email address"
           className="h-9 flex-1 bg-transparent px-2.5 font-mono text-sm outline-none placeholder:text-muted-foreground/70"
         />

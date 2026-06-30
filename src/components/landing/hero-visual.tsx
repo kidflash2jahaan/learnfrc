@@ -54,7 +54,7 @@ export function HeroVisual() {
               <span className="h-3 w-3 rounded-full bg-[#28c840] shadow-[0_0_8px_rgba(40,200,64,.6)]" />
             </span>
             <span className="ml-1 truncate font-mono text-xs text-muted-foreground">
-              build_status.log — ~/team5835
+              build_status.log — ~/learnfrc
             </span>
           </div>
 

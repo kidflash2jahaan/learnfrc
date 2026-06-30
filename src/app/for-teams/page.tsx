@@ -58,7 +58,7 @@ const FEATURES = [
   {
     icon: CheckCircle2,
     title: "Free, forever",
-    body: "No ads, no paywall, no per-seat pricing. Built by a student (FRC 5835) for the community.",
+    body: "No ads, no paywall, no per-seat pricing. Built by a student, for the community.",
   },
 ];
 

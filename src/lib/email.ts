@@ -49,7 +49,7 @@ const shell = (inner: string) => `
     </div>
     <div style="padding:30px 32px;color:#e8edf7;font-size:15px;line-height:1.6">${inner}</div>
     <div style="padding:18px 32px;border-top:1px solid #1d2740;color:#94a2bf;font-size:12px">
-      LearnFRC · Built by Jahaan Pardhanani · Sage Hill Robotics 5835
+      LearnFRC · Built by Jahaan Pardhanani
     </div>
   </div>
 </div>`;

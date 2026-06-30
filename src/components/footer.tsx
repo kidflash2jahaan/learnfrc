@@ -112,9 +112,7 @@ export function Footer() {
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-8 text-sm text-muted-foreground sm:flex-row sm:items-center">
           <p>
             Built by{" "}
-            <span className="font-medium text-foreground">Jahaan Pardhanani</span>{" "}
-            · Software Lead, Sage Hill Robotics{" "}
-            <span className="font-mono text-primary">5835</span>
+            <span className="font-medium text-foreground">Jahaan Pardhanani</span>
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
             <Link href="/privacy" className="text-xs transition-colors hover:text-primary">

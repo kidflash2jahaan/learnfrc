@@ -241,7 +241,7 @@ export function SettingsForm({
               inputMode="numeric"
               min={1}
               max={99999}
-              placeholder="5835"
+              placeholder="254"
               className="pl-10"
               defaultValue={profile?.team_number ?? ""}
               aria-describedby="team-help"

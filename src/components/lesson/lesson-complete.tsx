@@ -155,7 +155,7 @@ export function LessonComplete({
             <span className="h-3 w-3 rounded-full bg-[#28c840]" />
           </span>
           <span className="ml-1 font-mono text-xs text-muted-foreground">
-            quiz.run — ~/team5835
+            quiz.run — ~/learnfrc
           </span>
         </div>
         <div className="p-6">

@@ -242,7 +242,7 @@ export default async function CertificatePage({
                   Jahaan Pardhanani
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  LearnFRC · Sage Hill Robotics 5835
+                  LearnFRC
                 </div>
               </div>
             </div>
