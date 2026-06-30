@@ -78,6 +78,8 @@ export type AdminStats = {
   onlineUsers: { name: string; username: string | null; lastSeen: string }[];
   /** Acquisition-source breakdown for the pie chart. */
   sources: { name: string; count: number }[];
+  /** Acquisition-source breakdown for signups in the last 7 days. */
+  sources7d: { name: string; count: number }[];
   /** Number of users who joined via a referral link. */
   referralUsers: number;
   /** Who referred how many people, most first. */
@@ -214,7 +216,7 @@ export async function getAdminStats(): Promise<AdminStats> {
 
   const profsRes = await supabase
     .from("profiles")
-    .select("id, full_name, username, team_number, xp, referred_by, source, hide_name");
+    .select("id, full_name, username, team_number, xp, referred_by, source, hide_name, created_at");
   const pmap = new Map(
     ((profsRes.data as Record<string, unknown>[]) ?? []).map((p) => [
       p.id as string,
@@ -347,17 +349,25 @@ export async function getAdminStats(): Promise<AdminStats> {
     referred_by: string | null;
     source: string | null;
     hide_name: boolean | null;
+    created_at: string;
   };
   const allProfs = (profsRes.data as unknown as ProfRow[]) ?? [];
 
-  const sourceCounts = new Map<string, number>();
-  for (const p of allProfs) {
-    const key = (p.source && p.source.trim()) || "Unknown / Direct";
-    sourceCounts.set(key, (sourceCounts.get(key) ?? 0) + 1);
-  }
-  const sources = [...sourceCounts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+  const aggSources = (rows: ProfRow[]) => {
+    const counts = new Map<string, number>();
+    for (const p of rows) {
+      const key = (p.source && p.source.trim()) || "Unknown / Direct";
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  };
+  const sources = aggSources(allProfs);
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const sources7d = aggSources(
+    allProfs.filter((p) => p.created_at && +new Date(p.created_at) >= weekAgo)
+  );
 
   const referralUsers = allProfs.filter((p) => p.referred_by != null).length;
   const recruiterCounts = new Map<string, number>();
@@ -402,6 +412,7 @@ export async function getAdminStats(): Promise<AdminStats> {
     onlineNow,
     onlineUsers,
     sources,
+    sources7d,
     referralUsers,
     recruiters,
     daily,

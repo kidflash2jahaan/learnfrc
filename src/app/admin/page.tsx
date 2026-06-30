@@ -10,7 +10,7 @@ import { TerminalFrame, StatusPill } from "@/components/motion/terminal";
 import { ActivityChart } from "@/components/admin/activity-chart";
 import { AdminOverview } from "@/components/admin/admin-overview";
 import { AutoRefresh } from "@/components/admin/auto-refresh";
-import { SourcePie } from "@/components/admin/source-pie";
+import { SourceBreakdown } from "@/components/admin/source-breakdown";
 
 export const metadata: Metadata = { title: "Admin" };
 
@@ -156,10 +156,11 @@ export default async function AdminPage() {
             <PieChart className="h-4 w-4 text-primary" /> Where users come from
           </h2>
           <p className="mb-5 max-w-md font-mono text-xs text-muted-foreground">
-            // acquisition source captured at signup. Users from before tracking
-            launched show as &ldquo;Unknown / Direct.&rdquo;
+            // acquisition source captured at signup — toggle last 7 days vs
+            all-time to see what&rsquo;s driving signups now. Pre-tracking users
+            show as &ldquo;Unknown / Direct.&rdquo;
           </p>
-          <SourcePie data={stats.sources} />
+          <SourceBreakdown week={stats.sources7d} allTime={stats.sources} />
         </TerminalFrame>
       </Reveal>
 
