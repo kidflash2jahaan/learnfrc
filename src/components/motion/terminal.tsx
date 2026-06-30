@@ -200,28 +200,23 @@ export function NeonCounter({
 
 /** Site-wide ambient HUD: faint grid, neon aurora wash, and a slow scanline. */
 export function HudBackground() {
-  const stat = useStaticMotion();
+  // Fully STATIC — no breathing/rotation behind content. A moving background
+  // competes with reading; the page's life comes from scroll/hover/interaction.
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div className="absolute inset-0 hud-grid opacity-50 mask-radial-faded" />
-      <div className={cn("absolute inset-0 aurora-bg opacity-30", !stat && "animate-aurora")} />
+      <div className="absolute inset-0 aurora-bg opacity-[0.22]" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-      {/* faint robotics gears — subtle ambient motif */}
+      {/* faint robotics gears — static ambient motif */}
       <Cog
         aria-hidden
         strokeWidth={1}
-        className={cn(
-          "absolute -left-20 top-28 h-72 w-72 text-primary opacity-[0.04]",
-          !stat && "animate-gear"
-        )}
+        className="absolute -left-20 top-28 h-72 w-72 text-primary opacity-[0.035]"
       />
       <Cog
         aria-hidden
         strokeWidth={1}
-        className={cn(
-          "absolute -right-24 bottom-36 h-96 w-96 text-accent opacity-[0.04]",
-          !stat && "animate-gear-rev"
-        )}
+        className="absolute -right-24 bottom-36 h-96 w-96 text-accent opacity-[0.035]"
       />
     </div>
   );
