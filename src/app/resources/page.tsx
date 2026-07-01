@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { ExternalLink, MessageSquarePlus, Library } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, inkFor } from "@/lib/departments";
 import { Icon } from "@/lib/icon-map";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { FeedbackForm } from "@/components/feedback-form";
@@ -85,17 +85,23 @@ export default async function ResourcesPage() {
   );
 
   return (
-    <div className="relative mx-auto max-w-6xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
+    <div className="relative mx-auto max-w-6xl overflow-x-clip px-4 pt-28 pb-24 sm:px-6 lg:px-8">
       {/* ambient glows */}
       <div
         aria-hidden
         className="pointer-events-none absolute -left-24 top-10 -z-10 h-72 w-72 rounded-full opacity-60 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(37,96,230,0.22), transparent 70%)" }}
+        style={{
+          background:
+            "radial-gradient(circle, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%)",
+        }}
       />
       <div
         aria-hidden
         className="pointer-events-none absolute right-0 top-40 -z-10 h-80 w-80 rounded-full opacity-50 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(26,169,214,0.20), transparent 70%)" }}
+        style={{
+          background:
+            "radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%)",
+        }}
       />
 
       {/* Hero */}
@@ -124,11 +130,11 @@ export default async function ResourcesPage() {
           </p>
           <div className="aq-rise aq-rise-4 mt-7 flex flex-wrap items-center gap-3">
             <a href="#curated" className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold">
-              <Library className="h-4 w-4" />
+              <Library className="h-4 w-4" aria-hidden="true" focusable="false" />
               Browse the links
             </a>
             <a href="#suggest" className="aq-ghost inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold">
-              <MessageSquarePlus className="h-4 w-4" />
+              <MessageSquarePlus className="h-4 w-4" aria-hidden="true" focusable="false" />
               Suggest a resource
             </a>
           </div>
@@ -179,6 +185,7 @@ export default async function ResourcesPage() {
                 <span
                   className="aq-badge aq-badge-bob h-10 w-10"
                   style={{ "--a": cm.a } as CSSProperties}
+                  aria-hidden="true"
                 >
                   <Icon name={cm.icon} className="h-5 w-5" />
                 </span>
@@ -200,9 +207,10 @@ export default async function ResourcesPage() {
                     >
                       <span className="font-medium text-foreground transition-colors group-hover:text-primary">
                         {l.title}
+                        <span className="sr-only"> (opens in a new tab)</span>
                       </span>
                       <span className="aq-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-xl">
-                        <ExternalLink className="h-4 w-4 text-primary" />
+                        <ExternalLink className="h-4 w-4 text-primary" aria-hidden="true" focusable="false" />
                       </span>
                     </a>
                   </StaggerItem>
@@ -242,9 +250,16 @@ export default async function ResourcesPage() {
             </span>
           </div>
         </div>
+        {withSources.length === 0 ? (
+          <div className="aq-card rounded-2xl p-6 text-foreground/70">
+            Sources are being compiled — check back soon as each department&apos;s
+            guides are published.
+          </div>
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2">
           {withSources.map((d, di) => {
             const m = deptMeta(d.slug as string);
+            const ink = inkFor(m.color);
             const sources = ((d.sources as Resource[]) ?? []).slice(0, 6);
             return (
               <div
@@ -256,6 +271,7 @@ export default async function ResourcesPage() {
                   <span
                     className="aq-badge aq-badge-bob h-10 w-10"
                     style={{ "--a": m.color } as CSSProperties}
+                    aria-hidden="true"
                   >
                     <Icon name={m.icon} className="h-5 w-5" />
                   </span>
@@ -274,10 +290,19 @@ export default async function ResourcesPage() {
                         href={s.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group inline-flex items-start gap-2 text-sm text-foreground/80 transition-colors hover:text-primary"
+                        className="group inline-flex items-start gap-2 text-sm text-foreground/80 transition-colors hover:text-[var(--ink)]"
+                        style={{ "--ink": ink } as CSSProperties}
                       >
-                        <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                        <span>{s.title}</span>
+                        <ExternalLink
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                          style={{ color: ink }}
+                          aria-hidden="true"
+                          focusable="false"
+                        />
+                        <span>
+                          {s.title}
+                          <span className="sr-only"> (opens in a new tab)</span>
+                        </span>
                       </a>
                     </li>
                   ))}
@@ -293,7 +318,7 @@ export default async function ResourcesPage() {
         <div id="suggest" className="aq-glass aq-sheen scroll-mt-28 rounded-3xl p-6 sm:p-8">
           <div className="mb-4 flex items-center gap-3">
             <span className="aq-icon aq-badge-bob flex h-11 w-11 items-center justify-center rounded-2xl">
-              <MessageSquarePlus className="h-5 w-5 text-primary" />
+              <MessageSquarePlus className="h-5 w-5 text-primary" aria-hidden="true" focusable="false" />
             </span>
             <h2 className="aq-display text-xl font-bold sm:text-2xl">
               Suggest a topic or resource

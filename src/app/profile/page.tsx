@@ -44,7 +44,7 @@ function formatJoined(iso: string | null): string {
 }
 
 const GRADIENT_TEXT: CSSProperties = {
-  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
+  background: "linear-gradient(120deg,#2560e6,#1183a8)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
@@ -161,7 +161,7 @@ export default async function ProfilePage() {
                         {displayName}
                       </span>
                     </h1>
-                    <p className="mt-1 font-mono text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm tracking-tight text-muted-foreground">
                       @{handle}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -174,12 +174,12 @@ export default async function ProfilePage() {
                       </span>
                       {profile?.team_number != null && (
                         <span className="aq-chip">
-                          <Users2 className="h-3.5 w-3.5 text-accent" />
+                          <Users2 aria-hidden className="h-3.5 w-3.5 text-accent" />
                           Team {profile.team_number}
                         </span>
                       )}
                       <span className="aq-chip">
-                        <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                        <CalendarDays aria-hidden className="h-3.5 w-3.5 text-muted-foreground" />
                         Joined {formatJoined(profile?.created_at ?? null)}
                       </span>
                     </div>
@@ -232,7 +232,7 @@ export default async function ProfilePage() {
                 <div className="mt-3 aq-display text-3xl font-bold tracking-tight tabular-nums text-foreground">
                   <AnimatedCounter value={s.value} />
                 </div>
-                <div className="mt-0.5 font-mono text-[11px] uppercase tracking-wider text-foreground/60">
+                <div className="mt-0.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {s.label}
                 </div>
               </div>
@@ -262,7 +262,7 @@ export default async function ProfilePage() {
                 <div className="text-sm font-semibold text-foreground">
                   {toNext} XP to Level {level + 1}
                 </div>
-                <div className="font-mono text-xs text-muted-foreground">
+                <div className="text-xs tabular-nums text-muted-foreground">
                   {intoLevel} / 100 this level
                 </div>
               </div>
@@ -279,14 +279,17 @@ export default async function ProfilePage() {
 
         {/* ===================== ACHIEVEMENTS ===================== */}
         <Reveal delay={0.06} className="mt-12">
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <span className="aq-eyebrow">Every badge, earned in the pit</span>
               <h2 className="mt-2 text-2xl font-bold tracking-tight">
                 Achievements
               </h2>
             </div>
-            <span className="aq-chip shrink-0 text-xs tabular-nums">
+            <span
+              className="aq-chip shrink-0 text-xs tabular-nums"
+              aria-label={`${earnedCount} of ${achievements.length} earned`}
+            >
               <AnimatedCounter value={earnedCount} /> / {achievements.length}{" "}
               earned
             </span>
@@ -307,7 +310,7 @@ export default async function ProfilePage() {
           </Reveal>
         ) : (
           <Stagger
-            className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3"
+            className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
             stagger={0.05}
           >
             {achievements.map((a) => (
@@ -328,7 +331,7 @@ export default async function ProfilePage() {
                       )}
                       style={
                         a.earned
-                          ? ({ "--a": "#2560e6" } as CSSProperties)
+                          ? ({ "--a": "var(--color-primary)" } as CSSProperties)
                           : undefined
                       }
                     >
@@ -339,7 +342,7 @@ export default async function ProfilePage() {
                       )}
                     </span>
                     <div className="min-w-0">
-                      <div className="truncate font-semibold leading-tight text-foreground">
+                      <div className="font-semibold leading-tight text-foreground">
                         {a.name}
                       </div>
                       <p className="mt-1 text-sm leading-relaxed text-muted-foreground">

@@ -69,15 +69,13 @@ export function Footer() {
 
           {COLS.map((col) => (
             <div key={col.title}>
-              <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-primary">
-                {col.title}
-              </h4>
+              <h4 className="aq-eyebrow">{col.title}</h4>
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((l) => (
                   <li key={l.href}>
                     <Link
                       href={l.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                      className="block py-2 -my-0.5 text-sm text-muted-foreground transition-colors hover:text-primary"
                     >
                       {l.label}
                     </Link>
@@ -88,9 +86,7 @@ export function Footer() {
           ))}
 
           <div>
-            <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-primary">
-              FRC Community
-            </h4>
+            <h4 className="aq-eyebrow">FRC Community</h4>
             <ul className="mt-4 space-y-2.5">
               {FRC_LINKS.map((l) => (
                 <li key={l.href}>
@@ -98,10 +94,11 @@ export function Footer() {
                     href={l.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+                    className="inline-flex items-center gap-1.5 py-2 -my-0.5 text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
                     {l.label}
-                    <ExternalLink className="h-3 w-3" />
+                    <ExternalLink className="h-3 w-3" aria-hidden="true" focusable="false" />
+                    <span className="sr-only">(opens in a new tab)</span>
                   </a>
                 </li>
               ))}
@@ -114,11 +111,11 @@ export function Footer() {
             Built by{" "}
             <span className="font-medium text-foreground">Jahaan Pardhanani</span>
           </p>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
-            <Link href="/privacy" className="text-xs transition-colors hover:text-primary">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <Link href="/privacy" className="py-1.5 text-sm transition-colors hover:text-primary">
               Privacy
             </Link>
-            <Link href="/terms" className="text-xs transition-colors hover:text-primary">
+            <Link href="/terms" className="py-1.5 text-sm transition-colors hover:text-primary">
               Terms
             </Link>
             <p className="text-xs">
@@ -128,7 +125,7 @@ export function Footer() {
           </div>
         </div>
 
-        <p className="mt-6 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+        <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted-foreground">
           LearnFRC lessons are AI-assisted: drafted from primary sources like the
           WPILib docs, game manual, and vendor sites, then reviewed and
           fact-checked for accuracy. Spot something off?{" "}
@@ -136,9 +133,10 @@ export function Footer() {
             href="https://www.chiefdelphi.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 transition-colors hover:text-primary"
+            className="inline-block py-1 underline underline-offset-2 transition-colors hover:text-primary"
           >
             Flag it on Chief Delphi
+            <span className="sr-only">(opens in a new tab)</span>
           </a>{" "}
           and it gets fixed fast.
         </p>

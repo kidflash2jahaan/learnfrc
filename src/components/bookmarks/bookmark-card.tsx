@@ -90,10 +90,16 @@ export function BookmarkCard({ data }: { data: BookmarkCardData }) {
           transition={{ type: "spring", stiffness: 380, damping: 34 }}
           className="group relative"
         >
-          <Link
-            href={href}
-            className="aq-card aq-card-hover relative flex items-stretch gap-4 overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-5"
-          >
+          <div className="aq-card aq-card-hover relative flex items-stretch gap-4 overflow-hidden rounded-[20px] p-4 transition-colors duration-300 sm:p-5">
+            {/* Stretched overlay link — keeps the whole card clickable without
+                nesting the remove button inside the anchor. */}
+            <Link
+              href={href}
+              aria-label={`Open lesson: ${data.title}`}
+              className="absolute inset-0 z-0 rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <span className="sr-only">Open lesson: {data.title}</span>
+            </Link>
             {/* accent glow */}
             <div
               aria-hidden
@@ -110,7 +116,7 @@ export function BookmarkCard({ data }: { data: BookmarkCardData }) {
             <motion.span
               whileHover={reduce ? undefined : { rotate: -6, scale: 1.06 }}
               transition={{ type: "spring", stiffness: 300, damping: 15 }}
-              className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl text-primary-foreground shadow-[var(--shadow-md)] sm:flex"
+              className="pointer-events-none relative z-[1] hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl text-primary-foreground shadow-[var(--shadow-md)] sm:flex"
               style={{
                 backgroundImage: `linear-gradient(135deg, ${m.color}, ${m.to})`,
               }}
@@ -119,7 +125,7 @@ export function BookmarkCard({ data }: { data: BookmarkCardData }) {
               <Icon name={m.icon} className="h-6 w-6" />
             </motion.span>
 
-            <div className="min-w-0 flex-1">
+            <div className="pointer-events-none relative z-[1] min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 <span
                   className="inline-flex items-center gap-1 font-medium"
@@ -130,8 +136,8 @@ export function BookmarkCard({ data }: { data: BookmarkCardData }) {
                 </span>
                 <span aria-hidden>·</span>
                 <span className="inline-flex items-center gap-1">
-                  <Bookmark className="h-3 w-3" />
-                  {savedAgo(data.savedAt)}
+                  <Bookmark className="h-3 w-3" aria-hidden />
+                  <time dateTime={data.savedAt}>{savedAgo(data.savedAt)}</time>
                 </span>
               </div>
 
@@ -139,7 +145,7 @@ export function BookmarkCard({ data }: { data: BookmarkCardData }) {
                 {data.title}
               </h3>
               {data.summary && (
-                <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-1 line-clamp-2 text-[15px] leading-relaxed text-muted-foreground sm:text-sm">
                   {data.summary}
                 </p>
               )}
@@ -158,7 +164,7 @@ export function BookmarkCard({ data }: { data: BookmarkCardData }) {
               disabled={pending}
               aria-label={`Remove bookmark for ${data.title}`}
               className={cn(
-                "relative z-10 grid h-9 w-9 shrink-0 cursor-pointer place-items-center self-start rounded-lg border border-border bg-background/60 text-muted-foreground transition-all duration-200",
+                "relative z-10 grid h-11 w-11 shrink-0 cursor-pointer place-items-center self-start rounded-lg border border-border bg-background/60 text-muted-foreground transition-colors duration-200 sm:h-9 sm:w-9",
                 "hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive disabled:opacity-60"
               )}
@@ -169,7 +175,7 @@ export function BookmarkCard({ data }: { data: BookmarkCardData }) {
                 <Trash2 className="h-4 w-4" />
               )}
             </button>
-          </Link>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

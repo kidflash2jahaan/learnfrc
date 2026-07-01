@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
-import { Search, CornerDownLeft, BookOpen, Layers } from "lucide-react";
+import { Search, CornerDownLeft, BookOpen, Layers, Loader2 } from "lucide-react";
 import { Icon } from "@/lib/icon-map";
 import { deptMeta, inkFor } from "@/lib/departments";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ type ResultItem =
   | { type: "lesson"; href: string; lesson: LessonHit };
 
 const KBD =
-  "inline-flex h-5 min-w-5 items-center justify-center rounded border border-border bg-muted px-1 font-mono text-[10px] text-muted-foreground";
+  "inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-[rgba(120,145,190,.28)] bg-white/70 px-1.5 text-xs text-muted-foreground";
 
 export function CommandPalette() {
   const router = useRouter();
@@ -139,12 +139,12 @@ export function CommandPalette() {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-[60] bg-black/65 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[60] bg-[#182338]/25 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
           onKeyDown={onKeyDown}
           className={cn(
             "fixed left-1/2 top-[12vh] z-[61] w-[92vw] max-w-xl -translate-x-1/2",
-            "overflow-hidden rounded-2xl border border-primary/30 bg-popover shadow-[0_0_40px_-10px_var(--primary)]",
+            "overflow-hidden rounded-[20px] border border-[rgba(255,255,255,.85)] bg-popover shadow-[0_28px_64px_rgba(38,78,150,.2)]",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
           )}
         >
@@ -157,7 +157,7 @@ export function CommandPalette() {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="search departments, lessons, topics…"
+              placeholder="Search departments, lessons, topics…"
               role="combobox"
               aria-expanded={results.length > 0}
               aria-controls="cmdk-list"
@@ -166,19 +166,21 @@ export function CommandPalette() {
                 results[active] ? `cmdk-opt-${active}` : undefined
               }
               aria-label="Search LearnFRC"
-              className="w-full bg-transparent py-3.5 font-mono text-sm outline-none placeholder:text-muted-foreground/55"
+              className="w-full bg-transparent py-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
             />
           </div>
 
           <div ref={listRef} id="cmdk-list" role="listbox" aria-label="Search results" className="max-h-[52vh] overflow-y-auto p-2">
             {!loaded && (
-              <div className="px-3 py-8 text-center font-mono text-sm text-muted-foreground">
-                indexing<span className="caret" aria-hidden />
+              <div className="flex items-center justify-center gap-2 px-3 py-8 text-sm text-muted-foreground">
+                <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
+                Indexing…
               </div>
             )}
             {loaded && results.length === 0 && (
-              <div className="px-3 py-10 text-center font-mono text-sm text-muted-foreground">
-                <span className="text-primary">//</span> no matches for &ldquo;{query}&rdquo;
+              <div className="flex flex-col items-center gap-2 px-3 py-10 text-center text-sm text-muted-foreground">
+                <Search aria-hidden className="h-5 w-5 opacity-60" />
+                No matches for &ldquo;{query}&rdquo;
               </div>
             )}
             {results.map((r, i) => {
@@ -215,7 +217,7 @@ export function CommandPalette() {
                       <span className="block truncate text-sm font-medium">
                         {r.dept.name}
                       </span>
-                      <span className="block truncate font-mono text-xs text-muted-foreground">
+                      <span className="block truncate text-xs text-muted-foreground">
                         {r.dept.tagline}
                       </span>
                     </span>
@@ -240,14 +242,14 @@ export function CommandPalette() {
                     activeCls
                   )}
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-accent/30 bg-accent/10 text-accent">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-accent/30 bg-accent/10 text-[#0e7490]">
                     <BookOpen className="h-4.5 w-4.5" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium">
                       {r.lesson.title}
                     </span>
-                    <span className="block truncate font-mono text-xs text-muted-foreground">
+                    <span className="block truncate text-xs text-muted-foreground">
                       {r.lesson.deptName}
                     </span>
                   </span>
@@ -259,8 +261,8 @@ export function CommandPalette() {
             })}
           </div>
 
-          {/* terminal hint bar */}
-          <div className="flex items-center gap-4 border-t border-border px-4 py-2.5 font-mono text-[10px] text-muted-foreground">
+          {/* keyboard hint bar */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <kbd className={KBD}>↑</kbd>
               <kbd className={KBD}>↓</kbd> navigate
@@ -271,8 +273,8 @@ export function CommandPalette() {
             <span className="inline-flex items-center gap-1">
               <kbd className={KBD}>esc</kbd> close
             </span>
-            <span className="ml-auto inline-flex items-center gap-1 text-primary/80">
-              learnfrc<span className="caret" aria-hidden />
+            <span className="ml-auto hidden font-medium text-primary sm:inline-flex">
+              LearnFRC
             </span>
           </div>
         </DialogPrimitive.Content>

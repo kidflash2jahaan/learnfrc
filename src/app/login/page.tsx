@@ -63,7 +63,7 @@ export default async function LoginPage({
         <div className="absolute bottom-[-12%] left-[38%] h-[380px] w-[380px] rounded-full bg-violet-400/15 blur-3xl" />
       </div>
 
-      <div className="mx-auto grid min-h-[100svh] w-full max-w-6xl items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+      <div className="mx-auto grid min-h-[100svh] w-full max-w-6xl items-center gap-10 px-4 py-12 sm:gap-12 sm:px-6 sm:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-24">
         {/* Left: welcome + what you get */}
         <div className="order-2 lg:order-1">
           <Link
@@ -73,9 +73,9 @@ export default async function LoginPage({
           >
             <span
               className="aq-badge aq-badge-bob grid h-9 w-9 place-items-center"
-              style={{ "--a": "#2560e6" } as CSSProperties}
+              style={{ "--a": "var(--primary)" } as CSSProperties}
             >
-              <Bot className="h-5 w-5 text-foreground" />
+              <Bot className="h-5 w-5 text-foreground" aria-hidden />
             </span>
             <span className="aq-display text-lg font-bold tracking-tight text-foreground">
               Learn<span className="text-primary">FRC</span>
@@ -83,7 +83,7 @@ export default async function LoginPage({
           </Link>
 
           <p className="aq-eyebrow aq-rise aq-rise-1 mt-8">Welcome back to the pit</p>
-          <h1 className="aq-rise aq-rise-2 mt-3 max-w-xl text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="aq-rise aq-rise-2 mt-3 max-w-xl text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Pick up right where{" "}
             <span className="aq-grad-anim" style={HEADING_GRADIENT}>
               you left off
@@ -114,7 +114,7 @@ export default async function LoginPage({
                 style={{ animationDelay: `${i * 90}ms` }}
               >
                 <span className="aq-icon aq-badge-bob grid h-10 w-10 shrink-0 place-items-center">
-                  <p.icon className="h-5 w-5" />
+                  <p.icon className="h-5 w-5" aria-hidden />
                 </span>
                 <div>
                   <p className="font-semibold text-foreground">{p.title}</p>
@@ -135,7 +135,7 @@ export default async function LoginPage({
         <div className="order-1 lg:order-2">
           <div className="aq-glass aq-sheen aq-float aq-rise aq-rise-2 relative mx-auto w-full max-w-md rounded-3xl p-6 sm:p-8">
             <span className="aq-chip inline-flex items-center gap-1.5">
-              <ShieldCheck className="aq-badge-bob h-3.5 w-3.5 text-primary" />
+              <ShieldCheck className="aq-badge-bob h-3.5 w-3.5 text-primary" aria-hidden />
               Secure sign in
             </span>
 

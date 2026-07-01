@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Route, Layers, Target, Clock } from "lucide-react";
 import { PATHS } from "@/lib/paths-data";
 import { Icon } from "@/lib/icon-map";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, deptInk } from "@/lib/departments";
 import { AnimatedCounter } from "@/components/animated-counter";
 
 export const metadata: Metadata = {
@@ -47,7 +47,7 @@ export default function PathsPage() {
       <section className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <p className="aq-eyebrow aq-rise aq-rise-1">
-            <Route className="h-3.5 w-3.5" />
+            <Route aria-hidden className="h-3.5 w-3.5" />
             Pick a journey, not a page
           </p>
           <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
@@ -71,11 +71,11 @@ export default function PathsPage() {
           </p>
 
           <div className="aq-rise aq-rise-4 mt-8 flex flex-wrap items-center gap-3">
-            <Link href={`/paths/${PATHS[0]?.slug ?? ""}`} className="aq-cta">
+            <Link href={`/paths/${PATHS[0]?.slug ?? ""}`} className="aq-cta min-h-[44px]">
               Start the first path
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight aria-hidden className="h-4 w-4" />
             </Link>
-            <Link href="/guides" className="aq-ghost inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold">
+            <Link href="/guides" className="aq-ghost inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold">
               Browse departments
             </Link>
           </div>
@@ -85,11 +85,11 @@ export default function PathsPage() {
             {stats.map((s, i) => (
               <span
                 key={s.label}
-                className="aq-chip aq-reveal font-mono"
+                className="aq-chip aq-reveal"
                 style={{ animationDelay: `${i * 90}ms` }}
               >
-                <s.icon className="aq-badge-bob h-3.5 w-3.5 text-primary" />
-                <span className="font-semibold text-foreground">
+                <s.icon aria-hidden className="aq-badge-bob h-3.5 w-3.5 text-primary" />
+                <span className="font-semibold tabular-nums text-foreground">
                   <AnimatedCounter value={s.v} />
                 </span>
                 <span className="text-muted-foreground">{s.label}</span>
@@ -106,10 +106,10 @@ export default function PathsPage() {
                 className="aq-badge aq-badge-bob flex h-12 w-12 items-center justify-center rounded-2xl"
                 style={{ "--a": PATHS[0].color } as CSSProperties}
               >
-                <Icon name={PATHS[0].icon} className="h-6 w-6" />
+                <Icon name={PATHS[0].icon} aria-hidden className="h-6 w-6" />
               </span>
               <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="aq-eyebrow">
                   Featured path
                 </p>
                 <p className="aq-display text-lg font-semibold leading-tight text-foreground">
@@ -133,12 +133,12 @@ export default function PathsPage() {
                     style={{ "--a": m.color, animationDelay: `${i * 80}ms` } as CSSProperties}
                   >
                     <span className="flex h-8 w-8 flex-none items-center justify-center rounded-xl bg-white/60 text-foreground ring-1 ring-white/70">
-                      <Icon name={m.icon} className="h-4 w-4" />
+                      <Icon name={m.icon} aria-hidden className="h-4 w-4" />
                     </span>
                     <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
                       {step.label}
                     </span>
-                    <span className="flex-none font-mono text-[11px] font-semibold text-muted-foreground">
+                    <span aria-hidden className="flex-none text-xs font-semibold tabular-nums text-muted-foreground">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                   </div>
@@ -184,9 +184,9 @@ export default function PathsPage() {
                   className="aq-badge aq-badge-bob flex h-14 w-14 items-center justify-center rounded-2xl"
                   style={{ "--a": p.color } as CSSProperties}
                 >
-                  <Icon name={p.icon} className="h-7 w-7" />
+                  <Icon name={p.icon} aria-hidden className="h-7 w-7" />
                 </span>
-                <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <span aria-hidden className="text-xs font-semibold uppercase tabular-nums tracking-[0.18em] text-muted-foreground">
                   {String(idx + 1).padStart(2, "0")} / {String(PATHS.length).padStart(2, "0")}
                 </span>
               </div>
@@ -210,13 +210,14 @@ export default function PathsPage() {
                           {
                             "--a": m.color,
                             background: `color-mix(in srgb, ${m.color} 20%, #fff)`,
-                            color: "#1f2937",
+                            color: deptInk(step.deptSlug),
                             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8)",
                           } as CSSProperties
                         }
                         title={step.label}
+                        aria-label={step.label}
                       >
-                        <Icon name={m.icon} className="h-4 w-4" />
+                        <Icon name={m.icon} aria-hidden className="h-4 w-4" />
                       </span>
                       {i < p.steps.length - 1 && (
                         <span
@@ -231,19 +232,19 @@ export default function PathsPage() {
 
               {/* meta footer */}
               <div className="mt-6 flex items-center justify-between border-t border-border/70 pt-4">
-                <span className="inline-flex items-center gap-3 font-mono text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
-                    <Layers className="h-3.5 w-3.5" />{" "}
-                    <AnimatedCounter value={p.steps.length} /> steps
+                    <Layers aria-hidden className="h-3.5 w-3.5" />{" "}
+                    <span className="tabular-nums"><AnimatedCounter value={p.steps.length} /></span> steps
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <Target className="h-3.5 w-3.5" />{" "}
-                    <AnimatedCounter value={p.outcomes.length} /> outcomes
+                    <Target aria-hidden className="h-3.5 w-3.5" />{" "}
+                    <span className="tabular-nums"><AnimatedCounter value={p.outcomes.length} /></span> outcomes
                   </span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
                   View path
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                  <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </span>
               </div>
             </Link>
@@ -254,7 +255,7 @@ export default function PathsPage() {
         <div className="aq-glass aq-sheen aq-reveal mt-12 flex flex-col items-start gap-4 rounded-3xl p-7 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <span className="aq-icon aq-badge-bob h-12 w-12 flex-none">
-              <Clock className="h-6 w-6" />
+              <Clock aria-hidden className="h-6 w-6" />
             </span>
             <div>
               <p className="aq-display text-lg font-bold text-foreground">
@@ -266,9 +267,9 @@ export default function PathsPage() {
               </p>
             </div>
           </div>
-          <Link href="/guides" className="aq-cta flex-none">
+          <Link href="/guides" className="aq-cta min-h-[44px] flex-none">
             Explore all guides
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight aria-hidden className="h-4 w-4" />
           </Link>
         </div>
       </div>

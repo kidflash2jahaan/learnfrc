@@ -64,7 +64,7 @@ export default function BlogPage() {
             <span
               className="aq-grad-anim"
               style={{
-                background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
+                background: "linear-gradient(120deg,#1e4fc4,#0e7d9e)",
                 WebkitBackgroundClip: "text",
                 backgroundClip: "text",
                 color: "transparent",
@@ -73,7 +73,7 @@ export default function BlogPage() {
               decoded for the pit
             </span>
           </h1>
-          <p className="aq-rise aq-rise-3 mt-5 max-w-xl text-lg leading-relaxed text-foreground/70">
+          <p className="aq-rise aq-rise-3 mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Practical, no-fluff walkthroughs of the parts of FRC people search for
             most — starting a team, understanding swerve, and winning the Impact
             Award. Free, written by an FRC student.
@@ -93,24 +93,24 @@ export default function BlogPage() {
           </div>
 
           {/* Quick stats */}
-          <div className="aq-rise aq-rise-5 mt-8 grid max-w-xl grid-cols-3 gap-4">
+          <div className="aq-rise aq-rise-5 mt-8 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
             <div className="aq-glass rounded-2xl p-4 text-center">
               <div className="aq-display text-2xl font-bold text-primary">
                 <AnimatedCounter value={articles.length} />
               </div>
-              <div className="mt-1 text-xs text-foreground/70">Guides published</div>
+              <div className="mt-1 text-xs text-muted-foreground">Guides published</div>
             </div>
             <div className="aq-glass rounded-2xl p-4 text-center">
               <div className="aq-display text-2xl font-bold text-primary">
                 <AnimatedCounter value={totalMins} suffix=" min" />
               </div>
-              <div className="mt-1 text-xs text-foreground/70">Total reading</div>
+              <div className="mt-1 text-xs text-muted-foreground">Total reading</div>
             </div>
             <div className="aq-glass rounded-2xl p-4 text-center">
               <div className="aq-display text-2xl font-bold text-primary">
                 <AnimatedCounter value={100} suffix="%" />
               </div>
-              <div className="mt-1 text-xs text-foreground/70">Free, always</div>
+              <div className="mt-1 text-xs text-muted-foreground">Free, always</div>
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function BlogPage() {
             <h2 className="aq-display mt-3 text-xl font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
               {featured.title}
             </h2>
-            <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-foreground/70">
+            <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
               {featured.description}
             </p>
             <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4">
@@ -179,7 +179,7 @@ export default function BlogPage() {
               <h3 className="aq-display mt-4 text-lg font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
                 {a.title}
               </h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-foreground/70">
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
                 {a.description}
               </p>
               <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4">

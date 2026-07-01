@@ -23,11 +23,11 @@ export default async function VerifyEmailPage({
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div
           className="absolute -top-24 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(37,96,230,0.18), transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--primary) 18%, transparent), transparent 70%)" }}
         />
         <div
           className="absolute bottom-0 right-[8%] h-96 w-96 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(26,169,214,0.16), transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%)" }}
         />
         <div
           className="absolute top-1/3 left-[6%] h-72 w-72 rounded-full blur-3xl"
@@ -36,7 +36,7 @@ export default async function VerifyEmailPage({
       </div>
 
       <div className="aq-glass aq-sheen aq-rise aq-rise-1 w-full max-w-md rounded-3xl p-8 text-center sm:p-10">
-        <span className="aq-badge aq-badge-bob aq-rise aq-rise-1 mx-auto flex h-16 w-16 items-center justify-center" style={{ "--a": "#2560e6" } as CSSProperties}>
+        <span className="aq-badge aq-badge-bob aq-rise aq-rise-1 mx-auto flex h-16 w-16 items-center justify-center" style={{ "--a": "var(--primary)" } as CSSProperties}>
           <MailCheck className="h-8 w-8" aria-hidden />
         </span>
 
@@ -47,23 +47,13 @@ export default async function VerifyEmailPage({
 
         <h1 className="aq-display aq-rise aq-rise-2 mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
           Verify your{" "}
-          <span
-            className="aq-grad-anim"
-            style={{
-              background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            email
-          </span>
+          <span style={{ color: "var(--primary)" }}>email</span>
         </h1>
 
         <p className="aq-rise aq-rise-3 mx-auto mt-3 max-w-sm text-pretty text-base leading-relaxed text-foreground/70">
           We sent a verification link to{" "}
           {email ? (
-            <span className="font-mono font-semibold text-foreground">{email}</span>
+            <span className="font-semibold text-foreground break-all">{email}</span>
           ) : (
             "your inbox"
           )}
@@ -110,15 +100,22 @@ export default async function VerifyEmailPage({
         <div className="aq-reveal aq-rise aq-rise-4 mt-6" style={{ animationDelay: "200ms" } as CSSProperties}>
           <div className="mb-2 flex items-center justify-between text-xs font-medium text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
-              <span className="aq-pulse inline-block h-2 w-2 rounded-full" style={{ background: "#2560e6" } as CSSProperties} />
+              <span aria-hidden className="aq-pulse inline-block h-2 w-2 rounded-full" style={{ background: "var(--primary)" } as CSSProperties} />
               Almost there
             </span>
             <span>Step 3 of 4</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-card">
+          <div
+            className="h-2 w-full overflow-hidden rounded-full bg-card"
+            role="progressbar"
+            aria-valuenow={3}
+            aria-valuemin={1}
+            aria-valuemax={4}
+            aria-label="Sign-up progress: step 3 of 4"
+          >
             <div
               className="aq-bar-anim h-full rounded-full"
-              style={{ width: "75%", background: "linear-gradient(90deg,#2560e6,#1aa9d6)" } as CSSProperties}
+              style={{ width: "75%", background: "linear-gradient(90deg,var(--primary),var(--accent))" } as CSSProperties}
             />
           </div>
         </div>

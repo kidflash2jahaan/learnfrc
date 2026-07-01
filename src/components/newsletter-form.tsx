@@ -12,43 +12,53 @@ export function NewsletterForm({ className }: { className?: string }) {
   if (state?.success) {
     return (
       <p
+        role="status"
+        aria-live="polite"
         className={cn(
-          "inline-flex items-center gap-2 text-sm text-success",
+          "aq-chip inline-flex items-center gap-2 text-sm font-medium text-success",
           className
         )}
       >
-        <CheckCircle2 className="h-4 w-4" /> You&apos;re on the list — check your inbox.
+        <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> You&apos;re on the list — check your inbox.
       </p>
     );
   }
 
   return (
     <form action={action} className={cn("w-full max-w-sm", className)}>
-      <div className="flex items-center gap-2 rounded-xl border border-border bg-background/60 p-1.5 backdrop-blur-sm transition-shadow focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/25 focus-within:shadow-[var(--glow-primary)]">
+      <div className="group flex items-center gap-2 rounded-2xl border border-border bg-background/80 p-1.5 shadow-[0_1px_2px_rgba(24,35,56,0.06)] transition-shadow focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(37,96,230,0.18)]">
         <input
           type="email"
           name="email"
           required
           placeholder="you@team.org"
           aria-label="Email address"
-          className="h-9 flex-1 bg-transparent px-2.5 font-mono text-sm outline-none placeholder:text-muted-foreground"
+          className="h-11 flex-1 bg-transparent px-2.5 text-base outline-none placeholder:text-muted-foreground sm:h-9 sm:text-sm"
         />
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 font-mono text-sm font-semibold text-primary-foreground shadow-[var(--glow-primary)] transition hover:brightness-110 disabled:opacity-60 cursor-pointer"
+          aria-busy={pending}
+          className="aq-cta inline-flex h-11 items-center gap-1.5 px-3.5 text-sm font-semibold disabled:opacity-60 sm:h-9"
         >
           {pending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <span className="sr-only">Submitting</span>
+            </>
           ) : (
             <>
-              Join <ArrowRight className="h-3.5 w-3.5" />
+              Join{" "}
+              <ArrowRight
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
             </>
           )}
         </button>
       </div>
       {state?.error && (
-        <p className="mt-1.5 text-xs text-destructive" role="alert">
+        <p className="mt-1.5 text-sm text-destructive" role="alert">
           {state.error}
         </p>
       )}

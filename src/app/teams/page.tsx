@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 const HEADLINE_GRADIENT: CSSProperties = {
-  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
+  background: "linear-gradient(120deg, var(--primary), var(--accent))",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
@@ -66,7 +66,7 @@ function AmbientGlows() {
         className="absolute top-28 left-[4%] h-64 w-64 rounded-full opacity-50 blur-3xl"
         style={{
           background:
-            "radial-gradient(closest-side, color-mix(in srgb, #a855f7 22%, transparent), transparent 70%)",
+            "radial-gradient(closest-side, color-mix(in srgb, var(--magenta) 22%, transparent), transparent 70%)",
         }}
       />
     </div>
@@ -88,7 +88,7 @@ export default async function TeamsPage() {
               <Users className="h-3.5 w-3.5" aria-hidden />
               Your pit crew
             </span>
-            <h1 className="aq-rise aq-rise-2 mt-4 text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+            <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-balance text-4xl font-bold tracking-tight sm:text-5xl">
               See your whole{" "}
               <span className="aq-grad-anim" style={HEADLINE_GRADIENT}>
                 team&apos;s progress
@@ -133,20 +133,20 @@ export default async function TeamsPage() {
         icon: Users,
         label: "Members",
         value: members.length,
-        accent: "#2560e6",
+        accent: "var(--primary)",
       },
       {
         icon: CheckCircle2,
         label: "Lessons completed",
         value: totalCompleted,
-        accent: "#1aa9d6",
+        accent: "var(--accent)",
       },
       {
         icon: Trophy,
         label: "Avg. completion",
         value: avgPct,
         suffix: "%",
-        accent: "#a855f7",
+        accent: "var(--magenta)",
       },
     ];
 
@@ -158,7 +158,7 @@ export default async function TeamsPage() {
             <Users className="h-3.5 w-3.5" aria-hidden />
             Your pit crew
           </span>
-          <h1 className="aq-rise aq-rise-2 mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
             Team{" "}
             <span className="aq-grad-anim" style={HEADLINE_GRADIENT}>
               #{teamNumber}
@@ -184,13 +184,13 @@ export default async function TeamsPage() {
               }
             >
               <span className="aq-badge aq-badge-bob flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
-                <s.icon className="h-5 w-5" />
+                <s.icon className="h-5 w-5" aria-hidden />
               </span>
               <span className="min-w-0">
                 <span className="block text-2xl font-bold leading-none tracking-tight text-foreground tabular-nums">
                   <AnimatedCounter value={s.value} suffix={s.suffix} />
                 </span>
-                <span className="mt-1.5 block truncate text-[11px] font-medium uppercase tracking-wide text-foreground/70">
+                <span className="mt-1.5 block truncate text-xs font-medium uppercase tracking-wide text-foreground">
                   {s.label}
                 </span>
               </span>
@@ -204,9 +204,9 @@ export default async function TeamsPage() {
             <div className="flex items-start gap-3">
               <span
                 className="aq-badge aq-float flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-                style={{ "--a": "#2560e6" } as CSSProperties}
+                style={{ "--a": "var(--primary)" } as CSSProperties}
               >
-                <Sparkles className="h-5 w-5" />
+                <Sparkles className="h-5 w-5" aria-hidden />
               </span>
               <div>
                 <h2 className="text-lg font-bold tracking-tight">
@@ -250,9 +250,9 @@ export default async function TeamsPage() {
               <div className="aq-reveal px-6 py-14 text-center">
                 <div
                   className="aq-badge aq-float mx-auto flex h-14 w-14 items-center justify-center rounded-2xl"
-                  style={{ "--a": "#2560e6" } as CSSProperties}
+                  style={{ "--a": "var(--primary)" } as CSSProperties}
                 >
-                  <Sparkles className="h-6 w-6" />
+                  <Sparkles className="h-6 w-6" aria-hidden />
                 </div>
                 <p className="mt-4 text-base font-semibold text-foreground">
                   You&apos;re the first one here

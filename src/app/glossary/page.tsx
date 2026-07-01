@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 const HEADING_GRADIENT: CSSProperties = {
-  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
+  background: "linear-gradient(120deg,var(--primary),var(--accent))",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
@@ -74,7 +74,6 @@ export default function GlossaryPage() {
               </span>
               <AnimatedCounter
                 value={value}
-                suffix="+"
                 className="text-sm font-semibold text-foreground"
               />
               <span className="text-sm text-muted-foreground">{label}</span>
@@ -87,7 +86,7 @@ export default function GlossaryPage() {
       <Reveal className="mt-14" delay={0.05}>
         <div className="aq-glass aq-sheen rounded-3xl p-5 sm:p-8">
           <div className="mb-6 flex items-center gap-3">
-            <span className="aq-badge aq-badge-bob flex h-11 w-11 items-center justify-center" style={{ "--a": "#2560e6" } as CSSProperties}>
+            <span className="aq-badge aq-badge-bob flex h-11 w-11 items-center justify-center" style={{ "--a": "var(--primary)" } as CSSProperties}>
               <Search className="h-5 w-5" aria-hidden />
             </span>
             <div>

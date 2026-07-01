@@ -473,7 +473,9 @@
 /* CTA pill + ghost glass button. */
 .aq-cta {
   color: #fff;
-  background: linear-gradient(160deg, #3b78f2, #149fd0);
+  /* Light stop darkened (#149fd0 -> #0f7fb8) so white label text clears
+     WCAG AA contrast across the whole gradient. */
+  background: linear-gradient(160deg, #3b78f2, #0f7fb8);
   box-shadow: 0 10px 22px rgba(37, 96, 230, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -4px 9px rgba(0, 24, 70, 0.22);
 }
 .aq-cta:hover { transform: translateY(-1px); }
