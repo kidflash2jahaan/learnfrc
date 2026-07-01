@@ -382,6 +382,35 @@
   --accent: #1aa9d6;
   --accent-foreground: #04222b;
   --ring: #2560e6;
+  --success: #0c8f4f;
+  --warning: #a16207;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --gold: #a16207;
+  --magenta: #b83280;
+  --glow-primary: 0 1px 3px rgba(37, 96, 230, 0.18);
+  --glow-accent: 0 1px 3px rgba(26, 169, 214, 0.18);
+  --glow-magenta: 0 1px 3px rgba(184, 50, 128, 0.18);
+}
+
+/* Global light: neutralize the dark-only neon decorations on internal pages. */
+[data-theme="arena"] .aurora-bg,
+[data-theme="arena"] .hud-grid,
+[data-theme="arena"] .bg-grid,
+[data-theme="arena"] .bg-dots { background-image: none !important; }
+[data-theme="arena"] .scanlines::after { display: none !important; }
+[data-theme="arena"] .neon-text { text-shadow: none !important; }
+[data-theme="arena"] .neon-border,
+[data-theme="arena"] .neon-border-accent,
+[data-theme="arena"] .glow-primary,
+[data-theme="arena"] .glow-accent { box-shadow: none !important; }
+[data-theme="arena"] .text-gradient,
+[data-theme="arena"] .text-gradient-animated {
+  background-image: linear-gradient(120deg, #2560e6, #1aa9d6) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
 }
 
 /* Opaque light base (min 100vh) so the fixed dark HUD background and the
@@ -465,6 +494,75 @@
 [data-perf="on"] .aq-glass,
 [data-perf="on"] .aq-tile,
 [data-perf="on"] .aq-ghost { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+/* ================================================================== */
+/*  ARENA CLAY — motion layer (lots of it). All GPU-friendly           */
+/*  transform/opacity/background-position. Auto-disabled by the global */
+/*  prefers-reduced-motion + [data-perf="on"] blocks above.            */
+/* ================================================================== */
+@keyframes aq-drift-a { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(42px,32px) scale(1.09)} }
+@keyframes aq-drift-b { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-48px,26px) scale(1.11)} }
+@keyframes aq-drift-c { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(32px,-36px) scale(1.07)} }
+@keyframes aq-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
+@keyframes aq-ring { from{stroke-dashoffset:213.6} to{stroke-dashoffset:47} }
+@keyframes aq-grow { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+@keyframes aq-grad { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+@keyframes aq-pulse { 0%{box-shadow:0 0 0 0 rgba(18,181,101,.5)} 70%{box-shadow:0 0 0 9px rgba(18,181,101,0)} 100%{box-shadow:0 0 0 0 rgba(18,181,101,0)} }
+@keyframes aq-bob { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-4px) rotate(-5deg)} }
+@keyframes aq-spin { to{transform:rotate(360deg)} }
+@keyframes aq-sheen-move { 0%{background-position:190% 0} 100%{background-position:-90% 0} }
+
+/* drifting ambient light */
+.aq-glow > span:nth-child(1){ animation: aq-drift-a 19s ease-in-out infinite; }
+.aq-glow > span:nth-child(2){ animation: aq-drift-b 23s ease-in-out infinite; }
+.aq-glow > span:nth-child(3){ animation: aq-drift-c 27s ease-in-out infinite; }
+
+.aq-float { animation: aq-float 7s ease-in-out infinite; }
+.aq-grad-anim { background-size: 200% auto !important; animation: aq-grad 5s linear infinite alternate; }
+.aq-pulse { animation: aq-pulse 2.4s cubic-bezier(.4,0,.6,1) infinite; }
+.aq-ring-anim { animation: aq-ring 1.5s cubic-bezier(.35,0,.15,1) forwards; }
+.aq-bar-anim { transform-origin: left; animation: aq-grow 1.3s cubic-bezier(.35,0,.15,1) both; }
+.aq-badge-bob { animation: aq-bob 4.6s ease-in-out infinite; }
+
+/* continuous sheen sweep across glass surfaces */
+.aq-sheen { position: relative; }
+.aq-sheen::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; overflow: hidden;
+  background: linear-gradient(100deg, transparent 36%, rgba(255,255,255,.4) 50%, transparent 64%);
+  background-size: 250% 100%; background-position: 190% 0;
+  animation: aq-sheen-move 6.5s ease-in-out infinite;
+}
+
+/* department tile: hover lift already set; add a shine sweep + badge/arrow reactions */
+.aq-tile::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.5) 50%, transparent 70%);
+  background-size: 250% 100%; background-position: -120% 0; transition: background-position .7s ease;
+}
+.aq-tile:hover::before { background-position: 220% 0; }
+.aq-tile .aq-badge { transition: transform .28s cubic-bezier(.2,1.5,.5,1); }
+.aq-tile:hover .aq-badge { transform: scale(1.14) rotate(-7deg); }
+.aq-tile .aq-arw { transition: transform .28s ease, opacity .28s ease; }
+.aq-tile:hover .aq-arw { transform: translate(3px,-3px); opacity: .85; }
+
+/* CTA: animated conic gradient ring */
+.aq-ring-border { position: relative; }
+.aq-ring-border::before {
+  content: ""; position: absolute; inset: -1.5px; border-radius: inherit; padding: 1.5px; z-index: 0;
+  background: conic-gradient(from 0deg, #2560e6, #1aa9d6, #8b7fff, #2560e6);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: aq-spin 9s linear infinite; opacity: .75;
+}
+
+/* glossy shine sweep on buttons (hover) */
+.aq-cta, .aq-ghost { position: relative; overflow: hidden; }
+.aq-cta::after, .aq-ghost::after {
+  content: ""; position: absolute; top: 0; left: 0; width: 38%; height: 100%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: translateX(-170%) skewX(-18deg); transition: transform .6s ease;
+}
+.aq-cta:hover::after, .aq-ghost:hover::after { transform: translateX(340%) skewX(-18deg); }
 
 /* ------------------------------------------------------------------ */
 /*  Code highlighting (rehype-highlight / highlight.js tokens)        */

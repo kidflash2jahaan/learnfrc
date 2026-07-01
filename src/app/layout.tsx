@@ -8,7 +8,6 @@ import { ScrollProgress } from "@/components/scroll-progress";
 import { JsonLd } from "@/components/json-ld";
 import { PresenceBeacon } from "@/components/presence-beacon";
 import { SourceCapture } from "@/components/source-capture";
-import { HudBackground } from "@/components/motion/terminal";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -93,7 +92,8 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`dark ${grotesk.variable} ${inter.variable} ${jbmono.variable} ${baloo.variable} h-full`}
+      data-theme="arena"
+      className={`${grotesk.variable} ${inter.variable} ${jbmono.variable} ${baloo.variable} h-full`}
     >
       <body className="flex min-h-full flex-col antialiased">
         <script
@@ -132,7 +132,6 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <HudBackground />
         <Providers>
           <ScrollProgress />
           <Navbar />
