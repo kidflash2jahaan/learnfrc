@@ -14,89 +14,69 @@ export default async function Image() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: "80px",
-          background: "#090d15",
+          padding: "84px",
+          background: "linear-gradient(135deg, #eef3fd 0%, #dde8f8 55%, #e7edfb 100%)",
           position: "relative",
         }}
       >
-        {/* gradient glow */}
+        {/* soft Arena-Clay glows (light, not neon) */}
         <div
           style={{
             position: "absolute",
-            top: -200,
-            left: -100,
-            width: 700,
-            height: 700,
+            top: -220,
+            left: -120,
+            width: 720,
+            height: 720,
             borderRadius: "9999px",
-            background:
-              "radial-gradient(circle, rgba(198,255,61,0.38), transparent 60%)",
+            background: "radial-gradient(circle, rgba(47,107,255,0.16), transparent 62%)",
             display: "flex",
           }}
         />
         <div
           style={{
             position: "absolute",
-            bottom: -250,
-            right: -120,
-            width: 700,
-            height: 700,
+            bottom: -260,
+            right: -140,
+            width: 760,
+            height: 760,
             borderRadius: "9999px",
-            background:
-              "radial-gradient(circle, rgba(34,211,238,0.40), transparent 60%)",
+            background: "radial-gradient(circle, rgba(26,169,214,0.18), transparent 62%)",
             display: "flex",
           }}
         />
 
+        {/* brand mark — identical to the favicon: blue→cyan tile, white robot */}
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div
-            style={{
-              width: 84,
-              height: 84,
-              borderRadius: 22,
-              background: "linear-gradient(135deg, #c6ff3d, #22d3ee)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {/* robot head: dark face with two neon eyes */}
-            <div
-              style={{
-                width: 52,
-                height: 44,
-                borderRadius: 14,
-                background: "#0a1018",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 9,
-              }}
-            >
-              <div style={{ width: 11, height: 11, borderRadius: 6, background: "#c6ff3d", display: "flex" }} />
-              <div style={{ width: 11, height: 11, borderRadius: 6, background: "#22d3ee", display: "flex" }} />
-            </div>
-          </div>
-          <div
-            style={{
-              fontSize: 40,
-              fontWeight: 700,
-              color: "white",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            LearnFRC
+          <svg width="92" height="92" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#2f6bff" />
+                <stop offset="1" stopColor="#1aa9d6" />
+              </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="8" fill="url(#g)" />
+            <rect x="15.1" y="5.4" width="1.8" height="4" rx="0.9" fill="#ffffff" />
+            <circle cx="16" cy="5.2" r="1.7" fill="#ffffff" />
+            <rect x="8" y="9.8" width="16" height="13" rx="4" fill="#ffffff" />
+            <circle cx="12.9" cy="15.8" r="1.9" fill="#2560e6" />
+            <circle cx="19.1" cy="15.8" r="1.9" fill="#1aa9d6" />
+            <rect x="12.6" y="19.2" width="6.8" height="1.7" rx="0.85" fill="#2560e6" opacity="0.5" />
+          </svg>
+          <div style={{ display: "flex", fontSize: 44, fontWeight: 800, letterSpacing: "-0.02em" }}>
+            <span style={{ color: "#16203a" }}>Learn</span>
+            <span style={{ color: "#2560e6" }}>FRC</span>
           </div>
         </div>
 
         <div
           style={{
-            marginTop: 40,
-            fontSize: 84,
+            marginTop: 44,
+            fontSize: 86,
             fontWeight: 800,
-            color: "white",
-            lineHeight: 1.05,
+            color: "#16203a",
+            lineHeight: 1.04,
             letterSpacing: "-0.03em",
-            maxWidth: 950,
+            maxWidth: 960,
             display: "flex",
           }}
         >
@@ -105,27 +85,31 @@ export default async function Image() {
 
         <div
           style={{
-            marginTop: 28,
-            fontSize: 32,
-            color: "#94a2bf",
-            maxWidth: 880,
+            marginTop: 30,
+            fontSize: 33,
+            color: "#55668a",
+            maxWidth: 900,
+            lineHeight: 1.3,
             display: "flex",
           }}
         >
-          Structured, web-grounded guides for every department — 11 departments
-          · 394 lessons.
+          Structured, web-grounded guides for every department — 11 departments · 394 lessons.
         </div>
 
         <div
           style={{
             position: "absolute",
-            bottom: 64,
-            left: 80,
-            fontSize: 24,
-            color: "#5b6b8c",
+            bottom: 66,
+            left: 84,
             display: "flex",
+            alignItems: "center",
+            gap: 14,
+            fontSize: 26,
+            color: "#7a8aa8",
+            fontWeight: 600,
           }}
         >
+          <div style={{ display: "flex", width: 10, height: 10, borderRadius: 9999, background: "#2560e6" }} />
           learnfrc.systemerr.com
         </div>
       </div>
