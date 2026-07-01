@@ -630,9 +630,22 @@
 .aq-rise-4 { animation-delay: 0.24s; }
 .aq-rise-5 { animation-delay: 0.3s; }
 
-/* Default radii so these classes are never square when a page forgets the
-   rounded-* utility (fixes square buttons/tiles/badges). */
-.aq-cta, .aq-ghost { border-radius: 16px; }
+/* Make aq-cta / aq-ghost fully self-contained buttons (layout + radius) so a
+   bare className="aq-cta" renders a correct pill even without extra utilities. */
+.aq-cta, .aq-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.72rem 1.2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+  border-radius: 16px;
+  cursor: pointer;
+  text-decoration: none;
+}
 .aq-tile { border-radius: 20px; }
 .aq-badge { border-radius: 14px; }
 
