@@ -32,6 +32,36 @@ export function deptMeta(slug: string): DeptMeta {
   return DEPARTMENT_META[slug] ?? FALLBACK;
 }
 
+/**
+ * Darkened, same-hue versions of each accent that are legible as TEXT on the
+ * light theme. The neon accents are fine as fills / badges / progress bars, but
+ * bright ones (yellow, lime, gold, mint, cyan) fail contrast when used as text.
+ * Use inkFor()/deptInk() for accent-colored text, numbers, and small icons.
+ */
+const ACCENT_INK: Record<string, string> = {
+  "#c6ff3d": "#4d7c0f", // lime
+  "#ff8a3d": "#c2410c", // orange
+  "#b16bff": "#7c3aed", // violet
+  "#22d3ee": "#0e7490", // cyan
+  "#ffe53d": "#a16207", // yellow (electrical)
+  "#ff5db1": "#be185d", // pink
+  "#ff3dcb": "#a21caf", // magenta
+  "#ffd23d": "#a16207", // gold
+  "#2dd4bf": "#0f766e", // teal
+  "#ff6b5d": "#d0392b", // coral
+  "#5dff9b": "#059669", // mint
+};
+
+/** Legible-on-light text color for a raw accent hex (falls back to the hex). */
+export function inkFor(hex: string): string {
+  return ACCENT_INK[hex.toLowerCase()] ?? hex;
+}
+
+/** Legible-on-light text color for a department. */
+export function deptInk(slug: string): string {
+  return inkFor(deptMeta(slug).color);
+}
+
 export function deptGradient(slug: string, angle = 135) {
   const m = deptMeta(slug);
   return `linear-gradient(${angle}deg, ${m.color}, ${m.to})`;

@@ -12,6 +12,7 @@ import {
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { inkFor } from "@/lib/departments";
 
 type Lesson = {
   id: string;
@@ -41,6 +42,8 @@ export function DepartmentModules({
   accent: string;
 }) {
   const completed = React.useMemo(() => new Set(completedIds), [completedIds]);
+  // Legible-on-light tone for accent text/icons (bright accents wash out).
+  const ink = inkFor(accent);
   const [open, setOpen] = React.useState<Record<string, boolean>>(() =>
     Object.fromEntries(modules.map((m, i) => [m.id, i === 0]))
   );
@@ -86,7 +89,7 @@ export function DepartmentModules({
               <span
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border font-mono text-sm font-semibold transition-all duration-300"
                 style={{
-                  color: accent,
+                  color: ink,
                   borderColor: `color-mix(in srgb, ${accent} 40%, transparent)`,
                   background: `color-mix(in srgb, ${accent} 12%, transparent)`,
                 }}
@@ -164,7 +167,7 @@ export function DepartmentModules({
                               {isDone ? (
                                 <CheckCircle2
                                   className="h-5 w-5 shrink-0"
-                                  style={{ color: accent }}
+                                  style={{ color: ink }}
                                 />
                               ) : (
                                 <Circle className="h-5 w-5 shrink-0 text-muted-foreground/40 transition-colors group-hover/les:text-muted-foreground" />
@@ -173,7 +176,7 @@ export function DepartmentModules({
                                 <span className="block truncate text-sm font-medium text-foreground/90 group-hover/les:text-foreground">
                                   <span
                                     className="mr-2 font-mono text-xs"
-                                    style={{ color: accent }}
+                                    style={{ color: ink }}
                                   >
                                     {isPre ? "P" : label}.{li + 1}
                                   </span>

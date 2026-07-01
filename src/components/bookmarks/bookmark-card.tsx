@@ -8,7 +8,7 @@ import { ArrowUpRight, Bookmark, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { toggleBookmark } from "@/app/actions/progress";
 import { Icon } from "@/lib/icon-map";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, inkFor } from "@/lib/departments";
 import { cn } from "@/lib/utils";
 
 export type BookmarkCardData = {
@@ -123,7 +123,7 @@ export function BookmarkCard({ data }: { data: BookmarkCardData }) {
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 <span
                   className="inline-flex items-center gap-1 font-medium"
-                  style={{ color: m.color }}
+                  style={{ color: inkFor(m.color) }}
                 >
                   <Icon name={m.icon} className="h-3.5 w-3.5 sm:hidden" />
                   {data.deptName}

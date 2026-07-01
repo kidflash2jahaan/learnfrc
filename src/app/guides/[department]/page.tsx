@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { getDepartmentBySlug, getCompletedLessonIds, flattenLessons } from "@/lib/queries";
 import { getSession } from "@/lib/auth";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, inkFor } from "@/lib/departments";
 import { Icon } from "@/lib/icon-map";
 import { DepartmentModules } from "@/components/guides/department-modules";
 import { AnimatedCounter } from "@/components/animated-counter";
@@ -73,6 +73,9 @@ export default async function DepartmentPage({
   const sources = (dept.sources ?? []) as Resource[];
 
   const accent = meta.color;
+  // Darker, same-hue tone for accent text/numbers/icons — the neon accents
+  // (electrical yellow especially) are illegible as text on the light theme.
+  const ink = inkFor(accent);
 
   return (
     <div
@@ -175,11 +178,11 @@ export default async function DepartmentPage({
 
             <div className="aq-rise aq-rise-3 mt-6 flex flex-wrap items-center gap-2.5">
               <span className="aq-chip">
-                <Layers className="h-4 w-4" style={{ color: accent }} />
+                <Layers className="h-4 w-4" style={{ color: ink }} />
                 <AnimatedCounter value={totalModules} /> modules
               </span>
               <span className="aq-chip">
-                <BookOpen className="h-4 w-4" style={{ color: accent }} />
+                <BookOpen className="h-4 w-4" style={{ color: ink }} />
                 <AnimatedCounter value={totalLessons} /> lessons
               </span>
               {user && doneCount > 0 && (
@@ -246,13 +249,13 @@ export default async function DepartmentPage({
                   </svg>
                   <span
                     className="aq-display absolute inset-0 flex items-center justify-center text-xl font-extrabold leading-none"
-                    style={{ color: accent }}
+                    style={{ color: ink }}
                   >
                     <AnimatedCounter value={pct} suffix="%" />
                   </span>
                 </div>
                 <div>
-                  <span className="aq-display block text-3xl font-extrabold leading-none" style={{ color: accent }}>
+                  <span className="aq-display block text-3xl font-extrabold leading-none" style={{ color: ink }}>
                     <AnimatedCounter value={doneCount} />
                   </span>
                   <span className="mt-1 block text-sm font-medium text-foreground/70">
@@ -315,7 +318,7 @@ export default async function DepartmentPage({
                   className="aq-icon aq-badge-bob flex h-8 w-8 items-center justify-center"
                   style={{
                     background: `color-mix(in srgb, ${accent} 14%, transparent)`,
-                    color: accent,
+                    color: ink,
                   }}
                 >
                   <Sparkles className="h-4 w-4" />
@@ -329,7 +332,7 @@ export default async function DepartmentPage({
                     className="aq-reveal flex gap-2.5 text-[15px] leading-relaxed text-foreground/85"
                     style={{ animationDelay: `${120 + i * 55}ms` } as CSSProperties}
                   >
-                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: accent }} />
+                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: ink }} />
                     <span>{item}</span>
                   </li>
                 ))}

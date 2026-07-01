@@ -20,7 +20,7 @@ import {
   flattenLessons,
 } from "@/lib/queries";
 import { getSession } from "@/lib/auth";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, inkFor } from "@/lib/departments";
 import { Icon } from "@/lib/icon-map";
 import { Markdown } from "@/components/markdown";
 import { LessonActions } from "@/components/lesson/lesson-actions";
@@ -97,7 +97,8 @@ export default async function LessonPage({
   const total = flat.length;
   const pct = total ? Math.round((doneInDept / total) * 100) : 0;
   const deptGradient = `linear-gradient(135deg, ${meta.color}, ${meta.to})`;
-  const accentStyle = { "--a": meta.color } as CSSProperties;
+  // --a: bright accent (fills/badges); --ai: darker same-hue tone for text.
+  const accentStyle = { "--a": meta.color, "--ai": inkFor(meta.color) } as CSSProperties;
 
   return (
     <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 lg:px-8">
@@ -190,7 +191,7 @@ export default async function LessonPage({
             </Stagger>
 
             <h1 className="mt-5 text-balance font-display text-3xl font-bold tracking-tight sm:text-4xl lg:text-[2.7rem] lg:leading-[1.08]">
-              <span className="aq-grad-anim bg-gradient-to-r from-[#2560e6] via-[color:var(--a)] to-[#1aa9d6] bg-clip-text text-transparent" style={accentStyle}>
+              <span className="aq-grad-anim bg-gradient-to-r from-[#2560e6] via-[color:var(--ai)] to-[#1aa9d6] bg-clip-text text-transparent" style={accentStyle}>
                 {les.title}
               </span>
             </h1>

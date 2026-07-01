@@ -5,7 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
 import { Search, CornerDownLeft, BookOpen, Layers } from "lucide-react";
 import { Icon } from "@/lib/icon-map";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, inkFor } from "@/lib/departments";
 import { cn } from "@/lib/utils";
 
 type Dept = {
@@ -204,7 +204,7 @@ export function CommandPalette() {
                     <span
                       className="flex h-9 w-9 items-center justify-center rounded-lg border"
                       style={{
-                        color: m.color,
+                        color: inkFor(m.color),
                         borderColor: `color-mix(in srgb, ${m.color} 40%, var(--border))`,
                         background: `color-mix(in srgb, ${m.color} 14%, transparent)`,
                       }}
