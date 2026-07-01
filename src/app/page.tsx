@@ -41,8 +41,8 @@ export default async function HomePage() {
     getDepartments().catch(() => []),
     getOverviewStats().catch(() => ({
       deptCount: 11,
-      moduleCount: 100,
-      lessonCount: 393,
+      moduleCount: 59,
+      lessonCount: 203,
       learners: 0,
     })),
   ]);
