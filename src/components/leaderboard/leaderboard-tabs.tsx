@@ -75,8 +75,8 @@ export function LeaderboardTabs({
 
       {tab === "week" && (
         <p className="mt-3 text-center font-mono text-xs text-muted-foreground">
-          // ranked by XP earned in the last 7 days — resets weekly, so anyone
-          can reach the top.
+          Ranked by XP earned in the last 7 days — resets weekly, so anyone can
+          reach the top.
         </p>
       )}
 

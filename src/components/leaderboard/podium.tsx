@@ -103,7 +103,7 @@ function PodiumColumn({ entry }: { entry: PodiumEntry }) {
           className="absolute right-4 top-4 font-mono text-[0.62rem] tracking-[0.16em]"
           style={{ color: `color-mix(in srgb, ${accent} 75%, var(--muted-foreground))` }}
         >
-          // {s.label}
+          {s.label}
         </span>
 
         {/* crown on the champion */}

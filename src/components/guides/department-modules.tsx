@@ -115,7 +115,6 @@ export function DepartmentModules({
                   )}
                 </div>
                 <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                  <span style={{ color: accent }}>{"// "}</span>
                   {isPre ? "recommended before you start · " : ""}
                   {done}/{total} lessons · {pct}%
                 </p>
@@ -152,8 +151,7 @@ export function DepartmentModules({
                   <div className="border-t border-border px-3 pb-3 pt-1">
                     {m.overview && (
                       <p className="px-2 py-3 font-mono text-xs leading-relaxed text-muted-foreground">
-                        <span style={{ color: accent }}>{"// "}</span>
-                        {m.overview}
+                              {m.overview}
                       </p>
                     )}
                     <ul className="space-y-0.5">

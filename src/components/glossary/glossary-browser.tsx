@@ -71,7 +71,6 @@ export function GlossaryBrowser({
       </div>
 
       <p className="mt-6 text-center font-mono text-sm text-muted-foreground">
-        <span className="text-muted-foreground/60">// </span>
         <span className="text-primary">{filtered.length}</span>{" "}
         {filtered.length === 1 ? "term" : "terms"}
       </p>
