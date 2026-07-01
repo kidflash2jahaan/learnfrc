@@ -636,8 +636,12 @@
 /*  Code highlighting (rehype-highlight / highlight.js tokens)        */
 /*  Tuned for the neon-on-void terminal look.                         */
 /* ------------------------------------------------------------------ */
-.hljs { color: var(--foreground); background: transparent; }
-.hljs-comment, .hljs-quote { color: var(--muted-foreground); font-style: italic; }
+/* Code blocks are always dark ("neon-on-void"), so the base/punctuation text
+   must be light — NOT var(--foreground), which is near-black under the light
+   theme and made braces/semicolons/operators invisible on the dark block. */
+.hljs { color: #cbd5f0; background: transparent; }
+.hljs-comment, .hljs-quote { color: #8b97b5; font-style: italic; }
+.hljs-punctuation, .hljs-operator { color: #aab6d4; }
 .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #ff3dcb; }
 .hljs-function .hljs-keyword { color: #ff3dcb; }
 .hljs-string, .hljs-attribute, .hljs-symbol, .hljs-bullet, .hljs-addition { color: #c6ff3d; }

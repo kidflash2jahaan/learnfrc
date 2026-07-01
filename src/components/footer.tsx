@@ -49,7 +49,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         {/* stats strip */}
         <div className="mb-10 flex flex-wrap items-center gap-2.5">
-          <span className="aq-chip">200+ lessons</span>
+          <span className="aq-chip">394 lessons</span>
           <span className="aq-chip">11 departments</span>
           <span className="aq-chip">100% free, forever</span>
         </div>

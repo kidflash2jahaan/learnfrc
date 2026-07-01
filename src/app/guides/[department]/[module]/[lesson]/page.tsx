@@ -105,11 +105,11 @@ export default async function LessonPage({
       {/* ambient glows */}
       <div aria-hidden className="aq-glow -z-10">
         <span
-          className="aq-float left-[-6%] top-[6%] h-72 w-72 opacity-50"
+          className="aq-float left-[7%] top-[6%] h-72 w-72 opacity-50"
           style={{ background: "radial-gradient(circle, #2560e6, transparent 70%)" }}
         />
         <span
-          className="aq-float right-[-4%] top-[30%] h-80 w-80 opacity-40"
+          className="aq-float right-[6%] top-[30%] h-80 w-80 opacity-40"
           style={{ background: `radial-gradient(circle, ${meta.color}, transparent 70%)`, animationDelay: "1.4s" }}
         />
         <span

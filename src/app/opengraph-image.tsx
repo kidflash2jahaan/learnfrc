@@ -113,7 +113,7 @@ export default async function Image() {
           }}
         >
           Structured, web-grounded guides for every department — 11 departments
-          · 200+ lessons.
+          · 394 lessons.
         </div>
 
         <div

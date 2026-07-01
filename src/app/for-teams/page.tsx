@@ -43,7 +43,7 @@ const FEATURES = [
   {
     icon: GraduationCap,
     title: "A ready-made curriculum",
-    body: "200+ lessons across all 11 departments — stop rebuilding rookie training from scratch every season.",
+    body: "394 lessons across all 11 departments — stop rebuilding rookie training from scratch every season.",
   },
   {
     icon: Award,
@@ -63,8 +63,8 @@ const STATS: {
   label: string;
 }[] = [
   { value: 11, label: "departments" },
-  { value: 59, label: "modules" },
-  { value: 203, suffix: "+", label: "lessons" },
+  { value: 101, label: "modules" },
+  { value: 394, suffix: "+", label: "lessons" },
   { value: 100, suffix: "%", label: "free" },
 ];
 

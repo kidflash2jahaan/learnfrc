@@ -222,7 +222,7 @@ export default async function ArticlePage({
           <div className="mt-6 flex flex-wrap items-center justify-center gap-6">
             <div className="aq-reveal flex flex-col items-center" style={{ animationDelay: "60ms" } as CSSProperties}>
               <span className="aq-display text-2xl font-bold text-primary">
-                <AnimatedCounter value={203} suffix="+" />
+                <AnimatedCounter value={394} suffix="+" />
               </span>
               <span className="text-xs font-medium text-muted-foreground">lessons</span>
             </div>
