@@ -630,6 +630,12 @@
 .aq-rise-4 { animation-delay: 0.24s; }
 .aq-rise-5 { animation-delay: 0.3s; }
 
+/* Default radii so these classes are never square when a page forgets the
+   rounded-* utility (fixes square buttons/tiles/badges). */
+.aq-cta, .aq-ghost { border-radius: 16px; }
+.aq-tile { border-radius: 20px; }
+.aq-badge { border-radius: 14px; }
+
 /* ------------------------------------------------------------------ */
 /*  Code highlighting (rehype-highlight / highlight.js tokens)        */
 /*  Tuned for the neon-on-void terminal look.                         */
