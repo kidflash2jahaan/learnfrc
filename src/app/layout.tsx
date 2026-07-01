@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, JetBrains_Mono, Baloo_2 } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/navbar";
@@ -26,6 +26,13 @@ const inter = Inter({
 const jbmono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jbmono",
+  display: "swap",
+});
+// Rounded display face for the Arena Clay homepage (light glass + clay).
+const baloo = Baloo_2({
+  subsets: ["latin"],
+  variable: "--font-baloo",
+  weight: ["500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -86,7 +93,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`dark ${grotesk.variable} ${inter.variable} ${jbmono.variable} h-full`}
+      className={`dark ${grotesk.variable} ${inter.variable} ${jbmono.variable} ${baloo.variable} h-full`}
     >
       <body className="flex min-h-full flex-col antialiased">
         <script

@@ -52,6 +52,7 @@ type Me = {
 
 export function Navbar() {
   const pathname = usePathname();
+  const isHome = pathname === "/";
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [me, setMe] = React.useState<Me>({
@@ -98,11 +99,14 @@ export function Navbar() {
 
   return (
     <header
+      data-theme={isHome ? "arena" : undefined}
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-all duration-300",
         scrolled
           ? "glass border-b border-primary/15 shadow-[var(--shadow-sm)]"
-          : "border-b border-transparent bg-transparent"
+          : isHome
+            ? "glass border-b border-primary/10"
+            : "border-b border-transparent bg-transparent"
       )}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">

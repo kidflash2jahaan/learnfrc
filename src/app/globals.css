@@ -356,6 +356,116 @@
 [data-perf="on"] [class*="blur-"] { filter: none !important; }
 [data-perf="on"] [class*="backdrop-blur"] { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
+/* ================================================================== */
+/*  ARENA CLAY — light "liquid glass + clay" theme, scoped to the      */
+/*  homepage (and nav/footer while on it) via [data-theme="arena"].    */
+/*  Overrides the shared tokens so Tailwind utilities (bg-card,        */
+/*  text-muted-foreground, text-primary…) adapt to light automatically.*/
+/* ================================================================== */
+[data-theme="arena"] {
+  color-scheme: light;
+  --background: #e6eefb;
+  --background-2: #f2f6fd;
+  --foreground: #182338;
+  --card: #ffffff;
+  --card-foreground: #182338;
+  --popover: #ffffff;
+  --popover-foreground: #182338;
+  --muted: #eef2f9;
+  --muted-foreground: #4d5b78;
+  --border: rgba(120, 145, 190, 0.24);
+  --input: #d7e0ef;
+  --primary: #2560e6;
+  --primary-foreground: #ffffff;
+  --secondary: #eef3fb;
+  --secondary-foreground: #1a2540;
+  --accent: #1aa9d6;
+  --accent-foreground: #04222b;
+  --ring: #2560e6;
+}
+
+/* Opaque light base (min 100vh) so the fixed dark HUD background and the
+   shared flex-grow <main> never show through on the light homepage. */
+.aq-root { background-color: var(--background); min-height: 100vh; }
+.aq-display {
+  font-family: var(--font-baloo), var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+/* Liquid-glass panel (mastery panel, feature/stat cards). */
+.aq-glass {
+  position: relative;
+  background:
+    radial-gradient(130% 90% at 18% -10%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 46%),
+    linear-gradient(158deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.34));
+  backdrop-filter: blur(26px) saturate(1.9) brightness(1.05);
+  -webkit-backdrop-filter: blur(26px) saturate(1.9) brightness(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 28px 64px rgba(38, 78, 150, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -18px 34px rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+/* Translucent colored-glass department tile (expects --a accent). */
+.aq-tile {
+  position: relative;
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.05) 34%, transparent 56%),
+    linear-gradient(160deg, color-mix(in srgb, var(--a) 36%, rgba(255, 255, 255, 0.84)), color-mix(in srgb, var(--a) 16%, rgba(255, 255, 255, 0.6)));
+  backdrop-filter: blur(16px) saturate(1.7);
+  -webkit-backdrop-filter: blur(16px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow:
+    11px 13px 28px color-mix(in srgb, var(--a) 26%, transparent),
+    -7px -7px 18px rgba(255, 255, 255, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.aq-tile:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    14px 16px 32px color-mix(in srgb, var(--a) 36%, transparent),
+    -7px -7px 18px rgba(255, 255, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* Glossy accent icon badge (expects --a accent). */
+.aq-badge {
+  color: #141f2c;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--a) 80%, #fff), var(--a));
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.75),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.16),
+    0 6px 13px color-mix(in srgb, var(--a) 42%, transparent);
+}
+
+/* CTA pill + ghost glass button. */
+.aq-cta {
+  color: #fff;
+  background: linear-gradient(160deg, #3b78f2, #149fd0);
+  box-shadow: 0 10px 22px rgba(37, 96, 230, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -4px 9px rgba(0, 24, 70, 0.22);
+}
+.aq-cta:hover { transform: translateY(-1px); }
+.aq-ghost {
+  color: var(--foreground);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.34));
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 18px rgba(60, 95, 160, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+/* Ambient light blobs the glass refracts. */
+.aq-glow { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.aq-glow > span { position: absolute; border-radius: 50%; filter: blur(64px); }
+
+/* Perf-mode: drop the heavy blur but keep the light look. */
+[data-perf="on"] .aq-glass,
+[data-perf="on"] .aq-tile,
+[data-perf="on"] .aq-ghost { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
 /* ------------------------------------------------------------------ */
 /*  Code highlighting (rehype-highlight / highlight.js tokens)        */
 /*  Tuned for the neon-on-void terminal look.                         */

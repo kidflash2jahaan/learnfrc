@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { NewsletterForm } from "@/components/newsletter-form";
@@ -33,8 +36,14 @@ const FRC_LINKS = [
 ];
 
 export function Footer() {
+  const isHome = usePathname() === "/";
   return (
-    <footer className="relative mt-24 border-t border-border bg-card/30">
+    <footer
+      data-theme={isHome ? "arena" : undefined}
+      className={`relative border-t border-border ${
+        isHome ? "mt-0 bg-background" : "mt-24 bg-card/30"
+      }`}
+    >
       {/* neon top hairline */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
