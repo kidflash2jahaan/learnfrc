@@ -29,9 +29,10 @@ import {
 import { getSession } from "@/lib/auth";
 import { getDepartments, getDepartmentBySlug, getReferralCount } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, inkFor } from "@/lib/departments";
 import { clampPct, pluralize } from "@/lib/utils";
 import type { Achievement } from "@/lib/types";
+import { GaugeCluster } from "./_gauge-cluster";
 
 export const metadata: Metadata = {
   title: "Dashboard · LearnFRC",
@@ -263,6 +264,8 @@ export default async function DashboardPage() {
     background: "linear-gradient(90deg,var(--primary),var(--accent))",
   } as const;
 
+  const nextLevel = level + 1;
+
   return (
     <div className="relative mx-auto max-w-7xl px-4 pt-28 pb-20 sm:px-6 lg:px-8">
       {/* ambient glows */}
@@ -281,18 +284,25 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* ============================ HERO — PROGRESS AT A GLANCE ============================ */}
-      <section className="aq-glass aq-sheen aq-rise aq-rise-1 overflow-hidden rounded-[28px] p-6 sm:p-9">
+      {/* ============================ HERO — THE INSTRUMENT CLUSTER ============================ */}
+      {/* Signature: a telemetry gauge cluster reads out the learner's progress
+          like a robot's dashboard — streak, level, and XP-to-next as spring-fill dials. */}
+      <section className="aq-glass aq-sheen aq-rise aq-rise-1 overflow-hidden rounded-[30px] p-6 sm:p-9">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-3xl"
           style={{ background: "radial-gradient(circle,rgba(37,96,230,0.35),transparent 70%)" }}
         />
-        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-          {/* Greeting */}
-          <div className="min-w-0 flex-1">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-72 rounded-full opacity-25 blur-3xl"
+          style={{ background: "radial-gradient(circle,rgba(139,127,255,0.32),transparent 70%)" }}
+        />
+        <div className="relative grid gap-8 lg:grid-cols-[1.05fr_1.2fr] lg:items-center">
+          {/* Greeting + actions */}
+          <div className="min-w-0">
             <span className="aq-eyebrow aq-rise aq-rise-2">
-              <Sparkles aria-hidden className="h-3.5 w-3.5 aq-badge-bob" /> Welcome back
+              <Sparkles aria-hidden className="h-3.5 w-3.5 aq-badge-bob" /> Your telemetry
             </span>
             <div className="aq-rise aq-rise-3 mt-4 flex items-center gap-4">
               <Avatar
@@ -313,6 +323,23 @@ export default async function DashboardPage() {
                     : "Fresh start — pick a department and begin your build season."}
                 </p>
               </div>
+            </div>
+
+            {/* Level chip + XP-to-next line */}
+            <div className="aq-rise aq-rise-4 mt-6 flex flex-wrap items-center gap-2.5 text-sm">
+              <span className="aq-chip font-semibold">
+                <Zap aria-hidden className="h-3.5 w-3.5 text-primary" />
+                Level {level}
+              </span>
+              <span className="aq-chip font-semibold">
+                <AnimatedCounter value={xp} /> XP total
+              </span>
+              {streak > 0 && (
+                <span className="aq-chip font-semibold">
+                  <Flame aria-hidden className="h-3.5 w-3.5" style={{ color: "#e0721f" }} />
+                  {streak}-day streak
+                </span>
+              )}
             </div>
 
             <div className="aq-rise aq-rise-4 mt-6 flex flex-wrap items-center gap-3">
@@ -343,36 +370,35 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Level / XP glass panel */}
-          <div className="aq-rise aq-rise-5 aq-float aq-card w-full shrink-0 rounded-[22px] p-6 lg:w-80">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-                  Level {level}
-                </p>
-                <p className="aq-display mt-1 text-4xl font-bold tabular-nums text-foreground">
-                  <AnimatedCounter value={xp} />
-                  <span className="ml-1.5 font-sans text-base font-semibold text-muted-foreground">
-                    XP
-                  </span>
-                </p>
-              </div>
-              <span
-                className="aq-badge aq-badge-bob flex h-14 w-14 items-center justify-center rounded-2xl"
-                style={{ "--a": "#2560e6" } as CSSProperties}
-              >
-                <Zap aria-hidden className="h-7 w-7" />
+          {/* Instrument cluster — three spring-fill gauges */}
+          <div className="aq-rise aq-rise-5 aq-float aq-card rounded-[24px] p-5 sm:p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="aq-display text-[15px] font-bold text-foreground">
+                Progress at a glance
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#0a7a43]">
+                <span className="aq-pulse h-2 w-2 rounded-full bg-[#12b565]" />
+                Live
               </span>
             </div>
+            <GaugeCluster
+              level={level}
+              levelPct={levelPct}
+              xpToNext={xpToNext}
+              xp={xp}
+              xpIntoLevel={xpIntoLevel}
+              streak={streak}
+              xpMultiplier={xpMultiplier}
+              nextLevel={nextLevel}
+            />
             <div className="mt-5">
               <div className="mb-1.5 flex items-center justify-between text-xs font-medium text-foreground/70">
-                <span>Progress to level {level + 1}</span>
-                <span className="font-semibold text-foreground">{levelPct}%</span>
+                <span>Level {level} → {nextLevel}</span>
+                <span className="font-semibold text-foreground">
+                  {xpToNext} XP to go
+                </span>
               </div>
               <Progress value={levelPct} className="h-2.5 bg-white/55" barClassName="aq-bar-anim" style={xpBar} />
-              <p className="mt-2 text-xs text-muted-foreground">
-                {xpToNext} XP to go
-              </p>
             </div>
           </div>
         </div>
@@ -412,24 +438,27 @@ export default async function DashboardPage() {
         </Reveal>
       )}
 
-      {/* ============================ STAT CARDS ============================ */}
+      {/* ============================ MISSION READOUT — STAT CARDS ============================ */}
       <Reveal className="mt-10" delay={0.04}>
-        <span className="aq-eyebrow">Your stats</span>
+        <span className="aq-eyebrow">Mission readout</span>
         <h2 className="aq-display mt-2 text-2xl font-bold text-foreground">
-          Progress at a glance
+          Every gauge on the board
         </h2>
       </Reveal>
       <Stagger className="mt-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => (
           <StaggerItem key={s.label}>
-            <div className="aq-card aq-card-hover h-full rounded-[20px] p-4">
+            <div className="aq-card aq-card-hover group h-full rounded-[20px] p-4">
               <span
-                className="aq-badge aq-badge-bob mb-3 flex h-10 w-10 items-center justify-center rounded-2xl"
+                className="aq-badge aq-badge-bob mb-3 flex h-10 w-10 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110"
                 style={{ "--a": s.accent } as CSSProperties}
               >
                 <s.icon aria-hidden className="h-5 w-5" />
               </span>
-              <div className="aq-display text-3xl font-bold tabular-nums text-foreground">
+              <div
+                className="aq-display text-3xl font-bold tabular-nums"
+                style={{ color: inkFor(s.accent) }}
+              >
                 <AnimatedCounter value={s.value} />
               </div>
               <div className="mt-1 text-[13px] font-medium leading-snug text-muted-foreground">

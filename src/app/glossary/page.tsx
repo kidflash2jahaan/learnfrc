@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { BookA, Search, Sparkles, Tags } from "lucide-react";
 import { GLOSSARY, GLOSSARY_CATEGORIES } from "@/lib/glossary-data";
-import { GlossaryBrowser } from "@/components/glossary/glossary-browser";
+import { AlphabetSearch } from "./_alphabet-search";
 import { Reveal } from "@/components/motion/reveal";
 import { AnimatedCounter } from "@/components/animated-counter";
 
@@ -20,91 +20,83 @@ const HEADING_GRADIENT: CSSProperties = {
 };
 
 export default function GlossaryPage() {
+  // Count how many distinct letters actually open a term — a fun stat for the
+  // alphabet signature.
+  const lettersCovered = new Set(
+    GLOSSARY.map((t) => (t.term[0] ?? "").toUpperCase()).filter(Boolean)
+  ).size;
+
   const stats = [
-    { icon: BookA, label: "terms indexed", value: GLOSSARY.length },
-    { icon: Tags, label: "categories", value: GLOSSARY_CATEGORIES.length },
+    { icon: BookA, label: "terms indexed", value: GLOSSARY.length, suffix: "" },
+    { icon: Tags, label: "categories", value: GLOSSARY_CATEGORIES.length, suffix: "" },
+    { icon: Sparkles, label: "letters covered", value: lettersCovered, suffix: "/26" },
   ];
 
   return (
-    <div className="relative mx-auto max-w-6xl px-4 pt-28 pb-20 sm:px-6 lg:px-8">
-      {/* ambient glows */}
+    <div className="relative isolate overflow-hidden">
+      {/* ambient glows the glass refracts */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div
-          className="absolute -top-24 left-1/2 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full blur-3xl"
+        <span
+          className="aq-float absolute -top-24 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full blur-3xl"
           style={{ background: "radial-gradient(circle,rgba(37,96,230,0.22),transparent 70%)" }}
         />
-        <div
-          className="absolute top-24 -right-16 h-80 w-80 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle,rgba(26,169,214,0.20),transparent 70%)" }}
+        <span
+          className="aq-float absolute top-24 -right-16 h-80 w-80 rounded-full blur-3xl"
+          style={{ background: "radial-gradient(circle,rgba(26,169,214,0.20),transparent 70%)", animationDelay: "1.6s" }}
         />
-        <div
-          className="absolute top-40 -left-20 h-72 w-72 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle,rgba(124,92,246,0.16),transparent 70%)" }}
+        <span
+          className="aq-float absolute top-52 -left-20 h-72 w-72 rounded-full blur-3xl"
+          style={{ background: "radial-gradient(circle,rgba(124,92,246,0.16),transparent 70%)", animationDelay: "3s" }}
         />
       </div>
 
-      {/* hero */}
-      <Reveal className="mx-auto max-w-3xl text-center">
-        <p className="aq-eyebrow aq-rise aq-rise-1 justify-center">
-          <Sparkles className="h-3.5 w-3.5" aria-hidden />
-          Every acronym, decoded
-        </p>
+      <div className="mx-auto max-w-5xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
+        {/* ============================ HERO ============================ */}
+        <header className="mx-auto max-w-3xl text-center">
+          <p className="aq-eyebrow aq-rise aq-rise-1 justify-center">
+            <Search className="h-3.5 w-3.5" aria-hidden />
+            Every acronym, decoded
+          </p>
 
-        <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          The FRC{" "}
-          <span className="aq-grad-anim" style={HEADING_GRADIENT}>glossary</span>
-        </h1>
+          <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-balance text-4xl font-extrabold leading-[1.03] tracking-tight sm:text-5xl lg:text-6xl">
+            The FRC{" "}
+            <span className="aq-grad-anim" style={HEADING_GRADIENT}>
+              A&nbsp;to&nbsp;Z
+            </span>
+          </h1>
 
-        <p className="aq-rise aq-rise-3 mx-auto mt-5 max-w-2xl text-pretty text-lg leading-relaxed text-foreground/70">
-          Every acronym and bit of jargon you&apos;ll hear in the pit, decoded.
-          Search a term, filter by department, and learn the language of build
-          season.
-        </p>
+          <p className="aq-rise aq-rise-3 mx-auto mt-5 max-w-2xl text-pretty text-lg leading-relaxed text-foreground/70">
+            Every acronym and bit of jargon you&apos;ll hear in the pit, decoded.
+            Jump straight to a letter, search a term, or filter by department —
+            and learn the language of build season.
+          </p>
 
-        {/* stat badges */}
-        <div className="aq-rise aq-rise-4 mt-7 flex flex-wrap items-center justify-center gap-3">
-          {stats.map(({ icon: StatIcon, label, value }, i) => (
-            <span
-              key={label}
-              className="aq-card aq-card-hover aq-reveal inline-flex items-center gap-2 rounded-2xl px-4 py-2"
-              style={{ animationDelay: `${0.12 + i * 0.09}s` } as CSSProperties}
-            >
-              <span className="aq-icon aq-badge-bob flex h-7 w-7 items-center justify-center rounded-xl">
-                <StatIcon className="h-3.5 w-3.5 text-primary" aria-hidden />
+          {/* stat badges */}
+          <div className="aq-rise aq-rise-4 mt-8 flex flex-wrap items-center justify-center gap-3">
+            {stats.map(({ icon: StatIcon, label, value, suffix }) => (
+              <span
+                key={label}
+                className="aq-card aq-card-hover inline-flex items-center gap-2 rounded-2xl px-4 py-2.5"
+              >
+                <span className="aq-icon aq-badge-bob flex h-8 w-8 items-center justify-center rounded-xl">
+                  <StatIcon className="h-4 w-4 text-primary" aria-hidden />
+                </span>
+                <AnimatedCounter
+                  value={value}
+                  suffix={suffix}
+                  className="text-base font-bold text-foreground"
+                />
+                <span className="text-sm text-muted-foreground">{label}</span>
               </span>
-              <AnimatedCounter
-                value={value}
-                className="text-sm font-semibold text-foreground"
-              />
-              <span className="text-sm text-muted-foreground">{label}</span>
-            </span>
-          ))}
-        </div>
-      </Reveal>
-
-      {/* search + browser panel */}
-      <Reveal className="mt-14" delay={0.05}>
-        <div className="aq-glass aq-sheen rounded-3xl p-5 sm:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <span className="aq-badge aq-badge-bob flex h-11 w-11 items-center justify-center" style={{ "--a": "var(--primary)" } as CSSProperties}>
-              <Search className="h-5 w-5" aria-hidden />
-            </span>
-            <div>
-              <h2 className="aq-display text-xl font-bold leading-tight">
-                Search the language of FRC
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Type a term, an acronym, or a phrase — then narrow it down by
-                category.
-              </p>
-            </div>
+            ))}
           </div>
+        </header>
 
-          <div className="aq-divider mb-6" />
-
-          <GlossaryBrowser terms={GLOSSARY} categories={GLOSSARY_CATEGORIES} />
-        </div>
-      </Reveal>
+        {/* ================= SIGNATURE + SEARCH ================= */}
+        <Reveal className="mt-14 aq-rise aq-rise-5" delay={0.05}>
+          <AlphabetSearch terms={GLOSSARY} categories={GLOSSARY_CATEGORIES} />
+        </Reveal>
+      </div>
     </div>
   );
 }

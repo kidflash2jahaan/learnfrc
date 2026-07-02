@@ -10,17 +10,20 @@ import {
   BookOpenCheck,
   Zap,
   Lock,
+  ShieldCheck,
+  Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCompletedLessonIds } from "@/lib/queries";
 import type { Achievement } from "@/lib/types";
 import { Avatar } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { Icon } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
+import { TiltIdCard } from "./_id-card";
 
 export const metadata = {
   title: "Your profile · LearnFRC",
@@ -44,15 +47,10 @@ function formatJoined(iso: string | null): string {
 }
 
 const GRADIENT_TEXT: CSSProperties = {
-  background: "linear-gradient(120deg,#2560e6,#1183a8)",
+  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
-};
-
-// blue → cyan fill for the level progress bar
-const XP_BAR: CSSProperties = {
-  background: "linear-gradient(90deg, var(--color-primary), var(--color-accent))",
 };
 
 export default async function ProfilePage() {
@@ -99,6 +97,10 @@ export default async function ProfilePage() {
   const roleLabel = ROLE_LABEL[profile?.role ?? "student"] ?? "Member";
   const handle = profile?.username || "you";
 
+  // Level ring geometry (r=34 → circumference ≈ 213.6).
+  const RING_C = 213.6;
+  const ringOffset = RING_C - (intoLevel / 100) * RING_C;
+
   const stats: {
     icon: typeof Zap;
     label: string;
@@ -123,100 +125,282 @@ export default async function ProfilePage() {
 
   return (
     <main className="relative overflow-hidden">
-      {/* Ambient soft glows */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-[8%] top-[-6%] h-[420px] w-[520px] rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute right-[4%] top-[18%] h-[360px] w-[420px] rounded-full bg-accent/15 blur-3xl" />
-        <div className="absolute bottom-[6%] left-[30%] h-[360px] w-[460px] rounded-full bg-[#8b7fff]/12 blur-3xl" />
+      {/* Ambient drifting glows */}
+      <div aria-hidden className="aq-glow -z-10">
+        <span
+          className="h-[520px] w-[560px] opacity-60"
+          style={{
+            left: "-140px",
+            top: "-180px",
+            background: "radial-gradient(circle, #8bbcff, transparent 70%)",
+          }}
+        />
+        <span
+          className="h-[460px] w-[480px] opacity-55"
+          style={{
+            right: "-120px",
+            top: "40px",
+            background: "radial-gradient(circle, #6ff0ea, transparent 70%)",
+          }}
+        />
+        <span
+          className="h-[460px] w-[520px] opacity-45"
+          style={{
+            left: "34%",
+            top: "560px",
+            background: "radial-gradient(circle, #c8b6ff, transparent 70%)",
+          }}
+        />
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
-        {/* ===================== HERO ===================== */}
-        <Reveal>
-          <div className="aq-glass aq-sheen relative overflow-hidden rounded-[28px]">
-            {/* Banner wash */}
+      <div className="mx-auto max-w-6xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
+        {/* Page eyebrow */}
+        <span className="aq-eyebrow aq-rise aq-rise-1">
+          <Sparkles aria-hidden className="h-3.5 w-3.5" />
+          Your pit crew profile
+        </span>
+
+        {/* ===================== HERO: ID CARD + LIGHT SETTINGS ===================== */}
+        <div className="mt-4 grid items-start gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+          {/* ---- SIGNATURE: friendly interactive pit-crew ID card ---- */}
+          <TiltIdCard
+            className="aq-rise aq-rise-2 aq-glass relative overflow-hidden rounded-[28px] p-6 sm:p-8"
+          >
+            {/* Banner wash across the card top */}
             <div
               aria-hidden
-              className="absolute inset-x-0 top-0 h-32"
+              className="absolute inset-x-0 top-0 h-28"
               style={{
                 background:
                   "linear-gradient(120deg, color-mix(in srgb, var(--color-primary) 26%, transparent), color-mix(in srgb, var(--color-accent) 22%, transparent))",
               }}
             />
-            <div className="relative p-6 pt-16 sm:p-8 sm:pt-20">
-              <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-end">
-                  <div className="aq-rise aq-rise-1 aq-float">
-                    <Avatar
-                      name={displayName}
-                      src={profile?.avatar_url}
-                      seed={profile?.username || user.email || undefined}
-                      className="h-24 w-24 ring-4 ring-white/90 shadow-[0_18px_40px_rgba(40,80,150,0.28)] sm:h-28 sm:w-28"
-                    />
-                  </div>
-                  <div className="aq-rise aq-rise-2 pb-1">
-                    <span className="aq-eyebrow">Your pit crew profile</span>
-                    <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                      <span className="aq-grad-anim" style={GRADIENT_TEXT}>
-                        {displayName}
-                      </span>
-                    </h1>
-                    <p className="mt-1 text-sm tracking-tight text-muted-foreground">
-                      @{handle}
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="aq-chip font-medium">
-                        <span
-                          aria-hidden
-                          className="aq-pulse h-1.5 w-1.5 rounded-full bg-primary"
-                        />
-                        {roleLabel}
-                      </span>
-                      {profile?.team_number != null && (
-                        <span className="aq-chip">
-                          <Users2 aria-hidden className="h-3.5 w-3.5 text-accent" />
-                          Team {profile.team_number}
-                        </span>
-                      )}
-                      <span className="aq-chip">
-                        <CalendarDays aria-hidden className="h-3.5 w-3.5 text-muted-foreground" />
-                        Joined {formatJoined(profile?.created_at ?? null)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            {/* Punch-hole + lanyard cue — reads as a real ID card */}
+            <div
+              aria-hidden
+              className="absolute left-1/2 top-3 h-1.5 w-16 -translate-x-1/2 rounded-full bg-white/70 shadow-[inset_0_1px_2px_rgba(40,80,150,0.35)]"
+            />
 
-                <div className="aq-rise aq-rise-3 flex flex-wrap gap-2.5">
-                  <Link
-                    href="/settings"
-                    className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
+            <div className="relative flex flex-col gap-5 pt-10 sm:flex-row sm:items-end">
+              <div className="aq-float shrink-0">
+                <Avatar
+                  name={displayName}
+                  src={profile?.avatar_url}
+                  seed={profile?.username || user.email || undefined}
+                  className="h-28 w-28 ring-4 ring-white/90 shadow-[0_18px_40px_rgba(40,80,150,0.28)]"
+                />
+              </div>
+              <div className="min-w-0 pb-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="aq-badge inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-bold uppercase tracking-wider"
+                    style={{ "--a": "#2560e6" } as CSSProperties}
                   >
-                    <Pencil className="h-4 w-4" />
-                    Edit profile
-                  </Link>
-                  {profile?.username && (
-                    <Link
-                      href={`/u/${profile.username}`}
-                      className="aq-ghost inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
-                    >
-                      View public profile
-                      <ExternalLink className="h-4 w-4" />
-                    </Link>
+                    <ShieldCheck aria-hidden className="h-3.5 w-3.5" />
+                    Member
+                  </span>
+                  <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                    LearnFRC ID
+                  </span>
+                </div>
+                <h1 className="mt-2 aq-display text-3xl font-bold tracking-tight sm:text-4xl">
+                  <span className="aq-grad-anim" style={GRADIENT_TEXT}>
+                    {displayName}
+                  </span>
+                </h1>
+                <p className="mt-1 text-sm tracking-tight text-muted-foreground">
+                  @{handle}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="aq-chip font-medium">
+                    <span
+                      aria-hidden
+                      className="aq-pulse h-1.5 w-1.5 rounded-full bg-primary"
+                    />
+                    {roleLabel}
+                  </span>
+                  {profile?.team_number != null && (
+                    <span className="aq-chip">
+                      <Users2 aria-hidden className="h-3.5 w-3.5 text-accent" />
+                      Team {profile.team_number}
+                    </span>
                   )}
+                  <span className="aq-chip">
+                    <CalendarDays
+                      aria-hidden
+                      className="h-3.5 w-3.5 text-muted-foreground"
+                    />
+                    Joined {formatJoined(profile?.created_at ?? null)}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              {profile?.bio && (
-                <p className="aq-rise aq-rise-4 mt-6 max-w-2xl text-pretty text-base leading-relaxed text-foreground/70">
-                  {profile.bio}
-                </p>
-              )}
+            {profile?.bio && (
+              <p className="relative mt-6 max-w-2xl text-pretty text-base leading-relaxed text-foreground/70">
+                {profile.bio}
+              </p>
+            )}
+
+            {/* Card footer strip — level + xp inline, like a credential */}
+            <div className="relative mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/70 pt-4 text-sm">
+              <span className="inline-flex items-center gap-1.5 font-semibold text-foreground">
+                <Trophy aria-hidden className="h-4 w-4 text-accent" />
+                Level {level}
+              </span>
+              <span className="inline-flex items-center gap-1.5 font-semibold text-foreground tabular-nums">
+                <Zap aria-hidden className="h-4 w-4 text-primary" />
+                <AnimatedCounter value={xp} suffix=" XP" />
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground tabular-nums">
+                <BookOpenCheck aria-hidden className="h-4 w-4" />
+                <AnimatedCounter value={lessonsCompleted} /> lessons done
+              </span>
+            </div>
+          </TiltIdCard>
+
+          {/* ---- SETTINGS THAT FEEL LIGHT: level ring + quick actions ---- */}
+          <div className="aq-rise aq-rise-3 flex flex-col gap-6">
+            {/* Level progress ring */}
+            <div className="aq-card aq-card-hover overflow-hidden p-6">
+              <div className="aq-eyebrow">Season progress</div>
+              <div className="mt-4 flex items-center gap-5">
+                <div className="relative shrink-0">
+                  <svg width="96" height="96" viewBox="0 0 82 82" aria-hidden>
+                    <circle
+                      cx="41"
+                      cy="41"
+                      r="34"
+                      fill="none"
+                      stroke="rgba(120,145,190,.24)"
+                      strokeWidth="9"
+                    />
+                    <circle
+                      className="aq-ring-anim"
+                      cx="41"
+                      cy="41"
+                      r="34"
+                      fill="none"
+                      stroke="url(#aqlvl)"
+                      strokeWidth="9"
+                      strokeLinecap="round"
+                      strokeDasharray={RING_C}
+                      strokeDashoffset={ringOffset}
+                      transform="rotate(-90 41 41)"
+                    />
+                    <defs>
+                      <linearGradient id="aqlvl" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stopColor="#2560e6" />
+                        <stop offset="1" stopColor="#1aa9d6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <span className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="aq-display text-xl font-extrabold leading-none text-foreground">
+                      {level}
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      Level
+                    </span>
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <div
+                    className="aq-display text-2xl font-bold text-foreground tabular-nums"
+                    aria-label={`${xp} total XP`}
+                  >
+                    <AnimatedCounter value={xp} suffix=" XP" />
+                  </div>
+                  <p className="mt-1 text-sm leading-snug text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      {toNext} XP
+                    </span>{" "}
+                    to Level {level + 1}
+                  </p>
+                  <div
+                    className="mt-2 h-2 overflow-hidden rounded-full bg-[rgba(120,145,190,.24)]"
+                    role="progressbar"
+                    aria-valuenow={intoLevel}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${intoLevel} of 100 XP toward level ${level + 1}`}
+                  >
+                    <span
+                      className="aq-bar-anim block h-full rounded-full"
+                      style={{
+                        width: `${intoLevel}%`,
+                        background:
+                          "linear-gradient(90deg, var(--color-primary), var(--color-accent))",
+                      }}
+                    />
+                  </div>
+                  <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+                    {intoLevel} / 100 this level
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick actions — settings that feel light */}
+            <div className="aq-card p-5">
+              <div className="aq-eyebrow">Quick actions</div>
+              <div className="mt-3 flex flex-col gap-2.5">
+                <Link
+                  href="/settings"
+                  className="group flex items-center gap-3 rounded-2xl border border-white/70 bg-white/60 p-3 transition-colors hover:bg-white/90"
+                >
+                  <span className="aq-icon aq-badge-bob flex h-10 w-10 shrink-0">
+                    <Pencil aria-hidden className="h-[18px] w-[18px]" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold leading-tight text-foreground">
+                      Edit profile
+                    </span>
+                    <span className="block text-sm text-muted-foreground">
+                      Name, team, bio &amp; more
+                    </span>
+                  </span>
+                  <ArrowUpRight
+                    aria-hidden
+                    className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  />
+                </Link>
+
+                {profile?.username && (
+                  <Link
+                    href={`/u/${profile.username}`}
+                    className="group flex items-center gap-3 rounded-2xl border border-white/70 bg-white/60 p-3 transition-colors hover:bg-white/90"
+                  >
+                    <span
+                      className="aq-badge aq-badge-bob flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                      style={{ "--a": "#1aa9d6" } as CSSProperties}
+                    >
+                      <ExternalLink aria-hidden className="h-[18px] w-[18px]" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold leading-tight text-foreground">
+                        View public profile
+                      </span>
+                      <span className="block text-sm text-muted-foreground">
+                        How your team sees you
+                      </span>
+                    </span>
+                    <ArrowUpRight
+                      aria-hidden
+                      className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
-        </Reveal>
+        </div>
 
-        {/* ===================== STAT TILES ===================== */}
-        <Stagger className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4" stagger={0.07}>
+        {/* ===================== STAT SHELF ===================== */}
+        <Stagger
+          className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4"
+          stagger={0.07}
+        >
           {stats.map((s) => (
             <StaggerItem key={s.label}>
               <div
@@ -227,7 +411,7 @@ export default async function ProfilePage() {
                   className="aq-badge aq-badge-bob inline-flex h-10 w-10 items-center justify-center rounded-xl"
                   style={{ "--a": s.color } as CSSProperties}
                 >
-                  <s.icon className="h-5 w-5" />
+                  <s.icon aria-hidden className="h-5 w-5" />
                 </span>
                 <div className="mt-3 aq-display text-3xl font-bold tracking-tight tabular-nums text-foreground">
                   <AnimatedCounter value={s.value} />
@@ -240,49 +424,12 @@ export default async function ProfilePage() {
           ))}
         </Stagger>
 
-        {/* ===================== XP / LEVEL ===================== */}
-        <Reveal delay={0.04} className="mt-6">
-          <div className="aq-card aq-card-hover overflow-hidden p-6 sm:p-7">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="aq-icon aq-badge-bob h-12 w-12">
-                  <Zap className="h-5 w-5" />
-                </span>
-                <div>
-                  <div className="aq-eyebrow">Season progress</div>
-                  <div className="mt-1 aq-display text-2xl font-bold text-foreground">
-                    <AnimatedCounter value={xp} suffix=" XP" />
-                    <span className="ml-2 text-base font-semibold text-muted-foreground">
-                      · Level {level}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-semibold text-foreground">
-                  {toNext} XP to Level {level + 1}
-                </div>
-                <div className="text-xs tabular-nums text-muted-foreground">
-                  {intoLevel} / 100 this level
-                </div>
-              </div>
-            </div>
-            <Progress
-              value={intoLevel}
-              className="mt-5 h-2.5"
-              barClassName="aq-bar-anim"
-              style={XP_BAR}
-              aria-label={`${intoLevel} of 100 XP toward level ${level + 1}`}
-            />
-          </div>
-        </Reveal>
-
-        {/* ===================== ACHIEVEMENTS ===================== */}
-        <Reveal delay={0.06} className="mt-12">
+        {/* ===================== ACHIEVEMENTS — TROPHY SHELF ===================== */}
+        <Reveal delay={0.06} className="mt-14">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <span className="aq-eyebrow">Every badge, earned in the pit</span>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight">
+              <h2 className="mt-2 aq-display text-2xl font-bold tracking-tight">
                 Achievements
               </h2>
             </div>
@@ -300,7 +447,7 @@ export default async function ProfilePage() {
           <Reveal delay={0.08} className="mt-5">
             <div className="aq-card p-10 text-center">
               <span className="aq-icon mx-auto mb-3 flex h-12 w-12">
-                <Trophy className="h-6 w-6" />
+                <Trophy aria-hidden className="h-6 w-6" />
               </span>
               <p className="text-base text-foreground/70">
                 No achievements available yet — check back after the next build
@@ -338,7 +485,7 @@ export default async function ProfilePage() {
                       {a.earned ? (
                         <Icon name={a.icon} className="h-5 w-5" />
                       ) : (
-                        <Lock className="h-4 w-4" />
+                        <Lock aria-hidden className="h-4 w-4" />
                       )}
                     </span>
                     <div className="min-w-0">

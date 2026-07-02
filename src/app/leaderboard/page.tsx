@@ -1,6 +1,14 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { Trophy, ArrowRight, Users, Zap, Sparkles } from "lucide-react";
+import {
+  Trophy,
+  ArrowRight,
+  Users,
+  Zap,
+  Sparkles,
+  Flame,
+  CalendarClock,
+} from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { type PodiumEntry } from "@/components/leaderboard/podium";
@@ -19,6 +27,10 @@ import {
 } from "@/lib/queries";
 import { getSession } from "@/lib/auth";
 import type { Profile } from "@/lib/types";
+import {
+  ChampionSpotlight,
+  type ChampionData,
+} from "./_champion-spotlight";
 
 export const metadata = {
   title: "Leaderboard · LearnFRC",
@@ -97,138 +109,218 @@ export default async function LeaderboardPage() {
   // Site-wide totals (all learners), so the header matches the admin panel.
   const totalXp = xpTotals.totalXp;
 
-  return (
-    <div className="relative overflow-hidden">
-      {/* ambient glows */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[560px] w-[820px] -translate-x-1/2 rounded-full opacity-70 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(closest-side, color-mix(in srgb, var(--primary) 22%, transparent), transparent 72%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-10 right-[8%] -z-10 h-72 w-72 rounded-full opacity-60 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(closest-side, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-24 left-[6%] -z-10 h-64 w-64 rounded-full opacity-50 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(closest-side, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%)",
-        }}
-      />
+  const hasBoard = allTimeEntries.length > 0;
+  const champTop = allTimeEntries[0];
+  const champion: ChampionData | null = champTop
+    ? {
+        id: champTop.id,
+        name: champTop.name,
+        username: champTop.username,
+        avatarUrl: champTop.avatarUrl,
+        teamNumber: champTop.teamNumber,
+        role: champTop.role,
+        xp: champTop.xp,
+        level: champTop.level,
+        lessons: champTop.lessons,
+        isYou: champTop.isYou,
+      }
+    : null;
 
-      <div className="mx-auto max-w-5xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
-        {/* Hero */}
-        <section className="text-center">
-          <span className="aq-eyebrow aq-rise aq-rise-1 justify-center">
-            <Trophy className="h-3.5 w-3.5 aq-badge-bob" aria-hidden />
-            Climb the ranks
+  return (
+    <div
+      data-theme="arena"
+      className="aq-root relative isolate overflow-hidden text-foreground"
+    >
+      {/* ambient light the glass refracts */}
+      <div className="aq-glow" aria-hidden>
+        <span
+          className="h-[640px] w-[640px] opacity-70"
+          style={{
+            left: "-160px",
+            top: "-200px",
+            background: "radial-gradient(circle, #8bbcff, transparent 70%)",
+          }}
+        />
+        <span
+          className="h-[560px] w-[560px] opacity-55"
+          style={{
+            right: "-160px",
+            top: "-120px",
+            background: "radial-gradient(circle, #ffe08a, transparent 70%)",
+          }}
+        />
+        <span
+          className="h-[520px] w-[520px] opacity-50"
+          style={{
+            left: "34%",
+            top: "440px",
+            background: "radial-gradient(circle, #6ff0ea, transparent 70%)",
+          }}
+        />
+      </div>
+
+      {/* ============================ HERO ============================ */}
+      <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-12 pt-24 sm:px-6 sm:pt-28 lg:grid-cols-2 lg:gap-10 lg:pt-32">
+        <div>
+          <span className="aq-chip aq-eyebrow aq-rise aq-rise-1 inline-flex flex-wrap items-center gap-2">
+            <Trophy className="h-3.5 w-3.5" aria-hidden="true" /> Climb the ranks
           </span>
-          <h1 className="aq-rise aq-rise-2 mt-4 text-balance text-5xl font-bold tracking-tight sm:text-6xl">
+          <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-balance text-4xl font-extrabold leading-[1.03] sm:text-5xl lg:text-[3.4rem]">
             The{" "}
             <span className="aq-grad-anim" style={HEADLINE_GRADIENT}>
               podium
-            </span>
+            </span>{" "}
+            is earned, one lesson at a time.
           </h1>
-          <p className="aq-rise aq-rise-3 mx-auto mt-4 max-w-xl text-pretty text-base leading-relaxed text-foreground/70 sm:text-lg">
-            Every lesson you finish earns XP. Win the weekly sprint, chase the
+          <p className="aq-rise aq-rise-3 mt-4 max-w-xl text-pretty text-lg leading-relaxed text-foreground/70">
+            Every guide you finish earns XP. Win the weekly sprint, chase the
             all-time greats, and put your team on the map — the same gracious
             grind that wins build season.
           </p>
-        </section>
+          <div className="aq-rise aq-rise-4 mt-7 flex flex-wrap items-center gap-3">
+            <Link
+              href="/guides"
+              className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
+            >
+              Start climbing{" "}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+            {!user && (
+              <Link
+                href="/signup"
+                className="aq-ghost inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
+              >
+                Create free account
+              </Link>
+            )}
+          </div>
 
-        {allTimeEntries.length === 0 ? (
-          /* Empty state — no learners at all yet */
-          <Reveal className="mt-16">
-            <div className="aq-glass aq-sheen aq-float mx-auto max-w-md rounded-3xl p-10 text-center">
+          {/* season stat strip — mono data labels */}
+          {hasBoard && (
+            <div className="aq-rise aq-rise-5 mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <StatTile
+                icon={<Users className="h-4 w-4 text-foreground" aria-hidden />}
+                accent="#2560e6"
+                value={<AnimatedCounter value={xpTotals.learners} />}
+                label={
+                  xpTotals.learners === 1 ? "learner ranked" : "learners ranked"
+                }
+              />
+              <StatTile
+                icon={<Zap className="h-4 w-4 text-foreground" aria-hidden />}
+                accent="#1aa9d6"
+                value={<AnimatedCounter value={totalXp} />}
+                label="XP earned"
+              />
               <div
-                className="aq-badge aq-badge-bob mx-auto mb-5 flex h-16 w-16 items-center justify-center"
+                className="aq-tile col-span-2 flex items-center justify-center gap-2 rounded-2xl px-4 py-3 sm:col-span-1"
+                style={{ "--a": "var(--accent)" } as CSSProperties}
+              >
+                <span
+                  className="aq-pulse h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]"
+                  aria-hidden
+                />
+                <CalendarClock
+                  className="h-4 w-4 text-foreground/80"
+                  aria-hidden
+                />
+                <span className="text-sm font-semibold text-foreground">
+                  Weekly race resets Monday
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* SIGNATURE: champion spotlight (or invite to be first) */}
+        {champion ? (
+          <ChampionSpotlight champion={champion} />
+        ) : (
+          <div className="aq-glass aq-sheen aq-float aq-rise aq-rise-3 rounded-[28px] p-10 text-center lg:justify-self-end">
+            <div
+              className="aq-badge aq-badge-bob mx-auto mb-5 flex h-16 w-16 items-center justify-center"
+              style={{ "--a": "#ffd23d" } as CSSProperties}
+            >
+              <Trophy className="h-8 w-8 text-foreground" aria-hidden />
+            </div>
+            <h2 className="aq-display text-2xl font-bold tracking-tight">
+              The podium is empty
+            </h2>
+            <p className="mt-2 text-base leading-relaxed text-foreground/70">
+              No learners on the board yet. Be the first — start learning, earn
+              XP, and claim the crown.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <Link
+                href="/guides"
+                className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
+              >
+                Start learning
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {hasBoard && (
+        <div className="mx-auto max-w-5xl px-4 pb-24 sm:px-6 lg:px-8">
+          {user && profile?.username && (
+            <Reveal>
+              <InviteCard username={profile.username} count={referralCount} />
+            </Reveal>
+          )}
+
+          {/* Board section header */}
+          <Reveal className="mt-14 text-center">
+            <span className="aq-eyebrow inline-flex items-center justify-center gap-2">
+              <Flame className="h-3.5 w-3.5" aria-hidden />
+              The full board
+            </span>
+            <h2 className="aq-display mt-2 text-3xl font-bold text-foreground">
+              Every rank, every week
+            </h2>
+            <p className="mx-auto mt-1 max-w-lg text-base text-foreground/70">
+              Weekly sprints, the all-time greats, and how your team stacks up —
+              switch the view below.
+            </p>
+          </Reveal>
+
+          <LeaderboardTabs
+            weekly={weeklyEntries}
+            allTime={allTimeEntries}
+            teams={teamRows}
+            userTeam={profile?.team_number ?? null}
+          />
+
+          <Reveal className="mt-14 text-center">
+            <div className="aq-glass aq-sheen mx-auto max-w-2xl rounded-[28px] px-8 py-10">
+              <div
+                className="aq-badge aq-badge-bob mx-auto mb-4 flex h-12 w-12 items-center justify-center"
                 style={{ "--a": "#2560e6" } as CSSProperties}
               >
-                <Trophy className="h-8 w-8 text-foreground" aria-hidden />
+                <Sparkles className="h-6 w-6 text-foreground" aria-hidden />
               </div>
-              <h2 className="text-2xl font-bold tracking-tight">
-                No learners on the board yet
+              <h2 className="aq-display text-balance text-2xl font-bold text-foreground sm:text-3xl">
+                Not on the board yet?
               </h2>
-              <p className="mt-2 text-base leading-relaxed text-foreground/70">
-                Be the first — start learning, earn XP, and claim the top spot.
+              <p className="mx-auto mt-2 max-w-md text-base text-foreground/70">
+                Finish a lesson, earn your first XP, and start the climb toward
+                the crown.
               </p>
               <div className="mt-6 flex justify-center">
-                <Link href="/guides" className="aq-cta">
-                  Start learning
+                <Link
+                  href="/guides"
+                  className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
+                >
+                  Start a lesson
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
             </div>
           </Reveal>
-        ) : (
-          <>
-            {/* Season stat strip */}
-            <Reveal className="mt-10">
-              <div className="aq-card aq-card-hover grid grid-cols-2 gap-3 rounded-3xl p-3 sm:grid-cols-3 sm:gap-4 sm:p-4">
-                <StatTile
-                  icon={<Users className="h-4 w-4 text-foreground" aria-hidden />}
-                  accent="#2560e6"
-                  delay={0}
-                  value={<AnimatedCounter value={xpTotals.learners} />}
-                  label={xpTotals.learners === 1 ? "learner ranked" : "learners ranked"}
-                />
-                <StatTile
-                  icon={<Zap className="h-4 w-4 text-foreground" aria-hidden />}
-                  accent="#1aa9d6"
-                  delay={0.08}
-                  value={<AnimatedCounter value={totalXp} />}
-                  label="XP earned"
-                />
-                <div
-                  className="aq-tile aq-reveal col-span-2 flex items-center justify-center gap-2 rounded-2xl px-4 py-3 sm:col-span-1"
-                  style={{ "--a": "var(--accent)", animationDelay: "0.16s" } as CSSProperties}
-                >
-                  <span className="aq-pulse h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" aria-hidden />
-                  <Sparkles className="h-4 w-4 text-foreground/80" aria-hidden />
-                  <span className="text-sm font-semibold text-foreground">
-                    Weekly race resets Monday
-                  </span>
-                </div>
-              </div>
-            </Reveal>
-
-            {user && profile?.username && (
-              <Reveal>
-                <InviteCard username={profile.username} count={referralCount} />
-              </Reveal>
-            )}
-
-            <LeaderboardTabs
-              weekly={weeklyEntries}
-              allTime={allTimeEntries}
-              teams={teamRows}
-              userTeam={profile?.team_number ?? null}
-            />
-
-            <Reveal className="mt-14 text-center">
-              <p className="text-base text-foreground/70">
-                Not on the board yet?{" "}
-                <Link
-                  href="/guides"
-                  className="font-semibold text-primary underline-offset-4 hover:underline"
-                >
-                  Start a lesson
-                </Link>{" "}
-                and start climbing.
-              </p>
-            </Reveal>
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -238,18 +330,16 @@ function StatTile({
   accent,
   value,
   label,
-  delay = 0,
 }: {
   icon: React.ReactNode;
   accent: string;
   value: React.ReactNode;
   label: string;
-  delay?: number;
 }) {
   return (
     <div
-      className="aq-tile aq-reveal flex items-center gap-3 rounded-2xl px-4 py-3"
-      style={{ "--a": accent, animationDelay: `${delay}s` } as CSSProperties}
+      className="aq-tile flex items-center gap-3 rounded-2xl px-4 py-3"
+      style={{ "--a": accent } as CSSProperties}
     >
       <span className="aq-badge aq-badge-bob flex h-9 w-9 shrink-0 items-center justify-center">
         {icon}
