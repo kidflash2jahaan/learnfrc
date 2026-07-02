@@ -129,7 +129,7 @@ export default async function DepartmentPage({
       <section className="mx-auto max-w-6xl px-4 pb-10 pt-28 sm:px-6 lg:px-8 lg:pt-32">
         <Link
           href="/guides"
-          className="aq-rise aq-rise-1 group/back -my-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="aq-rise aq-rise-1 group/back inline-flex items-center gap-1.5 rounded-full px-1 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover/back:-translate-x-0.5" />
           All departments
@@ -153,7 +153,7 @@ export default async function DepartmentPage({
                 <span
                   className="aq-grad-anim"
                   style={{
-                    background: `linear-gradient(120deg, ${accent}, var(--accent), ${accent})`,
+                    background: `linear-gradient(120deg, ${accent}, #1aa9d6, ${accent})`,
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                     color: "transparent",
@@ -223,7 +223,7 @@ export default async function DepartmentPage({
               </p>
               <div className="mt-4 flex items-center gap-4">
                 <div className="relative h-24 w-24 shrink-0">
-                  <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden="true">
+                  <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
                     <circle
                       cx="50"
                       cy="50"
@@ -268,7 +268,7 @@ export default async function DepartmentPage({
                   className="aq-bar-anim h-full rounded-full"
                   style={{
                     width: `${pct}%`,
-                    background: `linear-gradient(90deg, ${accent}, var(--accent))`,
+                    background: `linear-gradient(90deg, ${accent}, #1aa9d6)`,
                   }}
                 />
               </div>
@@ -343,13 +343,7 @@ export default async function DepartmentPage({
           {tools.length > 0 && (
             <div className="aq-reveal aq-card aq-card-hover p-5" style={{ animationDelay: "120ms" } as CSSProperties}>
               <h3 className="mb-3 flex items-center gap-2 text-base font-bold">
-                <span
-                  className="aq-icon aq-badge-bob flex h-8 w-8 items-center justify-center"
-                  style={{
-                    background: `color-mix(in srgb, ${accent} 14%, transparent)`,
-                    color: ink,
-                  }}
-                >
+                <span className="aq-icon aq-badge-bob flex h-8 w-8 items-center justify-center text-accent">
                   <Wrench className="h-4 w-4" />
                 </span>
                 Tools &amp; tech
@@ -371,13 +365,7 @@ export default async function DepartmentPage({
           {prereqs.length > 0 && (
             <div className="aq-reveal aq-card aq-card-hover p-5" style={{ animationDelay: "180ms" } as CSSProperties}>
               <h3 className="mb-3 flex items-center gap-2 text-base font-bold">
-                <span
-                  className="aq-icon aq-badge-bob flex h-8 w-8 items-center justify-center"
-                  style={{
-                    background: `color-mix(in srgb, ${accent} 14%, transparent)`,
-                    color: ink,
-                  }}
-                >
+                <span className="aq-icon aq-badge-bob flex h-8 w-8 items-center justify-center">
                   <ListChecks className="h-4 w-4" />
                 </span>
                 Before you start
@@ -389,7 +377,7 @@ export default async function DepartmentPage({
                     className="aq-reveal flex gap-2.5"
                     style={{ animationDelay: `${240 + i * 55}ms` } as CSSProperties}
                   >
-                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: ink }} />
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <span>{p}</span>
                   </li>
                 ))}
@@ -407,9 +395,9 @@ export default async function DepartmentPage({
                       href={s.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/src flex min-h-[44px] items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-primary/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="group/src flex items-start gap-2 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-primary/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <ExternalLink className="h-3.5 w-3.5 shrink-0 transition-colors group-hover/src:text-primary" />
+                      <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 transition-colors group-hover/src:text-accent" />
                       <span>{s.title}</span>
                     </a>
                   </li>

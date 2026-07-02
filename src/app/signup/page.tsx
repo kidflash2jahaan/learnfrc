@@ -13,6 +13,13 @@ export const metadata = {
   robots: { index: false, follow: true },
 };
 
+const HEADING_GRADIENT: CSSProperties = {
+  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+};
+
 const VALUE_PROPS = [
   {
     icon: BookOpenCheck,
@@ -33,7 +40,7 @@ const VALUE_PROPS = [
 
 const STATS = [
   { value: 11, suffix: "", label: "Departments" },
-  { value: 390, suffix: "+", label: "Lessons" },
+  { value: 120, suffix: "+", label: "Lessons" },
   { value: 100, suffix: "%", label: "Free, forever" },
 ];
 
@@ -56,7 +63,7 @@ export default async function SignupPage({
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="aq-float absolute left-[-8%] top-[-6%] h-[460px] w-[460px] rounded-full bg-primary/25 blur-3xl" />
         <div className="absolute right-[-10%] top-[24%] h-[420px] w-[420px] rounded-full bg-accent/20 blur-3xl" />
-        <div className="absolute bottom-[-12%] left-[38%] h-[380px] w-[380px] rounded-full bg-accent/15 blur-3xl" />
+        <div className="absolute bottom-[-12%] left-[38%] h-[380px] w-[380px] rounded-full bg-violet-400/15 blur-3xl" />
       </div>
 
       <div className="mx-auto grid min-h-[100svh] w-full max-w-6xl items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
@@ -69,7 +76,7 @@ export default async function SignupPage({
           >
             <span
               className="aq-badge aq-badge-bob grid h-9 w-9 place-items-center"
-              style={{ "--a": "var(--primary)" } as CSSProperties}
+              style={{ "--a": "#2560e6" } as CSSProperties}
             >
               <Bot className="h-5 w-5 text-foreground" />
             </span>
@@ -81,9 +88,11 @@ export default async function SignupPage({
           <p className="aq-eyebrow aq-rise aq-rise-1 mt-8">
             New to the pit? Start here
           </p>
-          <h1 className="aq-display aq-rise aq-rise-2 mt-3 max-w-xl text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+          <h1 className="aq-rise aq-rise-2 mt-3 max-w-xl text-4xl font-bold tracking-tight sm:text-5xl">
             Go from rookie to{" "}
-            <span className="text-gradient-animated">robot-ready</span>
+            <span className="aq-grad-anim" style={HEADING_GRADIENT}>
+              robot-ready
+            </span>
           </h1>
           <p className="aq-rise aq-rise-3 mt-4 max-w-lg text-lg leading-relaxed text-foreground/70">
             Create your free account and learn every seat on the team — from
@@ -145,7 +154,9 @@ export default async function SignupPage({
 
             <h2 className="aq-display mt-5 text-2xl font-bold tracking-tight text-foreground">
               Create your free{" "}
-              <span className="text-gradient-animated">account</span>
+              <span className="aq-grad-anim" style={HEADING_GRADIENT}>
+                account
+              </span>
             </h2>
             <p className="mt-1.5 text-sm text-muted-foreground">
               A few details and you&apos;re into build season.

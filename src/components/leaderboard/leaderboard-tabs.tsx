@@ -39,62 +39,23 @@ export function LeaderboardTabs({
   userTeam?: number | null;
 }) {
   const [tab, setTab] = React.useState<TabKey>("week");
-  const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
-
-  const focusTab = (index: number) => {
-    const next = (index + TABS.length) % TABS.length;
-    setTab(TABS[next].key);
-    tabRefs.current[next]?.focus();
-  };
-
-  const onTabKeyDown = (e: React.KeyboardEvent, index: number) => {
-    switch (e.key) {
-      case "ArrowRight":
-      case "ArrowDown":
-        e.preventDefault();
-        focusTab(index + 1);
-        break;
-      case "ArrowLeft":
-      case "ArrowUp":
-        e.preventDefault();
-        focusTab(index - 1);
-        break;
-      case "Home":
-        e.preventDefault();
-        focusTab(0);
-        break;
-      case "End":
-        e.preventDefault();
-        focusTab(TABS.length - 1);
-        break;
-      default:
-        break;
-    }
-  };
 
   return (
     <div>
-      {/* Tab switcher — Arena Clay clay-glass segmented control */}
+      {/* Tab switcher — terminal segmented control */}
       <div
         role="tablist"
         aria-label="Leaderboard views"
-        className="aq-glass mx-auto mt-10 flex w-full max-w-md items-center gap-1 rounded-2xl p-1.5"
+        className="mx-auto mt-10 flex w-full max-w-md items-center gap-1 rounded-xl border border-border bg-card/60 p-1.5 font-mono backdrop-blur-md"
       >
-        {TABS.map((t, i) => (
+        {TABS.map((t) => (
           <button
             key={t.key}
-            ref={(el) => {
-              tabRefs.current[i] = el;
-            }}
             role="tab"
-            id={`lb-tab-${t.key}`}
             aria-selected={tab === t.key}
-            aria-controls={`lb-panel-${t.key}`}
-            tabIndex={tab === t.key ? 0 : -1}
             onClick={() => setTab(t.key)}
-            onKeyDown={(e) => onTabKeyDown(e, i)}
             className={cn(
-              "relative flex-1 min-h-[44px] cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "relative flex-1 cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
               tab === t.key
                 ? "text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
@@ -103,7 +64,7 @@ export function LeaderboardTabs({
             {tab === t.key && (
               <motion.span
                 layoutId="lb-tab"
-                className="aq-cta absolute inset-0 rounded-xl bg-primary"
+                className="absolute inset-0 rounded-lg bg-primary shadow-[var(--glow-primary)]"
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />
             )}
@@ -113,39 +74,25 @@ export function LeaderboardTabs({
       </div>
 
       {tab === "week" && (
-        <p className="mt-3 text-center text-sm text-muted-foreground">
+        <p className="mt-3 text-center font-mono text-xs text-muted-foreground">
           Ranked by XP earned in the last 7 days — resets weekly, so anyone can
           reach the top.
         </p>
       )}
 
       {tab === "team" ? (
-        <div
-          role="tabpanel"
-          id="lb-panel-team"
-          aria-labelledby="lb-tab-team"
-          tabIndex={0}
-        >
-          <TeamBoard key="team" teams={teams} userTeam={userTeam} />
-        </div>
+        <TeamBoard key="team" teams={teams} userTeam={userTeam} />
       ) : (
-        <div
-          role="tabpanel"
-          id={`lb-panel-${tab}`}
-          aria-labelledby={`lb-tab-${tab}`}
-          tabIndex={0}
-        >
-          <IndividualBoard
-            key={tab}
-            title={BOARD_TITLE[tab]}
-            entries={tab === "week" ? weekly : allTime}
-            emptyLabel={
-              tab === "week"
-                ? "No XP earned this week yet — be the first to climb."
-                : "No learners on the board yet."
-            }
-          />
-        </div>
+        <IndividualBoard
+          key={tab}
+          title={BOARD_TITLE[tab]}
+          entries={tab === "week" ? weekly : allTime}
+          emptyLabel={
+            tab === "week"
+              ? "No XP earned this week yet — be the first to climb."
+              : "No learners on the board yet."
+          }
+        />
       )}
     </div>
   );
@@ -175,7 +122,7 @@ function IndividualBoard({
           <div className="border-b border-border px-5 py-3">
             <h3 className="aq-display text-base font-semibold text-foreground">{title}</h3>
           </div>
-          <div className="aq-eyebrow hidden items-center gap-4 border-b border-border px-5 py-2.5 text-[0.65rem] text-muted-foreground sm:flex">
+          <div className="hidden items-center gap-4 border-b border-border px-5 py-2.5 font-mono text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:flex">
             <span className="w-9 text-center">Rank</span>
             <span className="ml-[3.25rem] flex-1">Learner</span>
             <span className="w-[4.5rem] text-center">Level</span>
@@ -207,7 +154,7 @@ function TeamBoard({
           {BOARD_TITLE.team}
         </h3>
       </div>
-      <div className="aq-eyebrow hidden items-center gap-4 border-b border-border px-5 py-2.5 text-[0.65rem] text-muted-foreground sm:flex">
+      <div className="hidden items-center gap-4 border-b border-border px-5 py-2.5 font-mono text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:flex">
         <span className="w-9 text-center">Rank</span>
         <span className="ml-[3.25rem] flex-1">Team</span>
         <span className="w-24 text-right">Members</span>
@@ -242,12 +189,12 @@ function TeamBoard({
               {mine && (
                 <span
                   aria-hidden
-                  className="absolute inset-y-0 left-0 w-1 rounded-r bg-primary"
+                  className="absolute inset-y-0 left-0 w-1 rounded-r bg-primary shadow-[0_0_12px_var(--primary)]"
                 />
               )}
               <span
                 className={cn(
-                  "w-7 shrink-0 text-center text-sm font-bold tabular-nums sm:w-9 sm:text-base",
+                  "w-7 shrink-0 text-center font-mono text-sm font-bold tabular-nums sm:w-9 sm:text-base",
                   mine ? "text-primary" : "text-muted-foreground"
                 )}
               >
@@ -261,32 +208,29 @@ function TeamBoard({
                     : "border-border bg-primary/10"
                 )}
               >
-                <Users2 className="h-5 w-5" aria-hidden="true" />
+                <Users2 className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
                 <div className="font-display font-semibold tracking-tight">
                   Team {t.team_number}
                   {mine && (
-                    <span className="aq-badge ml-2 bg-primary text-[0.7rem] font-bold uppercase tracking-[0.08em] text-primary-foreground">
+                    <span className="ml-2 rounded bg-primary px-1.5 py-0.5 font-mono text-[0.58rem] font-bold uppercase tracking-[0.1em] text-primary-foreground">
                       Your team
                     </span>
                   )}
                 </div>
               </div>
-              <span className="w-14 shrink-0 text-right text-sm tabular-nums text-muted-foreground sm:w-24">
-                {t.members}
-                <span className="ml-1 hidden sm:inline">
-                  {t.members === 1 ? "member" : "members"}
-                </span>
+              <span className="w-24 text-right font-mono text-xs text-muted-foreground sm:text-sm">
+                {t.members} {t.members === 1 ? "member" : "members"}
               </span>
               <span
                 className={cn(
-                  "w-16 shrink-0 text-right text-sm font-bold tabular-nums sm:w-24 sm:text-base",
+                  "w-16 shrink-0 text-right font-mono text-sm font-bold tabular-nums sm:w-24 sm:text-base",
                   mine ? "text-primary" : "text-foreground"
                 )}
               >
                 <AnimatedCounter value={t.totalXp} />
-                <span className="ml-1 text-[0.7rem] font-medium uppercase text-muted-foreground">
+                <span className="ml-1 text-[0.6rem] font-medium uppercase text-muted-foreground">
                   xp
                 </span>
               </span>
@@ -300,7 +244,7 @@ function TeamBoard({
 
 function Empty({ label }: { label: string }) {
   return (
-    <div className="aq-card mx-auto mt-12 max-w-md p-10 text-center text-sm text-muted-foreground">
+    <div className="mx-auto mt-12 max-w-md rounded-2xl border border-border bg-card p-10 text-center font-mono text-sm text-muted-foreground">
       {label}
     </div>
   );

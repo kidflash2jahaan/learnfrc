@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronDown,
   CheckCircle2,
@@ -42,7 +42,6 @@ export function DepartmentModules({
   accent: string;
 }) {
   const completed = React.useMemo(() => new Set(completedIds), [completedIds]);
-  const prefersReducedMotion = useReducedMotion();
   // Legible-on-light tone for accent text/icons (bright accents wash out).
   const ink = inkFor(accent);
   const [open, setOpen] = React.useState<Record<string, boolean>>(() =>
@@ -66,25 +65,14 @@ export function DepartmentModules({
         return (
           <motion.div
             key={m.id}
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={
-              prefersReducedMotion
-                ? { duration: 0 }
-                : { duration: 0.45, delay: mi * 0.04 }
-            }
+            transition={{ duration: 0.45, delay: mi * 0.04 }}
             className={cn(
-              "group/mod aq-card aq-card-hover relative overflow-hidden transition-all duration-300"
+              "group/mod aq-card aq-card-hover relative overflow-hidden transition-all duration-300",
+              isPre && "border-primary/40 bg-primary/[0.04]"
             )}
-            style={
-              isPre
-                ? {
-                    borderColor: `color-mix(in srgb, ${accent} 40%, transparent)`,
-                    background: `color-mix(in srgb, ${accent} 4%, transparent)`,
-                  }
-                : undefined
-            }
           >
             {/* top accent line on hover */}
             <span
@@ -99,7 +87,7 @@ export function DepartmentModules({
               aria-expanded={isOpen}
             >
               <span
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border font-display text-sm font-semibold transition-all duration-300"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border font-mono text-sm font-semibold transition-all duration-300"
                 style={{
                   color: ink,
                   borderColor: `color-mix(in srgb, ${accent} 40%, transparent)`,
@@ -107,7 +95,7 @@ export function DepartmentModules({
                 }}
               >
                 {isPre ? (
-                  <Sparkles className="h-5 w-5" aria-hidden="true" />
+                  <Sparkles className="h-5 w-5" />
                 ) : (
                   String(Number(label)).padStart(2, "0")
                 )}
@@ -116,14 +104,7 @@ export function DepartmentModules({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   {isPre && (
-                    <span
-                      className="aq-badge text-[11px] uppercase tracking-wider"
-                      style={{
-                        color: ink,
-                        borderColor: `color-mix(in srgb, ${accent} 40%, transparent)`,
-                        background: `color-mix(in srgb, ${accent} 12%, transparent)`,
-                      }}
-                    >
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-primary">
                       Start here · Prerequisite
                     </span>
                   )}
@@ -131,18 +112,12 @@ export function DepartmentModules({
                     {m.title}
                   </h3>
                   {moduleComplete && (
-                    <>
-                      <CheckCircle2
-                        className="h-4 w-4 shrink-0 text-success"
-                        aria-hidden="true"
-                      />
-                      <span className="sr-only">Module complete</span>
-                    </>
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
                   )}
                 </div>
-                <p className="mt-0.5 text-sm text-muted-foreground sm:text-xs">
+                <p className="mt-0.5 font-mono text-xs text-muted-foreground">
                   {isPre ? "recommended before you start · " : ""}
-                  {done}/{total} lessons · <span className="tabular-nums">{pct}%</span>
+                  {done}/{total} lessons · {pct}%
                 </p>
               </div>
 
@@ -152,12 +127,12 @@ export function DepartmentModules({
                   style={{
                     width: `${pct}%`,
                     background: accent,
+                    boxShadow: `0 0 10px color-mix(in srgb, ${accent} 60%, transparent)`,
                   }}
                 />
               </div>
 
               <ChevronDown
-                aria-hidden="true"
                 className={cn(
                   "h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300",
                   isOpen && "rotate-180"
@@ -168,52 +143,39 @@ export function DepartmentModules({
             <AnimatePresence initial={false}>
               {isOpen && (
                 <motion.div
-                  initial={
-                    prefersReducedMotion
-                      ? { height: "auto", opacity: 1 }
-                      : { height: 0, opacity: 0 }
-                  }
+                  initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
-                  exit={
-                    prefersReducedMotion
-                      ? { opacity: 0 }
-                      : { height: 0, opacity: 0 }
-                  }
-                  transition={
-                    prefersReducedMotion
-                      ? { duration: 0 }
-                      : { duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }
-                  }
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
                   className="overflow-hidden"
                 >
                   <div className="border-t border-border px-3 pb-3 pt-1">
                     {m.overview && (
-                      <p className="px-2 py-3 text-sm leading-relaxed text-muted-foreground md:text-xs">
-                        {m.overview}
+                      <p className="px-2 py-3 font-mono text-xs leading-relaxed text-muted-foreground">
+                              {m.overview}
                       </p>
                     )}
-                    <ul className="space-y-1">
+                    <ul className="space-y-0.5">
                       {m.lessons.map((l, li) => {
                         const isDone = completed.has(l.id);
                         return (
                           <li key={l.id}>
                             <Link
                               href={`/guides/${departmentSlug}/${m.slug}/${l.slug}`}
-                              className="group/les flex min-h-[44px] items-center gap-3 rounded-lg px-2.5 py-3 transition-colors hover:bg-muted"
+                              className="group/les flex items-center gap-3 rounded-lg px-2.5 py-2.5 transition-colors hover:bg-muted"
                             >
                               {isDone ? (
                                 <CheckCircle2
                                   className="h-5 w-5 shrink-0"
                                   style={{ color: ink }}
-                                  aria-hidden="true"
                                 />
                               ) : (
-                                <Circle className="h-5 w-5 shrink-0 text-muted-foreground/70 transition-colors group-hover/les:text-foreground" />
+                                <Circle className="h-5 w-5 shrink-0 text-muted-foreground/40 transition-colors group-hover/les:text-muted-foreground" />
                               )}
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate text-sm font-medium text-foreground/90 group-hover/les:text-foreground">
                                   <span
-                                    className="mr-2 text-xs tabular-nums"
+                                    className="mr-2 font-mono text-xs"
                                     style={{ color: ink }}
                                   >
                                     {isPre ? "P" : label}.{li + 1}
@@ -222,15 +184,12 @@ export function DepartmentModules({
                                 </span>
                               </span>
                               {l.estimated_minutes ? (
-                                <span className="hidden shrink-0 items-center gap-1 text-xs text-muted-foreground sm:inline-flex">
-                                  <Clock className="h-3 w-3" aria-hidden="true" />
-                                  <span className="tabular-nums">{l.estimated_minutes}</span>m
+                                <span className="hidden shrink-0 items-center gap-1 font-mono text-[11px] text-muted-foreground sm:inline-flex">
+                                  <Clock className="h-3 w-3" />
+                                  {l.estimated_minutes}m
                                 </span>
                               ) : null}
-                              <ArrowRight
-                                aria-hidden="true"
-                                className="h-4 w-4 shrink-0 -translate-x-1 text-muted-foreground opacity-0 transition-all group-hover/les:translate-x-0 group-hover/les:opacity-100"
-                              />
+                              <ArrowRight className="h-4 w-4 shrink-0 -translate-x-1 text-muted-foreground opacity-0 transition-all group-hover/les:translate-x-0 group-hover/les:opacity-100" />
                             </Link>
                           </li>
                         );

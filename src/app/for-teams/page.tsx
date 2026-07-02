@@ -69,7 +69,7 @@ const STATS: {
 ];
 
 const HEADLINE_GRADIENT: CSSProperties = {
-  background: "linear-gradient(120deg,#2560e6,#137ba0)",
+  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
@@ -102,8 +102,7 @@ export default async function ForTeamsPage() {
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             <p className="aq-eyebrow aq-rise aq-rise-1">
-              <Users aria-hidden="true" className="h-3.5 w-3.5" /> For mentors
-              &amp; team leads
+              <Users className="h-3.5 w-3.5" /> For mentors &amp; team leads
             </p>
             <h1 className="aq-rise aq-rise-2 mt-4 text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               Onboard your{" "}
@@ -123,8 +122,7 @@ export default async function ForTeamsPage() {
                 href="/teams"
                 className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
               >
-                Go to your team{" "}
-                <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                Go to your team <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/guides"
@@ -151,7 +149,7 @@ export default async function ForTeamsPage() {
                   >
                     <AnimatedCounter value={s.value} suffix={s.suffix} />
                   </div>
-                  <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
+                  <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
                     {s.label}
                   </div>
                 </div>
@@ -184,14 +182,11 @@ export default async function ForTeamsPage() {
               className="aq-card aq-card-hover aq-reveal relative h-full rounded-[20px] p-6"
               style={{ animationDelay: `${i * 120}ms` } as CSSProperties}
             >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute right-6 top-5 text-3xl font-bold text-foreground/25"
-              >
+              <span className="pointer-events-none absolute right-6 top-5 text-3xl font-bold text-primary/15">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <span className="aq-icon aq-badge-bob flex h-12 w-12 items-center justify-center">
-                <s.icon aria-hidden="true" className="h-6 w-6" />
+                <s.icon className="h-6 w-6" />
               </span>
               <h3 className="mt-5 text-lg font-semibold">{s.title}</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
@@ -218,7 +213,7 @@ export default async function ForTeamsPage() {
               style={{ animationDelay: `${i * 120}ms` } as CSSProperties}
             >
               <span className="aq-icon aq-badge-bob flex h-12 w-12 items-center justify-center">
-                <f.icon aria-hidden="true" className="h-6 w-6" />
+                <f.icon className="h-6 w-6" />
               </span>
               <h3 className="mt-5 text-lg font-semibold">{f.title}</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
@@ -260,27 +255,24 @@ export default async function ForTeamsPage() {
                       className="aq-badge aq-badge-bob flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px]"
                       style={{ "--a": m.color } as CSSProperties}
                     >
-                      <DeptIcon aria-hidden="true" className="h-6 w-6" />
+                      <DeptIcon className="h-6 w-6" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-foreground/60">
+                        <span className="text-xs font-semibold text-[#182338]/60">
                           {String(i + 1).padStart(2, "0")}
                         </span>
-                        <div className="truncate text-[15px] font-semibold text-foreground">
+                        <div className="truncate text-[15px] font-semibold text-[#182338]">
                           {d.name}
                         </div>
                       </div>
                       {d.tagline && (
-                        <div className="mt-0.5 truncate text-sm text-muted-foreground">
+                        <div className="mt-0.5 truncate text-sm text-[#182338]/70">
                           {d.tagline}
                         </div>
                       )}
                     </div>
-                    <ArrowRight
-                      aria-hidden="true"
-                      className="aq-arw h-4 w-4 shrink-0 text-foreground/60"
-                    />
+                    <ArrowRight className="aq-arw h-4 w-4 shrink-0 text-[#182338]/60" />
                   </div>
                 </Link>
               );

@@ -121,7 +121,7 @@ export default async function LeaderboardPage() {
         className="pointer-events-none absolute top-24 left-[6%] -z-10 h-64 w-64 rounded-full opacity-50 blur-3xl"
         style={{
           background:
-            "radial-gradient(closest-side, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%)",
+            "radial-gradient(closest-side, color-mix(in srgb, #a855f7 22%, transparent), transparent 70%)",
         }}
       />
 
@@ -190,9 +190,9 @@ export default async function LeaderboardPage() {
                 />
                 <div
                   className="aq-tile aq-reveal col-span-2 flex items-center justify-center gap-2 rounded-2xl px-4 py-3 sm:col-span-1"
-                  style={{ "--a": "var(--accent)", animationDelay: "0.16s" } as CSSProperties}
+                  style={{ "--a": "#7c3aed", animationDelay: "0.16s" } as CSSProperties}
                 >
-                  <span className="aq-pulse h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" aria-hidden />
+                  <span className="aq-pulse h-2 w-2 shrink-0 rounded-full bg-[#7c3aed]" aria-hidden />
                   <Sparkles className="h-4 w-4 text-foreground/80" aria-hidden />
                   <span className="text-sm font-semibold text-foreground">
                     Weekly race resets Monday
@@ -258,7 +258,7 @@ function StatTile({
         <span className="block text-lg font-bold tabular-nums leading-none text-foreground">
           {value}
         </span>
-        <span className="mt-1 block truncate text-sm font-medium text-foreground sm:text-xs">
+        <span className="mt-1 block truncate text-xs font-medium text-foreground/70">
           {label}
         </span>
       </span>

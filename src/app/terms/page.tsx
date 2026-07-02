@@ -27,7 +27,7 @@ const UPDATED = "June 20, 2026";
 const CONTACT = "29pardhananij@sagehillschool.org";
 
 const LINK =
-  "font-medium text-primary underline decoration-primary/30 underline-offset-2 transition-colors hover:decoration-primary";
+  "font-medium text-primary underline decoration-primary/30 underline-offset-2 transition-colors hover:text-accent hover:decoration-accent";
 
 function Section({
   icon: SectionIcon,
@@ -68,7 +68,7 @@ function Section({
 
 export default function TermsPage() {
   return (
-    <div className="relative mx-auto max-w-3xl overflow-x-clip px-4 pt-28 pb-24 sm:px-6 lg:px-8">
+    <div className="relative mx-auto max-w-3xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
       {/* ambient glows */}
       <div
         aria-hidden
@@ -146,7 +146,7 @@ export default function TermsPage() {
               <div className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="mt-1 text-xs font-medium text-foreground/70">
+              <div className="mt-1 text-xs font-medium text-foreground/60">
                 {stat.label}
               </div>
             </div>
@@ -225,11 +225,7 @@ export default function TermsPage() {
               rel="noopener noreferrer"
             >
               FRC Game Manual
-              <ExternalLink
-                className="mb-0.5 ml-0.5 inline h-3.5 w-3.5"
-                aria-hidden="true"
-                focusable="false"
-              />
+              <ExternalLink className="mb-0.5 ml-0.5 inline h-3.5 w-3.5" />
             </a>{" "}
             and official documentation. Content is provided &quot;as is&quot;
             without warranties.
@@ -282,7 +278,7 @@ export default function TermsPage() {
         <Section icon={Mail} a="#0f9d8f" index={9} title="Contact">
           <p>
             Questions about these terms? Email{" "}
-            <a className={`${LINK} break-words`} href={`mailto:${CONTACT}`}>
+            <a className={LINK} href={`mailto:${CONTACT}`}>
               {CONTACT}
             </a>
             . See also our{" "}

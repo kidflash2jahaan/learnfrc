@@ -101,14 +101,12 @@ export default async function LessonPage({
   const accentStyle = { "--a": meta.color, "--ai": inkFor(meta.color) } as CSSProperties;
 
   return (
-    <div className="relative overflow-x-clip">
-      {/* Full-width wrapper owns the glows so any clipping lands at the
-          viewport edge (invisible), not the max-w container edge (seam). */}
+    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 lg:px-8">
       {/* ambient glows */}
       <div aria-hidden className="aq-glow -z-10">
         <span
           className="aq-float left-[7%] top-[6%] h-72 w-72 opacity-50"
-          style={{ background: "radial-gradient(circle, var(--primary), transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, #2560e6, transparent 70%)" }}
         />
         <span
           className="aq-float right-[6%] top-[30%] h-80 w-80 opacity-40"
@@ -116,7 +114,7 @@ export default async function LessonPage({
         />
         <span
           className="aq-float bottom-[8%] left-[24%] h-72 w-72 opacity-30"
-          style={{ background: "radial-gradient(circle, var(--accent), transparent 70%)", animationDelay: "2.6s" }}
+          style={{ background: "radial-gradient(circle, #1aa9d6, transparent 70%)", animationDelay: "2.6s" }}
         />
       </div>
 
@@ -133,7 +131,6 @@ export default async function LessonPage({
         }}
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 lg:px-8">
       {/* breadcrumb */}
       <nav
         className="aq-rise aq-rise-1 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground"
@@ -167,26 +164,25 @@ export default async function LessonPage({
                   style={accentStyle}
                 >
                   <span className="aq-badge aq-badge-bob flex h-7 w-7 items-center justify-center rounded-full" style={accentStyle}>
-                    <Icon name={meta.icon} className="h-4 w-4" aria-hidden />
+                    <Icon name={meta.icon} className="h-4 w-4" />
                   </span>
                   <span className="font-medium">{dept.name}</span>
                 </Link>
               </StaggerItem>
-              <StaggerItem className="aq-chip text-xs tabular-nums">
+              <StaggerItem className="aq-chip font-mono text-xs">
                 Lesson <AnimatedCounter value={idx + 1} /> / <AnimatedCounter value={flat.length} />
               </StaggerItem>
-              <StaggerItem className="aq-chip gap-1.5 text-xs text-primary">
-                <Zap className="h-3.5 w-3.5" aria-hidden /> +10 XP
+              <StaggerItem className="aq-chip gap-1.5 font-mono text-xs text-primary">
+                <Zap className="h-3.5 w-3.5" /> +10 XP
               </StaggerItem>
               <StaggerItem
                 className={cn(
-                  "aq-chip gap-1.5 text-xs",
-                  isCompleted ? "text-primary" : "text-[color:var(--ai)]"
+                  "aq-chip gap-1.5 font-mono text-xs",
+                  isCompleted ? "text-primary" : "text-accent"
                 )}
-                style={accentStyle}
               >
                 {isCompleted ? (
-                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                  <CheckCircle2 className="h-3.5 w-3.5" />
                 ) : (
                   <span className="aq-pulse inline-block h-2 w-2 rounded-full bg-accent" aria-hidden />
                 )}
@@ -195,7 +191,7 @@ export default async function LessonPage({
             </Stagger>
 
             <h1 className="mt-5 text-balance font-display text-3xl font-bold tracking-tight sm:text-4xl lg:text-[2.7rem] lg:leading-[1.08]">
-              <span className="aq-grad-anim bg-gradient-to-r from-[color:var(--primary)] to-[color:var(--accent)] bg-clip-text text-transparent">
+              <span className="aq-grad-anim bg-gradient-to-r from-[#2560e6] via-[color:var(--ai)] to-[#1aa9d6] bg-clip-text text-transparent" style={accentStyle}>
                 {les.title}
               </span>
             </h1>
@@ -220,7 +216,7 @@ export default async function LessonPage({
               />
               {!user && (
                 <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Info className="h-4 w-4 text-primary" aria-hidden />
+                  <Info className="h-4 w-4 text-primary" />
                   <Link
                     href={`/login?next=${encodeURIComponent(lessonPath)}`}
                     className="font-medium text-primary hover:underline"
@@ -244,7 +240,7 @@ export default async function LessonPage({
               <section className="aq-card aq-card-hover aq-reveal mt-10 p-6">
                 <h2 className="flex items-center gap-2.5 font-display text-xl font-semibold">
                   <span className="aq-icon aq-badge-bob h-9 w-9">
-                    <Lightbulb className="h-5 w-5" aria-hidden />
+                    <Lightbulb className="h-5 w-5" />
                   </span>
                   Key takeaways
                 </h2>
@@ -255,7 +251,7 @@ export default async function LessonPage({
                       className="aq-reveal flex gap-3 text-foreground/85"
                       style={{ animationDelay: `${i * 0.07}s` }}
                     >
-                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                       <span className="leading-relaxed">{t}</span>
                     </li>
                   ))}
@@ -273,7 +269,7 @@ export default async function LessonPage({
                     className="aq-icon aq-badge-bob h-9 w-9"
                     style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}
                   >
-                    <ExternalLink className="h-5 w-5" aria-hidden />
+                    <ExternalLink className="h-5 w-5" />
                   </span>
                   Go deeper
                 </h2>
@@ -284,10 +280,9 @@ export default async function LessonPage({
                         href={r.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group inline-flex items-start gap-2 text-foreground/85 transition-colors hover:text-[color:var(--ai)]"
-                        style={accentStyle}
+                        className="group inline-flex items-start gap-2 text-foreground/85 transition-colors hover:text-accent"
                       >
-                        <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-accent/70 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                        <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-accent/70 transition-transform group-hover:translate-x-0.5" />
                         <span className="underline decoration-border underline-offset-2 group-hover:decoration-accent">
                           {r.title}
                         </span>
@@ -310,78 +305,6 @@ export default async function LessonPage({
             nextHref={nextHref}
           />
 
-          {/* mobile progress + contents (desktop shows these in the aside) */}
-          <div className="mt-10 space-y-4 lg:hidden">
-            {user && (
-              <div className="aq-card aq-sheen p-5">
-                <div className="aq-eyebrow">Your progress</div>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="font-display text-3xl font-bold text-foreground tabular-nums">
-                    {pct}%
-                  </span>
-                  <span className="text-sm text-muted-foreground">through {dept.name}</span>
-                </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full"
-                    style={{ width: `${pct}%`, backgroundImage: deptGradient }}
-                  />
-                </div>
-                <div className="mt-2 text-xs text-muted-foreground tabular-nums">
-                  {doneInDept} / {total} lessons complete
-                </div>
-              </div>
-            )}
-            <details className="aq-card overflow-hidden">
-              <summary className="flex cursor-pointer items-center gap-2.5 p-5 font-display text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                <span
-                  className="aq-badge flex h-9 w-9 items-center justify-center rounded-xl"
-                  style={accentStyle}
-                >
-                  <Icon name={meta.icon} className="h-4 w-4" aria-hidden />
-                </span>
-                <span className="truncate">{dept.name} — all lessons</span>
-              </summary>
-              <div className="space-y-3 border-t border-border p-4">
-                {dept.modules.map((m, mi) => (
-                  <div key={m.id}>
-                    <div className="aq-eyebrow px-1">
-                      {String(mi + 1).padStart(2, "0")} · {m.title}
-                    </div>
-                    <ul className="mt-1 space-y-0.5">
-                      {m.lessons.map((l) => {
-                        const active = l.id === les.id;
-                        const done = completed.has(l.id);
-                        return (
-                          <li key={l.id}>
-                            <Link
-                              href={`/guides/${dept.slug}/${m.slug}/${l.slug}`}
-                              aria-current={active ? "page" : undefined}
-                              className={cn(
-                                "flex min-h-[44px] items-center gap-2 rounded-xl px-2.5 py-2 text-sm transition-colors",
-                                active
-                                  ? "bg-primary/10 font-medium text-primary"
-                                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                              )}
-                            >
-                              {done ? (
-                                <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                              ) : (
-                                <Circle className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                              )}
-                              <span className="sr-only">{done ? "Completed:" : "Not started:"}</span>
-                              <span className="line-clamp-1">{l.title}</span>
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </details>
-          </div>
-
           {/* prev / next */}
           <Stagger className="mt-10 grid gap-4 sm:grid-cols-2" stagger={0.08}>
             {prev ? (
@@ -391,10 +314,10 @@ export default async function LessonPage({
                   className="aq-card aq-card-hover group flex h-full items-center gap-3 p-5"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors group-hover:border-primary/50 group-hover:text-primary">
-                    <ArrowLeft className="h-4 w-4" aria-hidden />
+                    <ArrowLeft className="h-4 w-4" />
                   </span>
                   <span className="min-w-0">
-                    <small className="aq-eyebrow block">
+                    <small className="block font-mono text-[0.65rem] uppercase tracking-[0.12em] text-muted-foreground">
                       Previous
                     </small>
                     <span className="line-clamp-1 font-display font-semibold group-hover:text-primary">
@@ -413,10 +336,10 @@ export default async function LessonPage({
                   className="aq-card aq-card-hover group flex h-full flex-row-reverse items-center gap-3 p-5 text-right"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors group-hover:border-primary/50 group-hover:text-primary">
-                    <ArrowRight className="h-4 w-4" aria-hidden />
+                    <ArrowRight className="h-4 w-4" />
                   </span>
                   <span className="min-w-0">
-                    <small className="aq-eyebrow block">
+                    <small className="block font-mono text-[0.65rem] uppercase tracking-[0.12em] text-muted-foreground">
                       Next up
                     </small>
                     <span className="line-clamp-1 font-display font-semibold group-hover:text-primary">
@@ -432,10 +355,10 @@ export default async function LessonPage({
                   className="aq-card aq-card-hover group flex h-full flex-row-reverse items-center gap-3 p-5 text-right"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors group-hover:border-primary/50 group-hover:text-primary">
-                    <ArrowRight className="h-4 w-4" aria-hidden />
+                    <ArrowRight className="h-4 w-4" />
                   </span>
                   <span className="min-w-0">
-                    <small className="aq-eyebrow block">
+                    <small className="block font-mono text-[0.65rem] uppercase tracking-[0.12em] text-muted-foreground">
                       Finish
                     </small>
                     <span className="line-clamp-1 font-display font-semibold group-hover:text-primary">
@@ -489,14 +412,14 @@ export default async function LessonPage({
                     className="aq-badge aq-badge-bob flex h-9 w-9 items-center justify-center rounded-xl"
                     style={accentStyle}
                   >
-                    <Icon name={meta.icon} className="h-4 w-4" aria-hidden />
+                    <Icon name={meta.icon} className="h-4 w-4" />
                   </span>
                   <span className="truncate font-display text-sm font-semibold">{dept.name}</span>
                 </Link>
                 <div className="space-y-3">
                   {dept.modules.map((m, mi) => (
                     <div key={m.id} className="aq-reveal" style={{ animationDelay: `${mi * 0.05}s` }}>
-                      <div className="aq-eyebrow px-1">
+                      <div className="px-1 font-mono text-[0.7rem] uppercase tracking-wide text-muted-foreground">
                         {String(mi + 1).padStart(2, "0")} · {m.title}
                       </div>
                       <ul className="mt-1 space-y-0.5">
@@ -516,11 +439,10 @@ export default async function LessonPage({
                                 )}
                               >
                                 {done ? (
-                                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
                                 ) : (
-                                  <Circle className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                                  <Circle className="h-4 w-4 shrink-0 text-muted-foreground/40" />
                                 )}
-                                <span className="sr-only">{done ? "Completed:" : "Not started:"}</span>
                                 <span className="line-clamp-1">{l.title}</span>
                               </Link>
                             </li>
@@ -534,7 +456,6 @@ export default async function LessonPage({
             </Reveal>
           </div>
         </aside>
-      </div>
       </div>
     </div>
   );

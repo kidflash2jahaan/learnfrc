@@ -253,20 +253,20 @@ export default async function DashboardPage() {
   const cm = continueLesson ? deptMeta(continueLesson.deptSlug) : null;
 
   const blueGradient = {
-    background: "linear-gradient(120deg,#2560e6,#0e7fa3)",
+    background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
     WebkitBackgroundClip: "text",
     backgroundClip: "text",
     color: "transparent",
   } as CSSProperties;
   // shared blue→cyan progress fill
   const xpBar = {
-    background: "linear-gradient(90deg,var(--primary),var(--accent))",
+    background: "linear-gradient(90deg,#2560e6,#1aa9d6)",
   } as const;
 
   return (
     <div className="relative mx-auto max-w-7xl px-4 pt-28 pb-20 sm:px-6 lg:px-8">
       {/* ambient glows */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
         <div
           className="absolute left-[-10%] top-[-6%] h-[440px] w-[560px] rounded-full opacity-60 blur-3xl"
           style={{ background: "radial-gradient(circle,rgba(37,96,230,0.18),transparent 68%)" }}
@@ -292,7 +292,7 @@ export default async function DashboardPage() {
           {/* Greeting */}
           <div className="min-w-0 flex-1">
             <span className="aq-eyebrow aq-rise aq-rise-2">
-              <Sparkles aria-hidden className="h-3.5 w-3.5 aq-badge-bob" /> Welcome back
+              <Sparkles className="h-3.5 w-3.5 aq-badge-bob" /> Welcome back
             </span>
             <div className="aq-rise aq-rise-3 mt-4 flex items-center gap-4">
               <Avatar
@@ -321,7 +321,7 @@ export default async function DashboardPage() {
                   href={`/guides/${continueLesson.deptSlug}/${continueLesson.moduleSlug}/${continueLesson.lessonSlug}`}
                   className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <Play aria-hidden className="h-4 w-4 fill-current" />
+                  <Play className="h-4 w-4 fill-current" />
                   {continueLesson.fresh ? "Start learning" : "Continue learning"}
                 </Link>
               ) : (
@@ -329,7 +329,7 @@ export default async function DashboardPage() {
                   href="/guides"
                   className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <Play aria-hidden className="h-4 w-4 fill-current" />
+                  <Play className="h-4 w-4 fill-current" />
                   Browse the guides
                 </Link>
               )}
@@ -337,7 +337,7 @@ export default async function DashboardPage() {
                 href="/leaderboard"
                 className="aq-ghost inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                <Trophy aria-hidden className="h-4 w-4" />
+                <Trophy className="h-4 w-4" />
                 Leaderboard
               </Link>
             </div>
@@ -361,7 +361,7 @@ export default async function DashboardPage() {
                 className="aq-badge aq-badge-bob flex h-14 w-14 items-center justify-center rounded-2xl"
                 style={{ "--a": "#2560e6" } as CSSProperties}
               >
-                <Zap aria-hidden className="h-7 w-7" />
+                <Zap className="h-7 w-7" />
               </span>
             </div>
             <div className="mt-5">
@@ -370,7 +370,7 @@ export default async function DashboardPage() {
                 <span className="font-semibold text-foreground">{levelPct}%</span>
               </div>
               <Progress value={levelPct} className="h-2.5 bg-white/55" barClassName="aq-bar-anim" style={xpBar} />
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-2 text-[11px] text-muted-foreground">
                 {xpToNext} XP to go
               </p>
             </div>
@@ -387,7 +387,7 @@ export default async function DashboardPage() {
           >
             <div className="flex items-center gap-3">
               <span className="aq-icon aq-badge-bob flex h-11 w-11 shrink-0 rounded-2xl">
-                <Sparkles aria-hidden className="h-5 w-5" />
+                <Sparkles className="h-5 w-5" />
               </span>
               <div>
                 <p className="text-[15px] font-semibold text-foreground">
@@ -400,7 +400,7 @@ export default async function DashboardPage() {
                 </p>
               </div>
             </div>
-            <ArrowRight aria-hidden className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
           </Link>
         </Reveal>
       )}
@@ -427,12 +427,12 @@ export default async function DashboardPage() {
                 className="aq-badge aq-badge-bob mb-3 flex h-10 w-10 items-center justify-center rounded-2xl"
                 style={{ "--a": s.accent } as CSSProperties}
               >
-                <s.icon aria-hidden className="h-5 w-5" />
+                <s.icon className="h-5 w-5" />
               </span>
               <div className="aq-display text-3xl font-bold tabular-nums text-foreground">
                 <AnimatedCounter value={s.value} />
               </div>
-              <div className="mt-1 text-[13px] font-medium leading-snug text-muted-foreground">
+              <div className="mt-1 text-xs font-medium leading-snug text-muted-foreground">
                 {s.label}
               </div>
             </div>
@@ -451,18 +451,18 @@ export default async function DashboardPage() {
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/75">
-                  <Play aria-hidden className="h-3.5 w-3.5 fill-current aq-badge-bob" />
+                  <Play className="h-3.5 w-3.5 fill-current aq-badge-bob" />
                   {continueLesson.fresh ? "Start learning" : "Continue learning"}
                 </span>
-                <h2 className="aq-display mt-2 text-balance text-2xl font-bold leading-tight text-foreground sm:text-3xl">
+                <h3 className="aq-display mt-2 text-balance text-2xl font-bold leading-tight text-foreground sm:text-3xl">
                   {continueLesson.lessonTitle}
-                </h2>
+                </h3>
                 <p className="mt-1.5 text-[15px] font-medium text-foreground/75">
                   {continueLesson.deptName} · {continueLesson.moduleTitle}
                 </p>
                 {!continueLesson.fresh && (
                   <div className="mt-4 max-w-sm">
-                    <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-foreground/75">
+                    <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-foreground/75">
                       <span>{continueLesson.deptName} progress</span>
                       <span className="text-foreground">{continueLesson.pct}%</span>
                     </div>
@@ -476,7 +476,7 @@ export default async function DashboardPage() {
               </div>
               <span className="aq-cta inline-flex shrink-0 items-center gap-2 self-start rounded-2xl px-5 py-3 text-sm font-semibold sm:self-center">
                 {continueLesson.fresh ? "Begin" : "Resume"}
-                <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
             </div>
           </Link>
@@ -498,9 +498,9 @@ export default async function DashboardPage() {
                 Pick up where you left off across every track.
               </p>
             </div>
-            <Button asChild variant="secondary" size="sm" className="min-h-11 shrink-0">
+            <Button asChild variant="secondary" size="sm" className="shrink-0">
               <Link href="/guides">
-                All guides <ArrowUpRight aria-hidden className="h-4 w-4" />
+                All guides <ArrowUpRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -591,11 +591,11 @@ export default async function DashboardPage() {
               className="aq-badge aq-badge-bob relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl"
               style={{ "--a": "#2560e6" } as CSSProperties}
             >
-              <CheckCircle2 aria-hidden className="h-8 w-8" />
+              <CheckCircle2 className="h-8 w-8" />
             </span>
-            <h2 className="aq-display mt-5 text-2xl font-bold text-foreground">
+            <h3 className="aq-display mt-5 text-2xl font-bold text-foreground">
               Complete your first lesson
-            </h2>
+            </h3>
             <p className="mx-auto mt-2 max-w-md text-[15px] text-foreground/70">
               Mark a lesson complete to earn XP, start your streak, and unlock your first
               achievement. Gracious professionalism starts with rep one.
@@ -605,7 +605,7 @@ export default async function DashboardPage() {
                 href="/guides/getting-started"
                 className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                Start with the basics <ArrowRight aria-hidden className="h-4 w-4" />
+                Start with the basics <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>

@@ -24,7 +24,7 @@ export default async function SettingsPage() {
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-[-10%] top-[-8%] h-[380px] w-[520px] rounded-full bg-[radial-gradient(circle,rgba(37,96,230,0.18),transparent_70%)] blur-3xl" />
         <div className="absolute right-[-12%] top-[6%] h-[340px] w-[460px] rounded-full bg-[radial-gradient(circle,rgba(26,169,214,0.16),transparent_70%)] blur-3xl" />
-        <div className="absolute bottom-[-14%] left-[24%] h-[320px] w-[520px] rounded-full bg-[radial-gradient(circle,rgba(26,169,214,0.12),transparent_70%)] blur-3xl" />
+        <div className="absolute bottom-[-14%] left-[24%] h-[320px] w-[520px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.12),transparent_70%)] blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-2xl px-4 pt-28 pb-24 sm:px-6">
@@ -39,13 +39,13 @@ export default async function SettingsPage() {
               className="aq-badge aq-badge-bob shrink-0"
               style={{ "--a": "#2560e6" } as CSSProperties}
             >
-              <SettingsIcon aria-hidden focusable="false" className="h-6 w-6" strokeWidth={2.25} />
+              <SettingsIcon className="h-6 w-6" strokeWidth={2.25} />
             </span>
             <h1 className="aq-display text-3xl font-bold tracking-tight sm:text-4xl">
               <span
                 className="aq-grad-anim"
                 style={{
-                  background: "linear-gradient(120deg,#2560e6,#0e7d9e,#6d3fe0,#2560e6)",
+                  background: "linear-gradient(120deg,#2560e6,#1aa9d6,#8b5cf6,#2560e6)",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
                   color: "transparent",
@@ -65,14 +65,14 @@ export default async function SettingsPage() {
           <div className="aq-rise aq-rise-4 flex flex-wrap items-center gap-3">
             <Button asChild className="aq-cta">
               <Link href="/profile">
-                <UserRound aria-hidden focusable="false" className="h-4 w-4" />
+                <UserRound className="h-4 w-4" />
                 View your profile
               </Link>
             </Button>
             {profile?.username && (
               <Button asChild className="aq-ghost">
                 <Link href={`/u/${profile.username}`}>
-                  <ExternalLink aria-hidden focusable="false" className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4" />
                   See public profile
                 </Link>
               </Button>
@@ -88,7 +88,7 @@ export default async function SettingsPage() {
                 className="aq-icon aq-badge-bob shrink-0"
                 style={{ "--a": "#2560e6" } as CSSProperties}
               >
-                <UserRound aria-hidden focusable="false" className="h-5 w-5" />
+                <UserRound className="h-5 w-5" />
               </span>
               <div>
                 <h2 className="aq-display text-xl font-semibold tracking-tight">
@@ -117,7 +117,7 @@ export default async function SettingsPage() {
                 className="aq-icon aq-badge-bob shrink-0"
                 style={{ "--a": "#1aa9d6" } as CSSProperties}
               >
-                <LogOut aria-hidden focusable="false" className="h-5 w-5" />
+                <LogOut className="h-5 w-5" />
               </span>
               <div>
                 <h2 className="aq-display text-xl font-semibold tracking-tight">
@@ -125,7 +125,7 @@ export default async function SettingsPage() {
                 </h2>
                 <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
                   You&apos;re signed in as{" "}
-                  <span className="font-medium text-foreground">
+                  <span className="font-mono font-medium text-foreground">
                     {user.email}
                   </span>
                   .
@@ -140,7 +140,7 @@ export default async function SettingsPage() {
               </p>
               <form action={signOut}>
                 <Button type="submit" variant="destructive" size="md" className="shrink-0">
-                  <LogOut aria-hidden focusable="false" className="h-4 w-4" />
+                  <LogOut className="h-4 w-4" />
                   Sign out
                 </Button>
               </form>

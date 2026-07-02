@@ -109,11 +109,10 @@ export default async function HomePage() {
       </div>
 
       {/* ============================ HERO ============================ */}
-      <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-20 sm:px-6 sm:pt-28 lg:grid-cols-2 lg:gap-10 lg:pb-20 lg:pt-36">
+      <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-28 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:pb-20 lg:pt-36">
         <div>
-          <span className="aq-chip aq-eyebrow aq-rise aq-rise-1 inline-flex flex-wrap items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Free · no login
-            to read a guide
+          <span className="aq-rise aq-rise-1 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.04em] text-primary">
+            <Sparkles className="h-3.5 w-3.5" /> Free · no login to read a guide
           </span>
           <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-balance text-4xl font-extrabold leading-[1.02] sm:text-5xl lg:text-[3.4rem]">
             Master every part of{" "}
@@ -140,7 +139,7 @@ export default async function HomePage() {
               href="/signup"
               className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
             >
-              Start learning <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Start learning <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/guides"
@@ -174,8 +173,8 @@ export default async function HomePage() {
             <span className="aq-display text-[17px] font-bold text-foreground">
               Build season ready
             </span>
-            <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#0a7a43]">
-              <span className="aq-pulse h-2 w-2 rounded-full bg-[#12b565]" />
+            <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold text-[#0c8f4f]">
+              <span className="aq-pulse h-2 w-2 rounded-full bg-[#12b565] shadow-[0_0_0_4px_rgba(18,181,101,0.18)]" />
               SAMPLE
             </span>
           </div>
@@ -213,7 +212,7 @@ export default async function HomePage() {
               <div className="aq-display text-2xl font-extrabold leading-none text-foreground">
                 <AnimatedCounter value={78} suffix="%" />
               </div>
-              <div className="mt-1 text-sm text-muted-foreground">
+              <div className="mt-1 text-[13px] text-muted-foreground">
                 across your departments
               </div>
             </div>
@@ -231,7 +230,7 @@ export default async function HomePage() {
                 <Icon name={s.icon} className="h-[18px] w-[18px]" />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-foreground">
+                <div className="truncate text-[13px] font-semibold text-foreground">
                   {s.name}
                 </div>
                 <div className="mt-1.5 h-[7px] overflow-hidden rounded-md bg-[rgba(120,145,190,.24)]">
@@ -245,12 +244,12 @@ export default async function HomePage() {
                   />
                 </div>
               </div>
-              <span className="tabular-nums text-xs font-semibold text-foreground/70">
+              <span className="font-mono text-xs font-semibold text-foreground/70">
                 <AnimatedCounter value={s.pct} suffix="%" />
               </span>
             </div>
           ))}
-          <p className="mt-2 text-center text-sm text-muted-foreground">
+          <p className="mt-2 text-center text-[12.5px] text-muted-foreground">
             Sample progress — track your own once you sign up (free).
           </p>
         </div>
@@ -258,13 +257,13 @@ export default async function HomePage() {
 
       {/* ========================= DEPARTMENTS ======================== */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <span className="aq-eyebrow aq-reveal">
+        <span className="aq-reveal font-mono text-xs font-semibold uppercase tracking-[0.08em] text-primary">
           Pick your department
         </span>
         <h2 className="aq-reveal aq-display mt-2 text-3xl font-bold text-foreground">
           Every role on your robotics team
         </h2>
-        <p className="aq-reveal mt-1 max-w-xl text-base text-foreground/70">
+        <p className="aq-reveal mt-1 max-w-xl text-[15.5px] text-foreground/70">
           A full FRC team is a small company. Tap into any department below —
           each has its own guides, quizzes, and a completion certificate.
         </p>
@@ -276,7 +275,7 @@ export default async function HomePage() {
               <Link
                 key={d.slug}
                 href={`/guides/${d.slug}`}
-                className="aq-tile aq-reveal group relative block rounded-[20px] p-[18px]"
+                className="aq-tile aq-reveal group block rounded-[20px] p-[18px]"
                 style={
                   {
                     "--a": m.color,
@@ -284,21 +283,18 @@ export default async function HomePage() {
                   } as CSSProperties
                 }
               >
-                <ArrowUpRight
-                  className="absolute right-4 top-4 h-[18px] w-[18px] text-muted-foreground/70"
-                  aria-hidden="true"
-                />
+                <ArrowUpRight className="absolute right-4 top-4 h-[18px] w-[18px] text-[#2c3752] opacity-50" />
                 <span
                   className="aq-badge aq-badge-bob flex h-11 w-11 items-center justify-center rounded-[14px]"
                   style={{ "--a": m.color } as CSSProperties}
                 >
-                  <Icon name={m.icon} className="h-[22px] w-[22px]" aria-hidden="true" />
+                  <Icon name={m.icon} className="h-[22px] w-[22px]" />
                 </span>
-                <h3 className="aq-display mt-3 text-[16px] font-bold leading-tight text-foreground">
+                <h3 className="aq-display mt-3 text-[16px] font-bold leading-tight text-[#1a2334]">
                   {d.name}
                 </h3>
                 {d.tagline && (
-                  <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
+                  <p className="mt-1 line-clamp-1 text-[12.5px] text-[#3b4762]">
                     {d.tagline}
                   </p>
                 )}
@@ -307,7 +303,7 @@ export default async function HomePage() {
           })}
           <Link
             href="/guides"
-            className="aq-tile aq-reveal group relative block rounded-[20px] p-[18px]"
+            className="aq-tile aq-reveal group block rounded-[20px] p-[18px]"
             style={
               {
                 "--a": "#8493ad",
@@ -315,20 +311,17 @@ export default async function HomePage() {
               } as CSSProperties
             }
           >
-            <ArrowUpRight
-              className="absolute right-4 top-4 h-[18px] w-[18px] text-muted-foreground/70"
-              aria-hidden="true"
-            />
+            <ArrowUpRight className="absolute right-4 top-4 h-[18px] w-[18px] text-[#2c3752] opacity-50" />
             <span
               className="aq-badge aq-badge-bob flex h-11 w-11 items-center justify-center rounded-[14px]"
               style={{ "--a": "#8493ad" } as CSSProperties}
             >
-              <LayoutGrid className="h-[22px] w-[22px]" aria-hidden="true" />
+              <LayoutGrid className="h-[22px] w-[22px]" />
             </span>
-            <h3 className="aq-display mt-3 text-[16px] font-bold leading-tight text-foreground">
+            <h3 className="aq-display mt-3 text-[16px] font-bold leading-tight text-[#1a2334]">
               See all {stats.deptCount}
             </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-[12.5px] text-[#3b4762]">
               the whole team, one place
             </p>
           </Link>
@@ -337,7 +330,7 @@ export default async function HomePage() {
 
       {/* ========================== FEATURES ========================== */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <span className="aq-eyebrow aq-reveal">
+        <span className="aq-reveal font-mono text-xs font-semibold uppercase tracking-[0.08em] text-primary">
           What you get
         </span>
         <h2 className="aq-reveal aq-display mt-2 text-3xl font-bold text-foreground">
@@ -351,12 +344,12 @@ export default async function HomePage() {
               style={{ animationDelay: `${i * 0.12}s` }}
             >
               <span className="aq-badge-bob flex h-[46px] w-[46px] items-center justify-center rounded-[14px] bg-primary/10 text-primary">
-                <f.icon className="h-[23px] w-[23px]" aria-hidden="true" />
+                <f.icon className="h-[23px] w-[23px]" />
               </span>
               <h3 className="aq-display mt-3 text-[17px] font-bold text-foreground">
                 {f.title}
               </h3>
-              <p className="mt-1 text-sm leading-relaxed text-foreground/70">
+              <p className="mt-1 text-[13.5px] leading-relaxed text-foreground/70">
                 {f.body}
               </p>
             </div>
@@ -406,7 +399,7 @@ export default async function HomePage() {
             </span>
             .
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-pretty text-base text-foreground/70">
+          <p className="mx-auto mt-3 max-w-xl text-pretty text-[15.5px] text-foreground/70">
             No experience needed. No credit card. Pick a department, track your
             progress across all {stats.deptCount} of them, and go.
           </p>
@@ -415,8 +408,7 @@ export default async function HomePage() {
               href="/signup"
               className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
             >
-              Create your free account{" "}
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Create your free account <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/guides"

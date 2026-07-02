@@ -24,9 +24,9 @@ export default async function AdminPage() {
       <div className="mx-auto flex max-w-md flex-col items-center px-4 pt-40 pb-20 text-center">
         <div
           className="aq-badge flex h-16 w-16 items-center justify-center rounded-2xl"
-          style={{ "--a": "var(--destructive)" } as CSSProperties}
+          style={{ "--a": "#e06a6a" } as CSSProperties}
         >
-          <ShieldAlert className="h-8 w-8" aria-hidden="true" />
+          <ShieldAlert className="h-8 w-8" />
         </div>
         <h1 className="mt-6 text-3xl font-bold">Access denied</h1>
         <p className="mt-3 text-base leading-relaxed text-foreground/70">
@@ -49,10 +49,10 @@ export default async function AdminPage() {
   return (
     <div className="relative mx-auto max-w-6xl px-4 pt-28 pb-20 sm:px-6 lg:px-8">
       {/* Ambient glows */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <span className="absolute -top-24 left-[8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--primary)_16%,transparent),transparent_70%)] blur-2xl" />
-        <span className="absolute top-40 right-[4%] h-80 w-80 rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--accent)_14%,transparent),transparent_70%)] blur-2xl" />
-        <span className="absolute bottom-10 left-[30%] h-64 w-64 rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--primary)_12%,transparent),transparent_70%)] blur-2xl" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <span className="absolute -top-24 left-[8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(37,96,230,0.16),transparent_70%)] blur-2xl" />
+        <span className="absolute top-40 right-[4%] h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(26,169,214,0.14),transparent_70%)] blur-2xl" />
+        <span className="absolute bottom-10 left-[30%] h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(139,127,255,0.12),transparent_70%)] blur-2xl" />
       </div>
 
       {/* Hero */}
@@ -61,7 +61,7 @@ export default async function AdminPage() {
           <span className="aq-pulse inline-block h-2 w-2 rounded-full bg-primary" />
           Mission control
         </span>
-        <span className="aq-chip text-xs break-all max-w-full">
+        <span className="aq-chip font-mono text-xs">
           Signed in as {user.email}
         </span>
         <span className="ml-auto">
@@ -73,12 +73,10 @@ export default async function AdminPage() {
         <span
           className="aq-grad-anim"
           style={{
-            color: "var(--primary)",
-            background:
-              "linear-gradient(120deg,var(--primary),var(--accent),var(--primary))",
+            background: "linear-gradient(120deg,#2560e6,#1aa9d6,#8b7fff,#2560e6)",
             WebkitBackgroundClip: "text",
             backgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            color: "transparent",
           }}
         >
           LearnFRC
@@ -125,13 +123,13 @@ export default async function AdminPage() {
               <h2 className="flex items-center gap-2 text-lg font-semibold">
                 <span
                   className="aq-icon aq-badge-bob h-9 w-9"
-                  style={{ "--a": "var(--primary)" } as CSSProperties}
+                  style={{ "--a": "#2560e6" } as CSSProperties}
                 >
-                  <TrendingUp className="h-4.5 w-4.5" aria-hidden="true" />
+                  <TrendingUp className="h-4.5 w-4.5" />
                 </span>
                 Activity
               </h2>
-              <span className="aq-chip text-xs">Last 14 days</span>
+              <span className="aq-chip text-[11px]">Last 14 days</span>
             </div>
             <ActivityChart data={stats.daily} />
           </section>
@@ -153,7 +151,7 @@ export default async function AdminPage() {
                       <span className="truncate font-medium text-foreground">
                         {d.name}
                       </span>
-                      <span className="tabular-nums text-xs font-semibold text-primary">
+                      <span className="font-mono text-xs font-semibold text-primary">
                         <AnimatedCounter value={d.completions ?? 0} />
                       </span>
                     </div>
@@ -181,9 +179,9 @@ export default async function AdminPage() {
           <h2 className="mb-1.5 flex items-center gap-2 text-lg font-semibold">
             <span
               className="aq-icon aq-badge-bob h-9 w-9"
-              style={{ "--a": "var(--accent)" } as CSSProperties}
+              style={{ "--a": "#1aa9d6" } as CSSProperties}
             >
-              <PieChart className="h-4.5 w-4.5" aria-hidden="true" />
+              <PieChart className="h-4.5 w-4.5" />
             </span>
             Where users come from
           </h2>
@@ -201,9 +199,9 @@ export default async function AdminPage() {
           <h2 className="mb-5 flex items-center gap-2 text-lg font-semibold">
             <span
               className="aq-icon aq-badge-bob h-9 w-9"
-              style={{ "--a": "var(--accent)" } as CSSProperties}
+              style={{ "--a": "#8b7fff" } as CSSProperties}
             >
-              <Users className="h-4.5 w-4.5" aria-hidden="true" />
+              <Users className="h-4.5 w-4.5" />
             </span>
             Recent signups
           </h2>
@@ -239,13 +237,13 @@ export default async function AdminPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 tabular-nums text-muted-foreground">
+                      <td className="py-3 font-mono text-muted-foreground">
                         {p.team_number ? `#${p.team_number}` : "—"}
                       </td>
-                      <td className="py-3 text-right tabular-nums font-semibold text-primary">
+                      <td className="py-3 text-right font-mono font-semibold text-primary">
                         <AnimatedCounter value={p.xp} />
                       </td>
-                      <td className="py-3 text-right tabular-nums text-muted-foreground">
+                      <td className="py-3 text-right font-mono text-muted-foreground">
                         {new Date(p.created_at).toLocaleDateString()}
                       </td>
                     </tr>

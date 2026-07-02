@@ -14,7 +14,7 @@ import { AnimatedCounter } from "@/components/animated-counter";
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://learnfrc.systemerr.com";
 
 const GRADIENT_TEXT: CSSProperties = {
-  background: "linear-gradient(120deg,#2560e6,#0d7ea3)",
+  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
@@ -90,7 +90,7 @@ export default async function ArticlePage({
   return (
     <article className="relative mx-auto max-w-3xl px-4 pt-28 pb-20 sm:px-6 lg:px-8">
       {/* Ambient glows */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div
           className="aq-float absolute -top-24 -left-20 h-72 w-72 rounded-full opacity-60 blur-3xl"
           style={{ background: "radial-gradient(circle, rgba(37,96,230,0.20), transparent 70%)" }}
@@ -122,24 +122,24 @@ export default async function ArticlePage({
       <header>
         <Link
           href="/blog"
-          className="aq-rise aq-rise-1 inline-flex min-h-11 items-center gap-1.5 rounded-full py-2 -my-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="aq-rise aq-rise-1 inline-flex items-center gap-1.5 rounded-full text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
         >
-          <ArrowLeft aria-hidden className="h-4 w-4" /> Back to all articles
+          <ArrowLeft className="h-4 w-4" /> Back to all articles
         </Link>
 
         <div className="aq-rise aq-rise-2 mt-6 flex flex-wrap items-center gap-2.5">
           <span className="aq-chip aq-badge-bob inline-flex items-center gap-1.5">
-            <BookOpen aria-hidden className="h-3.5 w-3.5" /> Guide
+            <BookOpen className="h-3.5 w-3.5" /> Guide
           </span>
           <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Clock aria-hidden className="h-3.5 w-3.5" /> {a.readMins} min read
+            <Clock className="h-3.5 w-3.5" /> {a.readMins} min read
           </span>
           <span aria-hidden className="text-border">•</span>
           <time
             dateTime={a.date}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"
           >
-            <Calendar aria-hidden className="h-3.5 w-3.5" /> {formattedDate}
+            <Calendar className="h-3.5 w-3.5" /> {formattedDate}
           </time>
         </div>
 
@@ -184,17 +184,17 @@ export default async function ArticlePage({
               <Link
                 key={r.slug}
                 href={`/blog/${r.slug}`}
-                className="aq-reveal aq-card aq-card-hover group flex flex-col gap-3 p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="aq-reveal aq-card aq-card-hover group flex flex-col gap-3 p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                 style={{ animationDelay: `${i * 90}ms` } as CSSProperties}
               >
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Clock aria-hidden className="h-3 w-3" /> {r.readMins} min read
+                  <Clock className="h-3 w-3" /> {r.readMins} min read
                 </span>
                 <h3 className="aq-display font-semibold leading-snug tracking-tight transition-colors group-hover:text-primary">
                   {r.title}
                 </h3>
                 <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-primary">
-                  Read <ArrowRight aria-hidden className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  Read <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </span>
               </Link>
             ))}
@@ -209,7 +209,7 @@ export default async function ArticlePage({
           style={{ "--a": "#2560e6" } as CSSProperties}
         >
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl aq-icon aq-badge-bob">
-            <BookOpen aria-hidden className="h-6 w-6 text-primary" />
+            <BookOpen className="h-6 w-6 text-primary" />
           </div>
           <h2 className="aq-display text-2xl font-bold tracking-tight">
             Learn every department of FRC —{" "}
@@ -241,7 +241,7 @@ export default async function ArticlePage({
           </div>
           <Button asChild variant="brand" className="mt-6">
             <Link href="/guides">
-              Browse the guides <ArrowRight aria-hidden className="h-4 w-4" />
+              Browse the guides <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>

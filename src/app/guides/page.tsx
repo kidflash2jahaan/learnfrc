@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 const HEADLINE_GRADIENT: CSSProperties = {
-  background: "linear-gradient(120deg,#2560e6,#1487b0)",
+  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
@@ -70,7 +70,7 @@ export default async function GuidesPage() {
       label: "Lessons",
       value: totalLessons,
       icon: BookOpen,
-      accent: "#1663c7",
+      accent: "#7c5cff",
     },
   ];
 
@@ -102,7 +102,7 @@ export default async function GuidesPage() {
             top: "22rem",
             left: "40%",
             background:
-              "radial-gradient(circle, rgba(22,99,199,0.2), transparent 70%)",
+              "radial-gradient(circle, rgba(124,92,255,0.2), transparent 70%)",
           }}
         />
       </div>
@@ -112,7 +112,7 @@ export default async function GuidesPage() {
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="max-w-2xl">
             <p className="aq-eyebrow aq-rise aq-rise-1">
-              <Compass className="h-4 w-4" aria-hidden="true" focusable="false" />
+              <Compass className="h-4 w-4" />
               Pick your department
             </p>
 
@@ -123,7 +123,7 @@ export default async function GuidesPage() {
               </span>
             </h1>
 
-            <p className="aq-rise aq-rise-3 mt-5 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
+            <p className="aq-rise aq-rise-3 mt-5 max-w-xl text-pretty text-lg leading-relaxed text-foreground/70">
               The whole map of build season in one place. Every track is a
               complete curriculum — structured modules and example-rich lessons
               that carry you from your first day in the pit to robot-ready.
@@ -135,7 +135,7 @@ export default async function GuidesPage() {
                 className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
               >
                 Start with the basics
-                <ArrowRight className="h-4 w-4" aria-hidden="true" focusable="false" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/glossary"
@@ -153,12 +153,12 @@ export default async function GuidesPage() {
                 className="aq-badge aq-badge-bob flex h-9 w-9 items-center justify-center rounded-xl"
                 style={{ "--a": "#2560e6" } as CSSProperties}
               >
-                <Compass className="h-5 w-5" aria-hidden="true" focusable="false" />
+                <Compass className="h-5 w-5" />
               </span>
               <div className="font-display text-lg font-semibold text-foreground">
                 The department map
               </div>
-              <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-foreground/60">
                 <span
                   className="aq-pulse inline-block h-2 w-2 rounded-full"
                   style={{ "--a": "#2560e6", background: "#2560e6" } as CSSProperties}
@@ -167,7 +167,7 @@ export default async function GuidesPage() {
               </span>
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+            <div className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
               {stats.map((s, i) => {
                 const StatIcon = s.icon;
                 return (
@@ -185,12 +185,12 @@ export default async function GuidesPage() {
                       className="aq-badge aq-badge-bob mx-auto flex h-9 w-9 items-center justify-center rounded-xl"
                       style={{ "--a": s.accent } as CSSProperties}
                     >
-                      <StatIcon className="h-5 w-5" aria-hidden="true" focusable="false" />
+                      <StatIcon className="h-5 w-5" />
                     </span>
                     <div className="mt-3 font-display text-3xl font-bold text-foreground">
                       <AnimatedCounter value={s.value} />
                     </div>
-                    <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-foreground">
+                    <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-foreground/70">
                       {s.label}
                     </div>
                   </div>
@@ -199,7 +199,7 @@ export default async function GuidesPage() {
             </div>
 
             <div className="aq-divider mt-6" />
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-4 text-sm leading-relaxed text-foreground/70">
               Every path starts from zero and ends robot-ready — and all of it
               is 100% free, in the spirit of gracious professionalism.
             </p>
@@ -211,7 +211,7 @@ export default async function GuidesPage() {
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div className="aq-reveal">
               <p className="aq-eyebrow">
-                <Layers className="h-4 w-4" aria-hidden="true" focusable="false" />
+                <Layers className="h-4 w-4" />
                 Every track, mapped
               </p>
               <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">

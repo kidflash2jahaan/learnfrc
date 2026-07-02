@@ -4,8 +4,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Crown } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
-import { AnimatedCounter } from "@/components/animated-counter";
-import { inkFor } from "@/lib/departments";
+import { NeonCounter } from "@/components/motion/terminal";
 import { cn } from "@/lib/utils";
 
 export type PodiumEntry = {
@@ -24,14 +23,12 @@ export type PodiumEntry = {
 
 const ROW_EASE = [0.21, 0.47, 0.32, 0.98] as const;
 
-/** Per-rank treatment. Rank 1 (gold) is centered & elevated. */
+/** Per-rank neon treatment. Rank 1 (gold) is centered & elevated. */
 const RANK_STYLE: Record<
   number,
   {
-    /** bright accent hex — used only for fills/badges/rings */
+    /** css color var for the rank accent */
     accent: string;
-    /** darkened, legible-on-light tone — used for accent-colored TEXT/numbers */
-    ink: string;
     label: string;
     order: string;
     delay: number;
@@ -40,25 +37,22 @@ const RANK_STYLE: Record<
   }
 > = {
   1: {
-    accent: "#ffd23d",
-    ink: inkFor("#ffd23d"),
-    label: "Rank 01",
+    accent: "var(--gold)",
+    label: "RANK 01",
     order: "order-first sm:order-2",
     delay: 0,
     lift: "sm:-translate-y-4",
   },
   2: {
-    accent: "#22d3ee",
-    ink: inkFor("#22d3ee"),
-    label: "Rank 02",
+    accent: "var(--accent)",
+    label: "RANK 02",
     order: "order-2 sm:order-1",
     delay: 0.08,
     lift: "",
   },
   3: {
-    accent: "#ff3dcb",
-    ink: inkFor("#ff3dcb"),
-    label: "Rank 03",
+    accent: "var(--magenta)",
+    label: "RANK 03",
     order: "order-3 sm:order-3",
     delay: 0.16,
     lift: "",
@@ -70,7 +64,6 @@ function PodiumColumn({ entry }: { entry: PodiumEntry }) {
   const s = RANK_STYLE[entry.rank] ?? RANK_STYLE[3];
   const isFirst = entry.rank === 1;
   const accent = s.accent;
-  const ink = s.ink;
 
   const NameTag = (
     <span className="block max-w-[12rem] truncate font-display text-base font-semibold tracking-tight sm:text-lg">
@@ -88,18 +81,27 @@ function PodiumColumn({ entry }: { entry: PodiumEntry }) {
     >
       <div
         className={cn(
-          "aq-card group relative overflow-hidden px-5 pb-6 pt-7 text-center",
+          "group relative overflow-hidden rounded-2xl border bg-card/70 px-5 pb-6 pt-7 text-center backdrop-blur-md transition-shadow",
           isFirst ? "sm:px-6 sm:pb-8 sm:pt-9" : ""
         )}
         style={{
           borderColor: `color-mix(in srgb, ${accent} 38%, var(--border))`,
+          boxShadow: `0 0 0 1px color-mix(in srgb, ${accent} 18%, transparent), 0 28px 60px -42px color-mix(in srgb, ${accent} 70%, transparent)`,
         }}
       >
+        {/* top radial glow */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -top-12 h-32 opacity-70"
+          style={{
+            background: `radial-gradient(closest-side, color-mix(in srgb, ${accent} 24%, transparent), transparent)`,
+          }}
+        />
+
         {/* rank tag */}
         <span
-          className="aq-eyebrow absolute right-4 top-4 text-[0.68rem] tracking-[0.16em]"
-          style={{ color: ink }}
-          aria-hidden
+          className="absolute right-4 top-4 font-mono text-[0.62rem] tracking-[0.16em]"
+          style={{ color: `color-mix(in srgb, ${accent} 75%, var(--muted-foreground))` }}
         >
           {s.label}
         </span>
@@ -113,12 +115,20 @@ function PodiumColumn({ entry }: { entry: PodiumEntry }) {
             className="mb-2 flex justify-center"
             aria-hidden
           >
-            <Crown className="h-6 w-6" style={{ color: ink }} />
+            <Crown
+              className="h-6 w-6 drop-shadow"
+              style={{ color: accent, filter: `drop-shadow(0 0 8px ${accent})` }}
+            />
           </motion.div>
         )}
 
         {/* avatar + medal chip */}
         <div className="relative mx-auto w-fit">
+          <div
+            aria-hidden
+            className="absolute -inset-1 rounded-2xl opacity-60 blur-md"
+            style={{ background: accent }}
+          />
           <div
             className="relative rounded-2xl p-[2px]"
             style={{ backgroundImage: `linear-gradient(135deg, ${accent}, color-mix(in srgb, ${accent} 30%, transparent))` }}
@@ -134,9 +144,9 @@ function PodiumColumn({ entry }: { entry: PodiumEntry }) {
             />
           </div>
           <span
-            aria-hidden
-            className="absolute -bottom-2.5 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border-2 border-background font-display text-xs font-bold"
-            style={{ background: accent, color: "var(--foreground)" }}
+            className="absolute -bottom-2.5 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border-2 border-background font-mono text-xs font-bold"
+            style={{ background: accent, color: "var(--background)" }}
+            aria-label={`Rank ${entry.rank}`}
           >
             {entry.rank}
           </span>
@@ -147,17 +157,17 @@ function PodiumColumn({ entry }: { entry: PodiumEntry }) {
           {entry.username ? (
             <Link
               href={`/u/${entry.username}`}
-              className="-my-2 inline-flex min-h-[44px] items-center justify-center rounded-md px-2 py-2 outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-block rounded-sm outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
             >
               {NameTag}
             </Link>
           ) : (
             NameTag
           )}
-          <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5 text-sm text-muted-foreground">
+          <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5 font-mono text-[0.72rem] text-muted-foreground">
             {entry.isYou && (
-              <span className="aq-chip px-1.5 py-0.5 font-semibold text-primary">
-                You
+              <span className="rounded bg-primary/15 px-1.5 py-0.5 font-semibold text-primary">
+                YOU
               </span>
             )}
             {entry.teamNumber != null && <span>Team {entry.teamNumber}</span>}
@@ -169,17 +179,17 @@ function PodiumColumn({ entry }: { entry: PodiumEntry }) {
         <div className="mt-5">
           <span
             className="font-display text-2xl font-bold tabular-nums tracking-tight sm:text-3xl"
-            style={{ color: ink }}
+            style={{ color: accent, textShadow: `0 0 24px color-mix(in srgb, ${accent} 45%, transparent)` }}
           >
-            <AnimatedCounter value={entry.xp} />
+            <NeonCounter to={entry.xp} />
           </span>
-          <span className="ml-1 text-[0.68rem] uppercase tracking-[0.12em] text-muted-foreground">
+          <span className="ml-1 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-muted-foreground">
             XP
           </span>
         </div>
 
         {/* plinth */}
-        <div className="mt-5 border-t border-border pt-3 text-xs tracking-wide text-muted-foreground">
+        <div className="mt-5 border-t border-border pt-3 font-mono text-[0.7rem] tracking-wide text-muted-foreground">
           Lvl {entry.level} · {entry.lessons} lessons
         </div>
       </div>
@@ -255,14 +265,14 @@ function LeaderRow({ entry }: { entry: PodiumEntry }) {
       {entry.isYou && (
         <span
           aria-hidden
-          className="absolute inset-y-0 left-0 w-1 rounded-r bg-primary"
+          className="absolute inset-y-0 left-0 w-1 rounded-r bg-primary shadow-[0_0_12px_var(--primary)]"
         />
       )}
 
       {/* rank */}
       <span
         className={cn(
-          "w-7 shrink-0 text-center font-display text-sm font-bold tabular-nums sm:w-9 sm:text-base",
+          "w-7 shrink-0 text-center font-mono text-sm font-bold tabular-nums sm:w-9 sm:text-base",
           entry.isYou ? "text-primary" : "text-muted-foreground"
         )}
       >
@@ -286,7 +296,7 @@ function LeaderRow({ entry }: { entry: PodiumEntry }) {
           {entry.username ? (
             <Link
               href={`/u/${entry.username}`}
-              className="-my-2 inline-flex min-h-[44px] min-w-0 items-center rounded-md py-2 outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
+              className="min-w-0 rounded-sm outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
             >
               {NameTag}
             </Link>
@@ -294,15 +304,12 @@ function LeaderRow({ entry }: { entry: PodiumEntry }) {
             <span className="min-w-0">{NameTag}</span>
           )}
           {entry.isYou && (
-            <span
-              className="aq-badge shrink-0 px-1.5 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.1em]"
-              style={{ ["--a" as string]: "var(--primary)" }}
-            >
+            <span className="shrink-0 rounded bg-primary px-1.5 py-0.5 font-mono text-[0.58rem] font-bold uppercase tracking-[0.1em] text-primary-foreground">
               You
             </span>
           )}
         </div>
-        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.72rem] text-muted-foreground">
           {entry.teamNumber != null && (
             <span className="text-foreground/70">Team {entry.teamNumber}</span>
           )}
@@ -312,25 +319,25 @@ function LeaderRow({ entry }: { entry: PodiumEntry }) {
 
       {/* level badge */}
       <span
-        className="hidden shrink-0 items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline-flex"
+        className="hidden shrink-0 items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 font-mono text-xs font-semibold text-primary sm:inline-flex"
         aria-label={`Level ${entry.level}`}
       >
         Lvl {entry.level}
       </span>
 
       {/* lessons */}
-      <span className="hidden w-20 shrink-0 text-right text-xs text-muted-foreground md:block">
+      <span className="hidden w-20 shrink-0 text-right font-mono text-xs text-muted-foreground md:block">
         <span className="font-semibold text-foreground/80">{entry.lessons}</span> done
       </span>
 
       {/* XP */}
       <span
         className={cn(
-          "w-16 shrink-0 text-right font-display text-sm font-bold tabular-nums sm:w-24 sm:text-base",
+          "w-16 shrink-0 text-right font-mono text-sm font-bold tabular-nums sm:w-24 sm:text-base",
           entry.isYou ? "text-primary" : "text-foreground"
         )}
       >
-        <AnimatedCounter value={entry.xp} />
+        <NeonCounter to={entry.xp} />
         <span className="ml-1 text-[0.6rem] font-medium uppercase text-muted-foreground">
           xp
         </span>

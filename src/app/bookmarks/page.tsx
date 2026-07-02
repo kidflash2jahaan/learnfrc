@@ -104,7 +104,7 @@ export default async function BookmarksPage() {
       <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
           <span className="aq-eyebrow aq-rise aq-rise-1">
-            <Bookmark aria-hidden className="h-3.5 w-3.5" />
+            <Bookmark className="h-3.5 w-3.5" />
             Saved for later
           </span>
           <h1 className="aq-display aq-rise aq-rise-2 mt-3 text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
@@ -124,11 +124,11 @@ export default async function BookmarksPage() {
           {total > 0 && (
             <div className="aq-rise aq-rise-4 mt-6 flex flex-wrap items-center gap-3">
               <Link href="/guides" className="aq-cta">
-                <Compass aria-hidden className="h-4 w-4" />
+                <Compass className="h-4 w-4" />
                 Browse guides
               </Link>
               <Link href="/guides/getting-started" className="aq-ghost">
-                <Sparkles aria-hidden className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" />
                 Start with the basics
               </Link>
             </div>
@@ -141,13 +141,13 @@ export default async function BookmarksPage() {
               className="aq-badge aq-badge-bob grid h-11 w-11 place-items-center"
               style={{ "--a": "#2560e6" } as CSSProperties}
             >
-              <Bookmark aria-hidden className="h-5 w-5" />
+              <Bookmark className="h-5 w-5" />
             </div>
             <div>
               <div className="aq-display text-3xl font-bold leading-none text-foreground">
                 <AnimatedCounter value={total} />
               </div>
-              <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
+              <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
                 saved {total === 1 ? "lesson" : "lessons"}
               </div>
             </div>
@@ -164,7 +164,7 @@ export default async function BookmarksPage() {
               className="aq-badge aq-badge-bob mx-auto grid h-16 w-16 place-items-center"
               style={{ "--a": "#2560e6" } as CSSProperties}
             >
-              <BookmarkX aria-hidden className="h-8 w-8" />
+              <BookmarkX className="h-8 w-8" />
             </div>
             <h2 className="aq-display aq-reveal mt-6 text-2xl font-bold tracking-tight">
               No bookmarks yet
@@ -192,7 +192,7 @@ export default async function BookmarksPage() {
               style={{ animationDelay: "220ms" } as CSSProperties}
             >
               <Link href="/guides" className="aq-cta">
-                <Compass aria-hidden className="h-4 w-4" />
+                <Compass className="h-4 w-4" />
                 Explore the guides
               </Link>
               <Link href="/guides/getting-started" className="aq-ghost">
@@ -206,7 +206,7 @@ export default async function BookmarksPage() {
           <div className="aq-reveal mt-8 flex items-center justify-between gap-4">
             <span className="aq-eyebrow">Every acronym, decoded</span>
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span aria-hidden className="aq-pulse inline-block h-2 w-2 rounded-full bg-[#2560e6]" />
+              <span className="aq-pulse inline-block h-2 w-2 rounded-full bg-[#2560e6]" />
               Newest first
             </span>
           </div>
