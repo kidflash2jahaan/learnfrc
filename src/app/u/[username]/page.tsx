@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Calendar, Zap, Trophy, BookOpen } from "lucide-react";
+import { Calendar, Zap, Trophy, BookOpen, Medal, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Avatar } from "@/components/ui/avatar";
@@ -10,6 +10,7 @@ import { Icon } from "@/lib/icon-map";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { ShareButton } from "@/components/profile/share-button";
 import { AnimatedCounter } from "@/components/animated-counter";
+import { TrophyRing } from "./_trophy-ring";
 import type { Profile } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -31,6 +32,15 @@ const ROLE_LABEL: Record<string, string> = {
   other: "Member",
 };
 
+/** Rank tiers earned by level — the trophy card's headline honor. */
+function tierFor(level: number): { name: string; color: string } {
+  if (level >= 25) return { name: "Champion", color: "#e0a415" };
+  if (level >= 15) return { name: "All-Star", color: "#8b7fff" };
+  if (level >= 8) return { name: "Veteran", color: "#1aa9d6" };
+  if (level >= 3) return { name: "Contender", color: "#2560e6" };
+  return { name: "Rookie", color: "#12b565" };
+}
+
 export default async function PublicProfilePage({
   params,
 }: {
@@ -50,6 +60,11 @@ export default async function PublicProfilePage({
   const displayName =
     (p.hide_name ? p.username : p.full_name || p.username) || username;
   const level = Math.floor(p.xp / 100) + 1;
+  const xpIntoLevel = p.xp % 100;
+  const xpToNext = 100 - xpIntoLevel;
+  const levelFraction = xpIntoLevel / 100;
+  const tier = tierFor(level);
+
   // Real completed-lesson count (lesson_progress is RLS-private → admin client).
   const { count: lessonsCount } = await createAdminClient()
     .from("lesson_progress")
@@ -71,78 +86,134 @@ export default async function PublicProfilePage({
     })
     .filter(Boolean) as Ach[];
 
+  const joined = new Date(p.created_at).toLocaleDateString(undefined, {
+    month: "short",
+    year: "numeric",
+  });
+
   const stats = [
-    { label: "XP", value: p.xp, icon: Zap, color: "#2560e6" },
+    { label: "Total XP", value: p.xp, icon: Zap, color: "#2560e6" },
     { label: "Level", value: level, icon: Trophy, color: "#1aa9d6" },
     { label: "Lessons", value: lessons, icon: BookOpen, color: "#12b565" },
-    { label: "Badges", value: achievements.length, icon: Trophy, color: "#e0a415" },
+    { label: "Badges", value: achievements.length, icon: Medal, color: "#e0a415" },
   ];
 
   return (
     <main className="relative overflow-hidden">
-      {/* Ambient light glows the glass refracts */}
+      {/* Ambient light the trophy-card glass refracts */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-[-8%] h-[440px] w-[720px] -translate-x-1/2 rounded-full bg-primary/25 opacity-60 blur-3xl" />
-        <div className="absolute right-[6%] top-[24%] h-[320px] w-[320px] rounded-full bg-accent/25 opacity-50 blur-3xl" />
-        <div className="absolute left-[4%] top-[46%] h-[300px] w-[300px] rounded-full bg-[#8b7fff]/20 opacity-50 blur-3xl" />
+        <div className="aq-float absolute left-1/2 top-[-8%] h-[440px] w-[720px] -translate-x-1/2 rounded-full bg-primary/25 opacity-60 blur-3xl" />
+        <div className="aq-float absolute right-[6%] top-[22%] h-[320px] w-[320px] rounded-full bg-accent/25 opacity-50 blur-3xl" />
+        <div className="aq-float absolute left-[3%] top-[44%] h-[300px] w-[300px] rounded-full bg-[#e0a415]/15 opacity-50 blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-4xl px-4 pt-28 pb-20 sm:px-6 lg:px-8">
-        {/* Hero — the learner card, front and center */}
-        <Reveal>
-          <div className="aq-glass aq-sheen aq-rise aq-rise-1 relative overflow-hidden rounded-[28px] p-8 sm:p-10">
+        <p className="aq-eyebrow aq-rise aq-rise-1 flex items-center gap-1.5">
+          <Sparkles aria-hidden className="h-3.5 w-3.5" />
+          Learner trophy card
+        </p>
+
+        {/* ============ SIGNATURE: the shareable trophy card ============ */}
+        <Reveal className="mt-3">
+          <div className="aq-glass aq-sheen aq-rise aq-rise-2 relative overflow-hidden rounded-[32px] p-6 sm:p-9">
+            {/* tier ribbon glow */}
             <div
               aria-hidden
-              className="aq-float pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/15 blur-3xl"
+              className="aq-float pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full blur-3xl"
+              style={{ background: `${tier.color}33` }}
             />
-            <div className="relative flex flex-col items-center text-center sm:flex-row sm:items-center sm:text-left sm:gap-7">
-              <Avatar
-                name={displayName}
-                src={p.avatar_url}
-                seed={p.id}
-                className="aq-badge-bob aq-rise aq-rise-1 h-28 w-28 shrink-0 text-3xl shadow-[0_16px_38px_rgba(40,80,150,0.22)] ring-4 ring-white/80"
-              />
-              <div className="mt-5 min-w-0 sm:mt-0">
-                <p className="aq-eyebrow aq-rise aq-rise-1 justify-center sm:justify-start">
-                  Learner profile
-                </p>
-                <h1 className="aq-display aq-rise aq-rise-2 mt-2 text-4xl font-extrabold leading-tight sm:text-5xl">
-                  <span
-                    className="aq-grad-anim"
-                    style={{
-                      background:
-                        "linear-gradient(120deg,#2560e6,#1478a0,#0e8f4f,#2560e6)",
-                      WebkitBackgroundClip: "text",
-                      backgroundClip: "text",
-                      color: "transparent",
-                    }}
-                  >
-                    {displayName}
-                  </span>
-                </h1>
-                <p className="aq-rise aq-rise-2 mt-1 text-sm text-muted-foreground">
-                  @{p.username}
-                </p>
-                <div className="aq-rise aq-rise-3 mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+
+            <div className="relative grid gap-8 sm:grid-cols-[auto_1fr] sm:items-center">
+              {/* Left: medallion — the level ring wrapping the avatar */}
+              <div className="aq-rise aq-rise-2 flex flex-col items-center gap-4">
+                <TrophyRing level={level} fraction={levelFraction} />
+                <span
+                  className="aq-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.1em]"
+                  style={{ "--a": tier.color } as CSSProperties}
+                >
+                  <Trophy aria-hidden className="h-3.5 w-3.5" />
+                  {tier.name}
+                </span>
+              </div>
+
+              {/* Right: identity + XP progress rail */}
+              <div className="min-w-0 text-center sm:text-left">
+                <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+                  <Avatar
+                    name={displayName}
+                    src={p.avatar_url}
+                    seed={p.id}
+                    className="aq-badge-bob h-16 w-16 shrink-0 text-xl shadow-[0_12px_30px_rgba(40,80,150,0.22)] ring-4 ring-white/80"
+                  />
+                  <div className="min-w-0">
+                    <h1 className="aq-display aq-rise aq-rise-3 text-3xl font-extrabold leading-tight sm:text-4xl">
+                      <span
+                        className="aq-grad-anim"
+                        style={{
+                          background:
+                            "linear-gradient(120deg,#2560e6,#1aa9d6,#e0a415,#2560e6)",
+                          WebkitBackgroundClip: "text",
+                          backgroundClip: "text",
+                          color: "transparent",
+                        }}
+                      >
+                        {displayName}
+                      </span>
+                    </h1>
+                    <p className="aq-rise aq-rise-3 mt-0.5 text-sm text-muted-foreground">
+                      @{p.username}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="aq-rise aq-rise-4 mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                   <Badge variant="primary">{ROLE_LABEL[p.role] ?? "Member"}</Badge>
                   {p.team_number && (
                     <Badge variant="accent">Team {p.team_number}</Badge>
                   )}
                   <Badge variant="outline">
                     <Calendar aria-hidden className="h-3 w-3" />
-                    Joined{" "}
-                    {new Date(p.created_at).toLocaleDateString(undefined, {
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    Joined {joined}
                   </Badge>
                 </div>
+
                 {p.bio && (
-                  <p className="aq-rise aq-rise-3 mt-4 max-w-md text-pretty text-base leading-relaxed text-foreground/70">
+                  <p className="aq-rise aq-rise-4 mt-4 max-w-md text-pretty text-base leading-relaxed text-foreground/70">
                     {p.bio}
                   </p>
                 )}
-                <div className="aq-rise aq-rise-4 mt-6 flex justify-center sm:justify-start">
+
+                {/* XP progress-to-next-level rail */}
+                <div className="aq-rise aq-rise-5 mt-5">
+                  <div className="mb-1.5 flex items-baseline justify-between gap-3 text-sm">
+                    <span className="font-semibold text-foreground">
+                      Level {level}
+                    </span>
+                    <span className="tabular-nums text-muted-foreground">
+                      <AnimatedCounter value={xpToNext} /> XP to level{" "}
+                      {level + 1}
+                    </span>
+                  </div>
+                  <div
+                    className="h-2.5 overflow-hidden rounded-full bg-[rgba(120,145,190,.24)]"
+                    role="progressbar"
+                    aria-valuenow={xpIntoLevel}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${xpIntoLevel} of 100 XP toward level ${level + 1}`}
+                  >
+                    <span
+                      className="aq-bar-anim block h-full rounded-full"
+                      style={{
+                        width: `${Math.max(levelFraction * 100, 3)}%`,
+                        background:
+                          "linear-gradient(90deg,#2560e6,#1aa9d6,#e0a415)",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="aq-rise aq-rise-5 mt-6 flex justify-center sm:justify-start">
                   <ShareButton username={username} name={displayName} />
                 </div>
               </div>
@@ -150,8 +221,8 @@ export default async function PublicProfilePage({
           </div>
         </Reveal>
 
-        {/* Stats — a row of clay tiles */}
-        <Stagger className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {/* ================== Stat ribbon — clay tiles ================== */}
+        <Stagger className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {stats.map((s, i) => (
             <StaggerItem key={s.label}>
               <div
@@ -177,13 +248,13 @@ export default async function PublicProfilePage({
           ))}
         </Stagger>
 
-        {/* Achievements — earned badges */}
+        {/* ================= Medal wall — achievements ================= */}
         <Reveal className="mt-12">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <p className="aq-eyebrow">Every badge, earned</p>
               <h2 className="aq-display mt-2 text-2xl font-bold sm:text-3xl">
-                Achievements
+                Medal wall
               </h2>
             </div>
             {achievements.length > 0 && (
@@ -196,10 +267,10 @@ export default async function PublicProfilePage({
           {achievements.length === 0 ? (
             <div className="aq-card aq-reveal flex flex-col items-center gap-3 rounded-3xl border-dashed p-10 text-center">
               <span className="aq-icon aq-badge-bob flex h-12 w-12 items-center justify-center">
-                <Trophy aria-hidden className="h-6 w-6" />
+                <Medal aria-hidden className="h-6 w-6" />
               </span>
               <p className="text-base text-foreground/70">
-                No badges yet — the first ones unlock during build season.
+                No medals yet — the first ones unlock during build season.
               </p>
             </div>
           ) : (
@@ -211,8 +282,8 @@ export default async function PublicProfilePage({
                     style={{ animationDelay: `${i * 70}ms` } as CSSProperties}
                   >
                     <span
-                      className="aq-badge aq-badge-bob flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-                      style={{ "--a": "#2560e6" } as CSSProperties}
+                      className="aq-badge aq-badge-bob flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110"
+                      style={{ "--a": "#e0a415" } as CSSProperties}
                     >
                       <Icon name={a.icon} className="h-6 w-6" />
                     </span>

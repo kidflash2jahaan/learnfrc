@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Clock, Sparkles } from "lucide-react";
-import { ARTICLES } from "@/lib/blog-data";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  Clock,
+  Newspaper,
+  Sparkles,
+  Star,
+} from "lucide-react";
+import { ARTICLES, type Article } from "@/lib/blog-data";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { AnimatedCounter } from "@/components/animated-counter";
 
@@ -30,172 +38,259 @@ function fmtDate(d: string) {
   });
 }
 
+/**
+ * Derive an editorial "desk" (topic) for an article from its slug/keywords.
+ * Purely presentational grouping — no data is invented or dropped.
+ */
+const DESKS: { label: string; color: string; test: RegExp }[] = [
+  { label: "Getting Started", color: "#2560e6", test: /start|what-is|beginner|join/i },
+  { label: "Drivetrain", color: "#1aa9d6", test: /swerve|drivetrain|gear|mecanum|tank/i },
+  { label: "Programming", color: "#7c5cff", test: /program|wpilib|code|software/i },
+  { label: "Electrical", color: "#e0803a", test: /wire|electrical|power|can-bus/i },
+  { label: "CAD & Design", color: "#12b565", test: /cad|design|onshape|solidworks/i },
+  { label: "Scouting", color: "#d64b8a", test: /scout|picklist|strategy|opr|epa/i },
+  { label: "Awards & Business", color: "#c9a227", test: /impact|award|sponsor|fund|business/i },
+];
+
+function deskFor(a: Article) {
+  const hay = `${a.slug} ${a.keywords.join(" ")}`;
+  return DESKS.find((d) => d.test.test(hay)) ?? { label: "Field Notes", color: "#4d5b78" };
+}
+
 export default function BlogPage() {
   const articles = [...ARTICLES].sort((a, b) => b.date.localeCompare(a.date));
   const [featured, ...rest] = articles;
   const totalMins = articles.reduce((sum, a) => sum + a.readMins, 0);
+  const deskCount = new Set(articles.map((a) => deskFor(a).label)).size;
+  const featuredDesk = featured ? deskFor(featured) : null;
 
   return (
-    <div className="relative mx-auto max-w-6xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
-      {/* ambient glows */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div
-          className="absolute -top-24 left-[8%] h-72 w-72 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(37,96,230,0.20), transparent 70%)" }}
+    <div
+      data-theme="arena"
+      className="aq-root relative isolate overflow-hidden text-foreground"
+    >
+      {/* ambient light the glass refracts */}
+      <div className="aq-glow" aria-hidden>
+        <span
+          className="h-[620px] w-[620px] opacity-70"
+          style={{
+            left: "-180px",
+            top: "-200px",
+            background: "radial-gradient(circle, #8bbcff, transparent 70%)",
+          }}
         />
-        <div
-          className="absolute top-40 right-[4%] h-80 w-80 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(26,169,214,0.18), transparent 70%)" }}
+        <span
+          className="h-[560px] w-[560px] opacity-55"
+          style={{
+            right: "-160px",
+            top: "-120px",
+            background: "radial-gradient(circle, #6ff0ea, transparent 70%)",
+          }}
         />
-        <div
-          className="absolute top-[46rem] left-[30%] h-72 w-72 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(139,92,246,0.14), transparent 70%)" }}
+        <span
+          className="h-[520px] w-[520px] opacity-45"
+          style={{
+            left: "30%",
+            top: "620px",
+            background: "radial-gradient(circle, #c8b6ff, transparent 70%)",
+          }}
         />
       </div>
 
-      {/* Hero */}
-      <header className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-        <div>
-          <span className="aq-eyebrow aq-rise aq-rise-1 aq-badge-bob">
-            <BookOpen className="h-3.5 w-3.5" /> Read between build seasons
-          </span>
-          <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-            FRC guides,{" "}
-            <span
-              className="aq-grad-anim"
-              style={{
-                background: "linear-gradient(120deg,#1e4fc4,#0e7d9e)",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                color: "transparent",
-              }}
-            >
-              decoded for the pit
+      {/* ============================ MASTHEAD ============================ */}
+      <section className="mx-auto max-w-7xl px-4 pb-4 pt-20 sm:px-6 sm:pt-28 lg:px-8">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <span className="aq-eyebrow aq-rise aq-rise-1 aq-badge-bob inline-flex items-center gap-2">
+              <Newspaper className="h-3.5 w-3.5" aria-hidden="true" /> The LearnFRC
+              Reader
             </span>
-          </h1>
-          <p className="aq-rise aq-rise-3 mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Practical, no-fluff walkthroughs of the parts of FRC people search for
-            most — starting a team, understanding swerve, and winning the Impact
-            Award. Free, written by an FRC student.
-          </p>
-          <div className="aq-rise aq-rise-4 mt-8 flex flex-wrap items-center gap-3">
-            {featured && (
-              <Link href={`/blog/${featured.slug}`} className="aq-cta">
-                Start with the latest
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            )}
-            <span className="aq-chip">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <AnimatedCounter value={articles.length} /> guides ·{" "}
-              <AnimatedCounter value={totalMins} /> min of reading
-            </span>
+            <h1 className="aq-display aq-rise aq-rise-2 mt-3 text-balance text-4xl font-extrabold leading-[1.02] sm:text-5xl lg:text-[3.3rem]">
+              FRC guides,{" "}
+              <span
+                className="aq-grad-anim"
+                style={{
+                  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                decoded for the pit.
+              </span>
+            </h1>
+            <p className="aq-rise aq-rise-3 mt-4 max-w-2xl text-pretty text-lg leading-relaxed text-foreground/70">
+              Practical, no-fluff walkthroughs of the parts of FRC people search
+              for most — starting a team, understanding swerve, winning the
+              Impact Award. Free, written by an FRC student, filed by desk.
+            </p>
           </div>
 
-          {/* Quick stats */}
-          <div className="aq-rise aq-rise-5 mt-8 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-            <div className="aq-glass rounded-2xl p-4 text-center">
-              <div className="aq-display text-2xl font-bold text-primary">
+          {/* running-count ticker */}
+          <div className="aq-rise aq-rise-4 shrink-0">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-4 py-2 text-sm text-muted-foreground shadow-sm backdrop-blur">
+              <span className="aq-pulse inline-block h-2 w-2 rounded-full bg-primary" />
+              <b className="font-semibold text-foreground">
                 <AnimatedCounter value={articles.length} />
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">Guides published</div>
-            </div>
-            <div className="aq-glass rounded-2xl p-4 text-center">
-              <div className="aq-display text-2xl font-bold text-primary">
-                <AnimatedCounter value={totalMins} suffix=" min" />
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">Total reading</div>
-            </div>
-            <div className="aq-glass rounded-2xl p-4 text-center">
-              <div className="aq-display text-2xl font-bold text-primary">
-                <AnimatedCounter value={100} suffix="%" />
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">Free, always</div>
-            </div>
+              </b>{" "}
+              guides in print
+            </span>
           </div>
         </div>
 
-        {/* Featured guide panel */}
-        {featured && (
+        {/* editorial stat rule */}
+        <div className="aq-rise aq-rise-5 mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/70 bg-border/60 sm:grid-cols-4">
+          {[
+            { n: articles.length, suffix: "", l: "Guides published" },
+            { n: totalMins, suffix: " min", l: "Total reading" },
+            { n: deskCount, suffix: "", l: "Editorial desks" },
+            { n: 100, suffix: "%", l: "Free, always" },
+          ].map((s) => (
+            <div key={s.l} className="bg-card/80 px-5 py-4 text-center backdrop-blur">
+              <div className="aq-display text-2xl font-extrabold leading-none text-primary sm:text-3xl">
+                <AnimatedCounter value={s.n} suffix={s.suffix} />
+              </div>
+              <div className="mt-1.5 text-[13px] text-muted-foreground">{s.l}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===================== SIGNATURE: LEAD STORY ===================== */}
+      {featured && featuredDesk && (
+        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <Link
             href={`/blog/${featured.slug}`}
-            className="aq-glass aq-sheen aq-float aq-card-hover aq-rise aq-rise-4 group block rounded-3xl p-6"
+            className="aq-glass aq-sheen aq-rise aq-rise-4 group relative block overflow-hidden rounded-[28px] p-6 sm:p-8"
           >
-            <span className="aq-eyebrow aq-badge-bob">
-              <Sparkles className="h-3.5 w-3.5 text-primary" /> Latest guide
-            </span>
-            <h2 className="aq-display mt-3 text-xl font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
-              {featured.title}
-            </h2>
-            <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-              {featured.description}
-            </p>
-            <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4">
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Clock className="h-3.5 w-3.5" /> {featured.readMins} min ·{" "}
-                {fmtDate(featured.date)}
-              </span>
-              <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                Read
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </span>
+            {/* colored desk wash keyed to the lead article's topic */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-60 blur-3xl transition-opacity duration-500 group-hover:opacity-90"
+              style={{
+                background: `radial-gradient(circle, ${featuredDesk.color}, transparent 70%)`,
+              }}
+            />
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_1.5fr] lg:items-center">
+              {/* giant issue number — the memorable device */}
+              <div className="flex flex-col justify-between gap-6">
+                <div className="flex items-center gap-2">
+                  <span className="aq-eyebrow aq-badge-bob inline-flex items-center gap-1.5">
+                    <Star
+                      className="h-3.5 w-3.5"
+                      style={{ color: featuredDesk.color }}
+                      aria-hidden="true"
+                    />
+                    Lead story
+                  </span>
+                  <span
+                    className="aq-chip"
+                    style={{ "--a": featuredDesk.color } as CSSProperties}
+                  >
+                    {featuredDesk.label}
+                  </span>
+                </div>
+                <div>
+                  <div
+                    className="aq-display font-mono text-7xl font-extrabold leading-none tracking-tighter opacity-90 sm:text-8xl"
+                    style={{
+                      background: `linear-gradient(140deg, ${featuredDesk.color}, #1aa9d6)`,
+                      WebkitBackgroundClip: "text",
+                      backgroundClip: "text",
+                      color: "transparent",
+                    }}
+                    aria-hidden="true"
+                  >
+                    №{String(articles.length).padStart(2, "0")}
+                  </div>
+                  <div className="mt-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" aria-hidden="true" />{" "}
+                    {featured.readMins} min read · {fmtDate(featured.date)}
+                  </div>
+                </div>
+              </div>
+
+              {/* headline + dek */}
+              <div>
+                <h2 className="aq-display text-3xl font-bold leading-[1.08] tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-4xl">
+                  {featured.title}
+                </h2>
+                <p className="mt-4 max-w-2xl text-lg leading-relaxed text-foreground/70">
+                  {featured.description}
+                </p>
+                <span className="mt-6 inline-flex items-center gap-2 text-base font-semibold text-primary">
+                  Read the lead story
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1.5" aria-hidden="true" />
+                </span>
+              </div>
             </div>
           </Link>
-        )}
-      </header>
+        </section>
+      )}
 
-      {/* Article grid */}
-      <Reveal className="mt-20">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <span className="aq-eyebrow aq-reveal">Every guide, sorted by newest</span>
-            <h2 className="aq-display aq-reveal mt-2 text-2xl font-bold tracking-tight sm:text-3xl" style={{ animationDelay: "80ms" } as CSSProperties}>
-              The full library
-            </h2>
+      {/* ========================= THE FULL LIBRARY ======================== */}
+      <section className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <span className="aq-eyebrow">Every guide, newest first</span>
+              <h2 className="aq-display mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+                The full library
+              </h2>
+            </div>
+            <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:inline-flex">
+              <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+              <AnimatedCounter value={rest.length} /> more guides
+            </span>
           </div>
-          <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:inline-flex">
-            <span className="aq-pulse inline-block h-2 w-2 rounded-full bg-primary" />
-            <AnimatedCounter value={articles.length} /> total
-          </span>
-        </div>
-      </Reveal>
+        </Reveal>
 
-      <Stagger className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {rest.map((a, i) => (
-          <StaggerItem key={a.slug} className="h-full">
-            <Link
-              href={`/blog/${a.slug}`}
-              className="aq-card aq-card-hover aq-reveal group flex h-full flex-col p-6"
-              style={{ animationDelay: `${Math.min(i * 60, 360)}ms` } as CSSProperties}
-            >
-              <div className="flex items-center gap-2">
-                <span className="aq-icon aq-badge-bob h-9 w-9">
-                  <BookOpen className="h-4 w-4" />
-                </span>
-                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-                  Guide
-                </span>
-              </div>
-              <h3 className="aq-display mt-4 text-lg font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
-                {a.title}
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                {a.description}
-              </p>
-              <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4">
-                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" /> {a.readMins} min ·{" "}
-                  {fmtDate(a.date)}
-                </span>
-                <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                  Read
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </span>
-              </div>
-            </Link>
-          </StaggerItem>
-        ))}
-      </Stagger>
+        <Stagger className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {rest.map((a, i) => {
+            const desk = deskFor(a);
+            return (
+              <StaggerItem key={a.slug} className="h-full">
+                <Link
+                  href={`/blog/${a.slug}`}
+                  className="aq-card aq-card-hover aq-reveal group flex h-full flex-col p-6"
+                  style={{ animationDelay: `${Math.min(i * 60, 360)}ms` } as CSSProperties}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className="aq-badge aq-badge-bob flex h-9 w-9 items-center justify-center rounded-xl"
+                      style={{ "--a": desk.color } as CSSProperties}
+                    >
+                      <BookOpen className="h-[18px] w-[18px]" aria-hidden="true" />
+                    </span>
+                    <span
+                      className="aq-chip"
+                      style={{ "--a": desk.color } as CSSProperties}
+                    >
+                      {desk.label}
+                    </span>
+                  </div>
+                  <h3 className="aq-display mt-4 text-lg font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
+                    {a.title}
+                  </h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                    {a.description}
+                  </p>
+                  <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4">
+                    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                      {a.readMins} min · {fmtDate(a.date)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                      Read
+                      <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
+                    </span>
+                  </div>
+                </Link>
+              </StaggerItem>
+            );
+          })}
+        </Stagger>
+      </section>
     </div>
   );
 }

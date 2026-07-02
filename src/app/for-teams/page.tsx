@@ -8,12 +8,16 @@ import {
   GraduationCap,
   Award,
   ArrowRight,
+  ArrowUpRight,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { getDepartments } from "@/lib/queries";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, inkFor } from "@/lib/departments";
 import { ICONS } from "@/lib/icon-map";
 import { AnimatedCounter } from "@/components/animated-counter";
+import { Reveal } from "@/components/motion/reveal";
+import { OnboardingRail } from "./_onboarding-rail";
 
 export const metadata: Metadata = {
   title: "LearnFRC for Teams — free onboarding curriculum for FRC teams",
@@ -23,17 +27,20 @@ export const metadata: Metadata = {
 
 const STEPS = [
   {
-    icon: Hash,
+    n: "01",
+    Icon: Hash,
     title: "Everyone adds your team number",
     body: "When your members sign up, they enter the same FRC team number. That's the only step — no codes, no invites, nothing to set up.",
   },
   {
-    icon: Users,
+    n: "02",
+    Icon: Users,
     title: "Your team groups automatically",
     body: "Anyone with your team number is instantly grouped together, and new members show up the moment they join.",
   },
   {
-    icon: Eye,
+    n: "03",
+    Icon: Eye,
     title: "See each other's progress",
     body: "You and your teammates can all see who's completed which lessons, their XP, and recent activity — so you can push each other and spot who needs help.",
   },
@@ -68,8 +75,16 @@ const STATS: {
   { value: 100, suffix: "%", label: "free" },
 ];
 
+// Illustrative roster shown in the hero "team assembles itself" panel.
+const SAMPLE_ROSTER = [
+  { initials: "AK", name: "Ava K.", role: "Mechanical", xp: 1240 },
+  { initials: "RJ", name: "Ravi J.", role: "Programming", xp: 980 },
+  { initials: "MB", name: "Mia B.", role: "Scouting", xp: 760 },
+  { initials: "DP", name: "Dev P.", role: "Rookie", xp: 120 },
+];
+
 const HEADLINE_GRADIENT: CSSProperties = {
-  background: "linear-gradient(120deg,#2560e6,#137ba0)",
+  background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
@@ -84,35 +99,46 @@ export default async function ForTeamsPage() {
       {/* ambient light the glass refracts */}
       <div className="aq-glow" aria-hidden>
         <span
+          className="h-[520px] w-[520px]"
+          style={{
+            top: "-8%",
+            left: "4%",
+            background: "radial-gradient(circle, #8bbcff, transparent 70%)",
+          }}
+        />
+        <span
+          className="h-[460px] w-[460px]"
+          style={{
+            top: "6%",
+            right: "-4%",
+            background: "radial-gradient(circle, #6ff0ea, transparent 70%)",
+          }}
+        />
+        <span
           className="h-[420px] w-[420px]"
-          style={{ top: "-6%", left: "8%", background: "rgba(37,96,230,0.28)" }}
-        />
-        <span
-          className="h-[380px] w-[380px]"
-          style={{ top: "12%", right: "4%", background: "rgba(26,169,214,0.24)" }}
-        />
-        <span
-          className="h-[360px] w-[360px]"
-          style={{ top: "48%", left: "42%", background: "rgba(139,127,255,0.18)" }}
+          style={{
+            top: "52%",
+            left: "38%",
+            background: "radial-gradient(circle, #c8b6ff, transparent 70%)",
+          }}
         />
       </div>
 
-      {/* HERO */}
-      <section className="relative mx-auto max-w-6xl px-4 pt-28 pb-14 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+      {/* ============================ HERO ============================ */}
+      <section className="relative mx-auto max-w-6xl px-4 pt-24 pb-14 sm:px-6 sm:pt-28 lg:px-8">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr]">
           <div>
-            <p className="aq-eyebrow aq-rise aq-rise-1">
-              <Users aria-hidden="true" className="h-3.5 w-3.5" /> For mentors
-              &amp; team leads
-            </p>
-            <h1 className="aq-rise aq-rise-2 mt-4 text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+            <span className="aq-chip aq-eyebrow aq-rise aq-rise-1 inline-flex items-center gap-2">
+              <Users aria-hidden="true" className="h-3.5 w-3.5" /> For mentors &amp; team leads
+            </span>
+            <h1 className="aq-display aq-rise aq-rise-2 mt-4 text-balance text-4xl font-extrabold leading-[1.04] sm:text-5xl lg:text-[3.3rem]">
               Onboard your{" "}
               <span className="aq-grad-anim" style={HEADLINE_GRADIENT}>
                 whole team
               </span>{" "}
-              without rebuilding training every season
+              in one build season.
             </h1>
-            <p className="aq-rise aq-rise-3 mt-5 max-w-xl text-lg leading-relaxed text-foreground/70">
+            <p className="aq-rise aq-rise-3 mt-5 max-w-xl text-pretty text-lg leading-relaxed text-foreground/70">
               LearnFRC gives your team a structured curriculum for every
               department, and automatically groups everyone who signs up with
               your team number — so you can all see each other&apos;s progress
@@ -133,42 +159,74 @@ export default async function ForTeamsPage() {
                 Browse the curriculum
               </Link>
             </div>
+            <div className="aq-rise aq-rise-5 mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+              <span>
+                <b className="font-semibold text-foreground">
+                  <AnimatedCounter value={11} />
+                </b>{" "}
+                departments
+              </span>
+              <span>
+                <b className="font-semibold text-foreground">
+                  <AnimatedCounter value={394} suffix="+" />
+                </b>{" "}
+                lessons
+              </span>
+              <span>
+                <b className="font-semibold text-foreground">$0</b> — always free
+              </span>
+            </div>
           </div>
 
-          {/* floating glass stat panel */}
+          {/* floating glass panel — the team "assembling itself" */}
           <div className="aq-glass aq-sheen aq-float aq-rise aq-rise-3 rounded-[28px] p-6 sm:p-7 lg:justify-self-end">
-            <p className="aq-eyebrow">The whole program, ready</p>
-            <div className="mt-5 grid grid-cols-2 gap-4">
-              {STATS.map((s, i) => (
-                <div
-                  key={s.label}
-                  className="aq-card aq-card-hover aq-reveal rounded-2xl p-4 text-center"
-                  style={{ animationDelay: `${i * 90}ms` } as CSSProperties}
-                >
-                  <div
-                    className="aq-display text-4xl font-bold"
-                    style={HEADLINE_GRADIENT}
-                  >
-                    <AnimatedCounter value={s.value} suffix={s.suffix} />
-                  </div>
-                  <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
-                    {s.label}
-                  </div>
-                </div>
-              ))}
+            <div className="mb-4 flex items-center gap-2">
+              <span className="aq-display text-[17px] font-bold text-foreground">
+                Team 254 · roster
+              </span>
+              <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#0a7a43]">
+                <span className="aq-pulse h-2 w-2 rounded-full bg-[#12b565]" />
+                SAMPLE
+              </span>
             </div>
-            <hr className="aq-divider my-5" />
-            <p className="text-sm leading-relaxed text-foreground/70">
-              One team number groups everyone — rookies, veterans, and mentors
-              — into a shared roster you can all see.
+
+            <ul className="space-y-2.5">
+              {SAMPLE_ROSTER.map((r, i) => (
+                <li
+                  key={r.initials}
+                  className="aq-card aq-card-hover aq-reveal flex items-center gap-3 rounded-2xl p-3"
+                  style={{ animationDelay: `${0.15 + i * 0.12}s` } as CSSProperties}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary"
+                  >
+                    {r.initials}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-foreground">
+                      {r.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{r.role}</div>
+                  </div>
+                  <span className="shrink-0 tabular-nums text-xs font-semibold text-foreground/70">
+                    <AnimatedCounter value={r.xp} /> XP
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <hr className="aq-divider my-4" />
+            <p className="text-center text-sm leading-relaxed text-muted-foreground">
+              One team number groups everyone — rookies, veterans, and mentors —
+              into a shared roster you can all see.
             </p>
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="aq-reveal text-center">
+      {/* ============= HOW IT WORKS — the signature 3-step rail ========= */}
+      <section className="relative mx-auto max-w-3xl px-4 py-14 sm:px-6 lg:px-8">
+        <Reveal className="text-center">
           <p className="aq-eyebrow justify-center">Three steps, zero setup</p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
             How it works
@@ -176,40 +234,20 @@ export default async function ForTeamsPage() {
           <p className="mx-auto mt-3 max-w-xl text-lg leading-relaxed text-foreground/70">
             No admin dashboard, no invite codes. Your team assembles itself.
           </p>
-        </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <div
-              key={s.title}
-              className="aq-card aq-card-hover aq-reveal relative h-full rounded-[20px] p-6"
-              style={{ animationDelay: `${i * 120}ms` } as CSSProperties}
-            >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute right-6 top-5 text-3xl font-bold text-foreground/25"
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="aq-icon aq-badge-bob flex h-12 w-12 items-center justify-center">
-                <s.icon aria-hidden="true" className="h-6 w-6" />
-              </span>
-              <h3 className="mt-5 text-lg font-semibold">{s.title}</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
-                {s.body}
-              </p>
-            </div>
-          ))}
-        </div>
+        </Reveal>
+
+        <OnboardingRail steps={STEPS} />
       </section>
 
-      {/* FEATURES */}
+      {/* ============= WHAT YOUR TEAM GETS — features + stats =========== */}
       <section className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="aq-reveal text-center">
+        <Reveal className="text-center">
           <p className="aq-eyebrow justify-center">Why teams pick LearnFRC</p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
             Everything a rookie season needs
           </h2>
-        </div>
+        </Reveal>
+
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {FEATURES.map((f, i) => (
             <div
@@ -227,21 +265,40 @@ export default async function ForTeamsPage() {
             </div>
           ))}
         </div>
+
+        {/* the whole program, by the numbers */}
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {STATS.map((s, i) => (
+            <div
+              key={s.label}
+              className="aq-glass aq-card-hover aq-reveal rounded-2xl p-5 text-center"
+              style={{ animationDelay: `${i * 90}ms` } as CSSProperties}
+            >
+              <div className="aq-display text-3xl font-extrabold leading-none" style={HEADLINE_GRADIENT}>
+                <AnimatedCounter value={s.value} suffix={s.suffix} />
+              </div>
+              <div className="mt-1.5 text-[13px] uppercase tracking-wider text-muted-foreground">
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* SUGGESTED ROOKIE TRACK */}
+      {/* ==================== SUGGESTED ROOKIE TRACK ==================== */}
       {track.length > 0 && (
         <section className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="aq-reveal text-center">
+          <Reveal className="text-center">
             <p className="aq-eyebrow justify-center">Suggested rookie track</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
               A starting path for new members
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-lg leading-relaxed text-foreground/70">
-              Not sure where to point rookies? Start them here and work down —
-              or let them pick the department they&apos;re joining in the pit.
+              Not sure where to point rookies? Start them here and work down — or
+              let them pick the department they&apos;re joining in the pit.
             </p>
-          </div>
+          </Reveal>
+
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {track.map((d, i) => {
               const m = deptMeta(d.slug);
@@ -264,7 +321,10 @@ export default async function ForTeamsPage() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-foreground/60">
+                        <span
+                          className="text-xs font-bold tabular-nums"
+                          style={{ color: inkFor(m.color) }}
+                        >
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <div className="truncate text-[15px] font-semibold text-foreground">
@@ -277,7 +337,7 @@ export default async function ForTeamsPage() {
                         </div>
                       )}
                     </div>
-                    <ArrowRight
+                    <ArrowUpRight
                       aria-hidden="true"
                       className="aq-arw h-4 w-4 shrink-0 text-foreground/60"
                     />
@@ -289,27 +349,27 @@ export default async function ForTeamsPage() {
         </section>
       )}
 
-      {/* CTA BAND */}
+      {/* ============================= CTA ============================= */}
       <section className="relative mx-auto max-w-6xl px-4 pb-20 pt-6 sm:px-6 lg:px-8">
         <div className="aq-glass aq-sheen aq-reveal rounded-[28px] px-8 py-12 text-center sm:px-16">
           <p className="aq-eyebrow justify-center">
-            <span className="aq-pulse inline-block h-2 w-2 rounded-full bg-primary" />{" "}
-            Ready when you are
+            <Sparkles aria-hidden="true" className="h-3.5 w-3.5" /> Ready when you are
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight sm:text-4xl">
             Ready to onboard your team?
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-lg leading-relaxed text-foreground/70">
-            Add your team number and tell your members to do the same —
-            everyone groups together automatically. It&apos;s free, and
-            there&apos;s nothing to set up.
+            Add your team number and tell your members to do the same — everyone
+            groups together automatically. It&apos;s free, and there&apos;s
+            nothing to set up.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/teams"
               className="aq-cta inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold"
             >
-              Go to your team <ArrowRight className="h-4 w-4" />
+              Go to your team{" "}
+              <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
             <Link
               href="/guides"
