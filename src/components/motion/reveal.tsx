@@ -82,14 +82,16 @@ export function Stagger({
 export function StaggerItem({
   children,
   className,
+  style,
 }: {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }) {
   const stat = useStaticMotion();
-  if (stat) return <div className={className}>{children}</div>;
+  if (stat) return <div className={className} style={style}>{children}</div>;
   return (
-    <motion.div className={className} variants={itemVariants}>
+    <motion.div className={className} style={style} variants={itemVariants}>
       {children}
     </motion.div>
   );

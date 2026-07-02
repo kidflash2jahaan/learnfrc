@@ -62,7 +62,7 @@ export function LessonActions({
         setCompleted(!next);
         toast.error(r.error);
       } else {
-        if (next) toast.success("Lesson complete!  +10 XP");
+        if (next) toast.success("Lesson complete! +10 XP");
         router.refresh();
       }
     });
@@ -87,9 +87,13 @@ export function LessonActions({
   return (
     <div className="relative flex flex-wrap items-center gap-3">
       <Confetti trigger={burst} />
+      <span role="status" aria-live="polite" className="sr-only">
+        {pending ? "Saving…" : ""}
+      </span>
       <Button
         onClick={onComplete}
         disabled={pending}
+        aria-busy={pending}
         variant={completed ? "secondary" : quizRequired ? "outline" : "brand"}
         size="lg"
       >
@@ -107,12 +111,13 @@ export function LessonActions({
       <button
         onClick={onBookmark}
         disabled={pending}
+        aria-busy={pending}
         aria-label={bookmarked ? "Remove bookmark" : "Bookmark lesson"}
         className={cn(
-          "inline-flex h-12 w-12 items-center justify-center rounded-xl border transition-all cursor-pointer hover:-translate-y-0.5",
+          "inline-flex h-12 w-12 items-center justify-center rounded-2xl border transition-all cursor-pointer hover:-translate-y-0.5",
           bookmarked
-            ? "border-primary/40 bg-primary/10 text-primary shadow-[var(--glow-primary)]"
-            : "border-border text-muted-foreground hover:border-accent/40 hover:text-accent hover:shadow-[var(--glow-accent)]"
+            ? "border-primary/40 bg-primary/10 text-primary shadow-[0_6px_16px_rgba(60,95,160,0.12)]"
+            : "border-border text-muted-foreground hover:border-[#0e7490]/40 hover:text-[#0e7490] hover:shadow-[0_6px_16px_rgba(60,95,160,0.10)]"
         )}
       >
         {bookmarked ? (

@@ -26,7 +26,7 @@ const UPDATED = "June 22, 2026";
 const CONTACT = "29pardhananij@sagehillschool.org";
 
 const LINK =
-  "font-medium text-primary underline decoration-primary/40 underline-offset-2 transition-colors hover:text-accent hover:decoration-accent";
+  "font-medium text-primary underline decoration-primary/40 underline-offset-2 transition-colors hover:text-accent hover:decoration-accent break-words";
 
 function Section({
   icon,
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
   return (
     <div className="relative mx-auto max-w-5xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
       {/* ambient glows */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div
           className="absolute -top-16 -left-24 h-72 w-72 rounded-full blur-3xl"
           style={{ background: "radial-gradient(circle,rgba(37,96,230,0.16),transparent 70%)" }}
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
           className="aq-glass aq-float aq-sheen aq-rise aq-rise-5 hidden w-64 rounded-3xl p-5 lg:block"
         >
           <div className="flex items-center gap-2 text-xs font-semibold text-foreground/70">
-            <span className="aq-pulse inline-block h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="aq-pulse inline-block h-2 w-2 rounded-full" style={{ background: "var(--success)" }} />
             Privacy at a glance
           </div>
 
@@ -149,7 +149,7 @@ export default function PrivacyPage() {
                   cy="18"
                   r="15.5"
                   fill="none"
-                  stroke="#12b565"
+                  stroke="var(--success)"
                   strokeWidth="3"
                   strokeLinecap="round"
                   className="aq-ring-anim"
@@ -171,19 +171,19 @@ export default function PrivacyPage() {
               <div className="text-lg font-bold text-foreground">
                 <AnimatedCounter value={1} />
               </div>
-              <div className="text-[11px] text-foreground/60">essential cookie</div>
+              <div className="text-[11px] text-foreground/70">essential cookie</div>
             </div>
             <div className="rounded-2xl border border-border bg-card/60 p-3">
               <div className="text-lg font-bold text-foreground">
                 <AnimatedCounter value={0} />
               </div>
-              <div className="text-[11px] text-foreground/60">trackers sold</div>
+              <div className="text-[11px] text-foreground/70">trackers sold</div>
             </div>
           </div>
 
           {/* encryption bar */}
           <div className="mt-4">
-            <div className="mb-1 flex items-center justify-between text-[11px] text-foreground/60">
+            <div className="mb-1 flex items-center justify-between text-[11px] text-foreground/70">
               <span>Encrypted in transit</span>
               <span className="font-semibold text-foreground">
                 <AnimatedCounter value={100} suffix="%" />
@@ -266,7 +266,7 @@ export default function PrivacyPage() {
             </P>
           </Section>
 
-          <Section icon={<Cog className="h-5 w-5" aria-hidden />} title="Service providers" accent="#12b565" index={4}>
+          <Section icon={<Cog className="h-5 w-5" aria-hidden />} title="Service providers" accent="var(--success)" index={4}>
             <P>We rely on a few trusted providers to run LearnFRC:</P>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-[16px] leading-relaxed text-foreground/80 marker:text-primary/60">
               <li>

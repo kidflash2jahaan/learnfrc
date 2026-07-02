@@ -10,7 +10,7 @@ import {
 } from "@/lib/queries";
 import { getSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { deptMeta } from "@/lib/departments";
+import { deptMeta, inkFor } from "@/lib/departments";
 import { Icon } from "@/lib/icon-map";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -48,11 +48,12 @@ export default async function CertificatePage({
   const done = flat.filter((l) => completed.has(l.id)).length;
   const earned = total > 0 && done === total;
   const meta = deptMeta(dept.slug);
+  const ink = inkFor(meta.color);
   const name = profile?.full_name || profile?.username || "FRC Learner";
 
   // Soft ambient glows shared by both states.
   const ambientGlows = (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
       <div
         className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl"
         style={{ background: "radial-gradient(circle, rgba(37,96,230,0.16), transparent 70%)" }}
@@ -85,7 +86,7 @@ export default async function CertificatePage({
             className="aq-badge aq-badge-bob aq-rise aq-rise-1 mx-auto flex h-16 w-16 items-center justify-center rounded-2xl"
             style={{ "--a": meta.color } as CSSProperties}
           >
-            <Lock className="h-7 w-7" />
+            <Lock aria-hidden className="h-7 w-7" />
           </span>
 
           <div className="aq-rise aq-rise-2 mt-6">
@@ -96,7 +97,7 @@ export default async function CertificatePage({
             <span
               className="aq-grad-anim"
               style={{
-                background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
+                background: "linear-gradient(120deg,#2560e6,#0e7fa3)",
                 WebkitBackgroundClip: "text",
                 backgroundClip: "text",
                 color: "transparent",
@@ -114,7 +115,7 @@ export default async function CertificatePage({
           {/* Animated progress ring — draws itself in on view. */}
           <div className="aq-reveal mx-auto mt-8 flex items-center justify-center" style={{ animationDelay: "0.05s" } as CSSProperties}>
             <div className="relative h-32 w-32">
-              <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+              <svg aria-hidden viewBox="0 0 120 120" className="h-full w-full -rotate-90">
                 <circle
                   cx="60"
                   cy="60"
@@ -129,7 +130,7 @@ export default async function CertificatePage({
                   cy="60"
                   r="52"
                   fill="none"
-                  stroke={meta.color}
+                  stroke={ink}
                   strokeWidth="10"
                   strokeLinecap="round"
                   className="aq-ring-anim"
@@ -168,7 +169,7 @@ export default async function CertificatePage({
             {next && (
               <Button asChild variant="brand" className="aq-cta">
                 <Link href={`/guides/${dept.slug}/${next.moduleSlug}/${next.slug}`}>
-                  Keep going <ArrowRight className="h-4 w-4" />
+                  Keep going <ArrowRight aria-hidden className="h-4 w-4" />
                 </Link>
               </Button>
             )}
@@ -215,12 +216,12 @@ export default async function CertificatePage({
       `}</style>
 
       {/* Page chrome — clean glass, hidden in print. */}
-      <div className="mb-6 flex items-center justify-between print:hidden">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-2 print:hidden">
         <Link
           href={`/guides/${dept.slug}`}
-          className="inline-flex items-center gap-1.5 rounded-xl text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to {dept.name}
+          <ArrowLeft aria-hidden className="h-4 w-4" /> Back to {dept.name}
         </Link>
         <div className="flex items-center gap-2">
           <ShareButton
@@ -235,7 +236,7 @@ export default async function CertificatePage({
       <div className="aq-rise aq-rise-1 mb-6 flex justify-center print:hidden">
         <span className="aq-chip aq-float gap-2 text-primary">
           <span className="aq-pulse h-2 w-2 rounded-full bg-primary" aria-hidden />
-          <Sparkles className="aq-badge-bob h-4 w-4" />
+          <Sparkles aria-hidden className="aq-badge-bob h-4 w-4" />
           <span className="font-semibold">Achievement unlocked</span>
         </span>
       </div>
@@ -274,14 +275,14 @@ export default async function CertificatePage({
           <div className="relative text-center">
             <div className="aq-rise aq-rise-1 flex items-center justify-center gap-2.5 print:animate-none">
               <span className="aq-badge-bob flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#3b78f2] to-[#149fd0] text-white shadow-[0_8px_18px_rgba(37,96,230,0.28)] print:shadow-none print:animate-none">
-                <Award className="h-5 w-5" />
+                <Award aria-hidden className="h-5 w-5" />
               </span>
               <span className="font-display text-lg font-bold tracking-tight">
                 Learn
                 <span
                   className="aq-grad-anim print:animate-none"
                   style={{
-                    background: "linear-gradient(120deg,#2560e6,#1aa9d6)",
+                    background: "linear-gradient(120deg,#2560e6,#0e7fa3)",
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                     color: "transparent",
@@ -292,11 +293,11 @@ export default async function CertificatePage({
               </span>
             </div>
 
-            <p className="aq-rise aq-rise-2 mt-8 font-mono text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground print:animate-none">
+            <p className="aq-rise aq-rise-2 mt-8 text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground print:animate-none">
               Certificate of Completion
             </p>
             <p className="aq-rise aq-rise-3 mt-6 text-sm text-muted-foreground print:animate-none">This certifies that</p>
-            <h1 className="aq-rise aq-rise-3 mt-2 text-balance font-display text-4xl font-bold tracking-tight sm:text-5xl print:animate-none">
+            <h1 className="aq-rise aq-rise-3 mt-2 text-balance break-words font-display text-3xl font-bold tracking-tight sm:text-5xl print:animate-none">
               {name}
             </h1>
             <p className="aq-rise aq-rise-4 mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-foreground/70 print:animate-none">
@@ -325,12 +326,12 @@ export default async function CertificatePage({
 
             <div className="aq-rise aq-rise-5 mt-10 flex flex-col items-center justify-between gap-6 border-t border-border pt-6 sm:flex-row print:animate-none">
               <div className="text-center sm:text-left">
-                <div className="font-mono text-sm font-semibold text-foreground">{dateStr}</div>
+                <div className="text-sm font-semibold tabular-nums text-foreground">{dateStr}</div>
                 <div className="text-xs text-muted-foreground">Date completed</div>
               </div>
               {profile?.team_number ? (
                 <div className="text-center">
-                  <div className="font-mono text-sm font-semibold text-foreground">
+                  <div className="text-sm font-semibold tabular-nums text-foreground">
                     Team {profile.team_number}
                   </div>
                   <div className="text-xs text-muted-foreground">FRC Team</div>

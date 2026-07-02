@@ -111,7 +111,7 @@ export default async function PublicProfilePage({
                     className="aq-grad-anim"
                     style={{
                       background:
-                        "linear-gradient(120deg,#2560e6,#1aa9d6,#12b565,#2560e6)",
+                        "linear-gradient(120deg,#2560e6,#1478a0,#0e8f4f,#2560e6)",
                       WebkitBackgroundClip: "text",
                       backgroundClip: "text",
                       color: "transparent",
@@ -120,7 +120,7 @@ export default async function PublicProfilePage({
                     {displayName}
                   </span>
                 </h1>
-                <p className="aq-rise aq-rise-2 mt-1 font-mono text-sm text-muted-foreground">
+                <p className="aq-rise aq-rise-2 mt-1 text-sm text-muted-foreground">
                   @{p.username}
                 </p>
                 <div className="aq-rise aq-rise-3 mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
@@ -129,7 +129,7 @@ export default async function PublicProfilePage({
                     <Badge variant="accent">Team {p.team_number}</Badge>
                   )}
                   <Badge variant="outline">
-                    <Calendar className="h-3 w-3" />
+                    <Calendar aria-hidden className="h-3 w-3" />
                     Joined{" "}
                     {new Date(p.created_at).toLocaleDateString(undefined, {
                       month: "short",
@@ -164,12 +164,12 @@ export default async function PublicProfilePage({
                   className="aq-badge aq-badge-bob flex h-11 w-11 items-center justify-center rounded-2xl"
                   style={{ "--a": s.color } as CSSProperties}
                 >
-                  <s.icon className="h-5 w-5" />
+                  <s.icon aria-hidden focusable="false" className="h-5 w-5" />
                 </span>
                 <div className="aq-display mt-3 text-3xl font-extrabold tabular-nums text-foreground">
                   <AnimatedCounter value={s.value} />
                 </div>
-                <div className="font-mono text-[11px] uppercase tracking-wider text-foreground/60">
+                <div className="text-[11px] font-medium uppercase tracking-wider text-foreground/70">
                   {s.label}
                 </div>
               </div>
@@ -196,7 +196,7 @@ export default async function PublicProfilePage({
           {achievements.length === 0 ? (
             <div className="aq-card aq-reveal flex flex-col items-center gap-3 rounded-3xl border-dashed p-10 text-center">
               <span className="aq-icon aq-badge-bob flex h-12 w-12 items-center justify-center">
-                <Trophy className="h-6 w-6" />
+                <Trophy aria-hidden className="h-6 w-6" />
               </span>
               <p className="text-base text-foreground/70">
                 No badges yet — the first ones unlock during build season.

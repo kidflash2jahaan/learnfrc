@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Search,
   Menu,
@@ -52,7 +52,6 @@ type Me = {
 
 export function Navbar() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [me, setMe] = React.useState<Me>({
@@ -61,6 +60,7 @@ export function Navbar() {
     isAdmin: false,
   });
   const [loaded, setLoaded] = React.useState(false);
+  const reduceMotion = useReducedMotion();
 
   // Auth is fetched client-side so the root layout can stay static/cacheable.
   React.useEffect(() => {
@@ -99,17 +99,18 @@ export function Navbar() {
 
   return (
     <header
-      data-theme={isHome ? "arena" : undefined}
+      data-theme="arena"
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-all duration-300",
         scrolled
-          ? "glass border-b border-primary/15 shadow-[var(--shadow-sm)]"
-          : isHome
-            ? "glass border-b border-primary/10"
-            : "border-b border-transparent bg-transparent"
+          ? "aq-glass border-b border-primary/15 shadow-[var(--shadow-sm)]"
+          : "border-b border-transparent bg-transparent"
       )}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <nav
+        aria-label="Main"
+        className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
+      >
         <Logo />
 
         {/* Desktop nav */}
@@ -133,8 +134,12 @@ export function Navbar() {
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-primary shadow-[var(--glow-primary)]"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-primary"
+                    transition={
+                      reduceMotion
+                        ? { duration: 0 }
+                        : { type: "spring", stiffness: 380, damping: 30 }
+                    }
                   />
                 )}
               </Link>
@@ -146,18 +151,21 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <button
             onClick={openSearch}
-            className="hidden cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 font-mono text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground sm:flex"
+            className="hidden cursor-pointer items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground sm:flex"
             aria-label="Search"
           >
             <Search className="h-4 w-4" />
             <span className="hidden lg:inline">Search</span>
-            <kbd className="hidden h-5 items-center rounded border border-border bg-muted px-1 font-mono text-[10px] lg:inline-flex">
+            <kbd
+              aria-hidden="true"
+              className="hidden h-5 items-center rounded-full border border-border bg-white/60 px-1.5 text-[10px] lg:inline-flex"
+            >
               ⌘K
             </kbd>
           </button>
           <button
             onClick={openSearch}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-border text-muted-foreground hover:border-primary/40 hover:text-foreground sm:hidden"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-border text-muted-foreground hover:border-primary/40 hover:text-foreground sm:hidden"
             aria-label="Search"
           >
             <Search className="h-4 w-4" />
@@ -168,7 +176,7 @@ export function Navbar() {
           ) : authed ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex cursor-pointer items-center gap-1.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <button className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-1.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <Avatar
                     name={profile?.full_name || profile?.username || email}
                     src={profile?.avatar_url}
@@ -221,13 +229,15 @@ export function Navbar() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <form action={signOut}>
-                  <button type="submit" className="w-full">
-                    <DropdownMenuItem className="text-destructive focus:text-destructive">
-                      <LogOut className="h-4 w-4" /> Sign out
-                    </DropdownMenuItem>
-                  </button>
-                </form>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    void signOut();
+                  }}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <LogOut className="h-4 w-4" /> Sign out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
@@ -244,8 +254,10 @@ export function Navbar() {
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileOpen((o) => !o)}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground hover:border-primary/40 md:hidden"
-            aria-label="Menu"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-border text-foreground hover:border-primary/40 md:hidden"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -256,13 +268,14 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
+            id="mobile-nav"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="glass overflow-hidden border-b border-primary/15 md:hidden"
+            transition={{ duration: reduceMotion ? 0 : 0.25 }}
+            className="aq-glass overflow-hidden border-b border-primary/15 md:hidden"
           >
-            <div className="space-y-1 px-4 py-4">
+            <nav aria-label="Mobile" className="space-y-1 px-4 py-4">
               {NAV.map((item) => (
                 <Link
                   key={item.href}
@@ -282,7 +295,7 @@ export function Navbar() {
                   </Button>
                 </div>
               )}
-            </div>
+            </nav>
           </motion.div>
         )}
       </AnimatePresence>
