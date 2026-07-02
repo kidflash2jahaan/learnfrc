@@ -312,7 +312,7 @@ function LeaderRow({ entry }: { entry: PodiumEntry }) {
 
       {/* level badge */}
       <span
-        className="hidden shrink-0 items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline-flex"
+        className="hidden w-[4.5rem] shrink-0 items-center justify-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline-flex"
         aria-label={`Level ${entry.level}`}
       >
         Lvl {entry.level}

@@ -182,12 +182,16 @@ function IndividualBoard({
           <div className="border-b border-border px-5 py-3">
             <h3 className="aq-display text-base font-semibold text-foreground">{title}</h3>
           </div>
-          <div className="aq-eyebrow hidden items-center gap-4 border-b border-border px-5 py-2.5 text-[0.65rem] text-muted-foreground sm:flex">
-            <span className="w-9 text-center">Rank</span>
-            <span className="ml-[3.25rem] flex-1">Learner</span>
-            <span className="w-[4.5rem] text-center">Level</span>
-            <span className="hidden w-20 text-right md:block">Lessons</span>
-            <span className="w-24 text-right">XP</span>
+          {/* Header mirrors LeaderRow's exact flex geometry (same gaps, paddings,
+              fixed widths). NOTE: no aq-eyebrow here — it's display:inline-flex
+              globally, which shrinks the header to content width. */}
+          <div className="hidden items-center gap-3 border-b border-border px-4 py-2.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:flex sm:gap-4 sm:px-5">
+            <span className="w-9 shrink-0 text-center">Rank</span>
+            <span className="w-10 shrink-0" aria-hidden />
+            <span className="min-w-0 flex-1">Learner</span>
+            <span className="w-[4.5rem] shrink-0 text-center">Level</span>
+            <span className="hidden w-20 shrink-0 text-right md:block">Lessons</span>
+            <span className="w-24 shrink-0 text-right">XP</span>
           </div>
           <LeaderList entries={rest} />
         </div>
@@ -214,11 +218,13 @@ function TeamBoard({
           {BOARD_TITLE.team}
         </h3>
       </div>
-      <div className="aq-eyebrow hidden items-center gap-4 border-b border-border px-5 py-2.5 text-[0.65rem] text-muted-foreground sm:flex">
-        <span className="w-9 text-center">Rank</span>
-        <span className="ml-[3.25rem] flex-1">Team</span>
-        <span className="w-24 text-right">Members</span>
-        <span className="w-24 text-right">XP</span>
+      {/* Header mirrors the team-row flex geometry; no aq-eyebrow (inline-flex). */}
+      <div className="hidden items-center gap-3 border-b border-border px-4 py-2.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:flex sm:gap-4 sm:px-5">
+        <span className="w-9 shrink-0 text-center">Rank</span>
+        <span className="w-10 shrink-0" aria-hidden />
+        <span className="min-w-0 flex-1">Team</span>
+        <span className="w-24 shrink-0 text-right">Members</span>
+        <span className="w-24 shrink-0 text-right">XP</span>
       </div>
       <motion.ul
         initial="hidden"

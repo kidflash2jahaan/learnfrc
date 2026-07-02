@@ -84,6 +84,7 @@ export default async function AdminPage() {
   ];
 
   return (
+    <div className="relative overflow-x-clip">
     <div className="relative mx-auto max-w-6xl px-4 pt-28 pb-20 sm:px-6 lg:px-8">
       {/* Ambient drifting glows */}
       <div className="aq-glow" aria-hidden>
@@ -390,7 +391,7 @@ export default async function AdminPage() {
                   {stats.recentSignups.map((p, i) => (
                     <tr
                       key={p.id}
-                      className="aq-reveal border-b border-border/60 transition-colors last:border-0 hover:bg-primary/[0.05]"
+                      className="border-b border-border/60 transition-colors last:border-0 hover:bg-primary/[0.05]"
                       style={{ animationDelay: `${i * 45}ms` }}
                     >
                       <td className="py-3">
@@ -422,6 +423,7 @@ export default async function AdminPage() {
           )}
         </section>
       </Reveal>
+    </div>
     </div>
   );
 }

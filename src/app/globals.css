@@ -345,6 +345,13 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+  /* Entrance animations must land at their END state — never leave content
+     stuck invisible at the keyframe start for reduced-motion users. */
+  .aq-reveal, .aq-rise, .aq-rise-1, .aq-rise-2, .aq-rise-3, .aq-rise-4, .aq-rise-5, .aq-route {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* Performance mode: opt-in toggle that strips the GPU-heavy effects. */
@@ -614,6 +621,10 @@
 @supports (animation-timeline: view()) {
   .aq-reveal { animation: aq-reveal-kf linear both; animation-timeline: view(); animation-range: entry 2% cover 20%; }
 }
+/* route-change entrance (template.tsx remounts this per navigation) */
+.aq-route { animation: aq-route-kf 0.5s cubic-bezier(0.21, 0.47, 0.32, 0.98) both; }
+@keyframes aq-route-kf { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
 /* on-load staggered rise for above-the-fold hero content */
 .aq-rise { animation: aq-reveal-kf 0.62s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .aq-rise-1 { animation-delay: 0.06s; }

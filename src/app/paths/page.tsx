@@ -52,7 +52,7 @@ export default function PathsPage() {
   return (
     <div className="relative mx-auto max-w-6xl px-4 pt-28 pb-24 sm:px-6 lg:px-8">
       {/* ambient glows */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-x-clip">
         <div
           className="aq-float absolute -top-24 left-[8%] h-80 w-80 rounded-full opacity-60 blur-3xl"
           style={{
